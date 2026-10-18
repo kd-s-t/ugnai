@@ -25,7 +25,7 @@ export type ScenarioReportPin = {
   lat: number;
   lng: number;
   purokHint: string;
-  /** e.g. "Image report · live" */
+  /** e.g. "Field report" */
   sourceLabel: string;
   notes: string;
   reportedAt: string;

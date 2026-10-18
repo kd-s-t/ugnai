@@ -1,15 +1,18 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
 import { ShortagePlanMap } from "@/components/ShortagePlanMap";
 import { upsertShortageFromPlan } from "@/lib/resourcesShortages/api";
 import {
   hrefForShortageWorkflow,
   type ResourceShortage,
 } from "@/lib/resourcesShortages/types";
-import { listenSuggestionsByEpic } from "@/lib/resourcesSuggestions/api";
+import {
+  listenSuggestionsByEpic,
+  upsertSuggestionsFromPlan,
+} from "@/lib/resourcesSuggestions/api";
 import type {
   ResourceSuggestion,
   ResourceSuggestionRequest,
@@ -46,6 +49,7 @@ export function ResourceShortagePlan({
   storageId?: string;
   reportScope?: ReportScope | null;
 }) {
+  const { scopedReports } = useCommandWorkspace();
   const [suggestionDoc, setSuggestionDoc] =
     useState<ResourceSuggestion | null>(null);
   const [shortageDoc, setShortageDoc] = useState<ResourceShortage | null>(null);
@@ -53,15 +57,32 @@ export function ResourceShortagePlan({
   const shortageId = plan.code.trim().toUpperCase();
   const docId = (storageId?.trim() || shortageId).toUpperCase();
 
+  const planSyncKey = useMemo(
+    () =>
+      [
+        plan.code,
+        plan.availableL,
+        plan.totalNeededL,
+        ...plan.rows.map(
+          (r) =>
+            `${r.reportId}:${r.community}:${r.needL}:${r.gapL}:${r.readiness}`,
+        ),
+      ].join("|"),
+    [plan],
+  );
+
   useEffect(() => {
     let cancelled = false;
     setSyncing(true);
     void (async () => {
       try {
-        const saved = await upsertShortageFromPlan(plan, docId);
+        const [saved] = await Promise.all([
+          upsertShortageFromPlan(plan, docId),
+          upsertSuggestionsFromPlan(plan, docId),
+        ]);
         if (!cancelled) setShortageDoc(saved);
       } catch {
-        /* rules / offline — table still falls back to plan rows */
+        /* rules / offline - table still falls back to plan rows */
       } finally {
         if (!cancelled) setSyncing(false);
       }
@@ -69,28 +90,30 @@ export function ResourceShortagePlan({
     return () => {
       cancelled = true;
     };
-  }, [plan, docId]);
+    // planSyncKey captures row identity; plan is read for the upsert payload.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [planSyncKey, docId]);
 
   useEffect(() => {
     return listenSuggestionsByEpic(docId, setSuggestionDoc);
   }, [docId]);
 
   const tableRows = useMemo((): ResourceSuggestionRequest[] => {
-    const planIds = new Set(plan.rows.flatMap((r) => r.reportIds));
-    const scopedRequests =
-      suggestionDoc?.requests.filter((r) =>
-        (r.reportIds.length ? r.reportIds : [r.reportId]).some((id) =>
-          planIds.has(id),
-        ),
-      ) ?? [];
-    if (scopedRequests.length > 0) return scopedRequests;
-    const totalGap = plan.rows.reduce((s, r) => s + Math.max(0, r.gapL), 0);
-    return plan.rows.map((row) => {
-      const people = Number(row.peopleLabel.replace(/[^\d]/g, "")) || 0;
+    const liveRows = plan.rows;
+    const totalGap = liveRows.reduce((s, r) => s + Math.max(0, r.gapL), 0);
+    const suggestedById = new Map(
+      (suggestionDoc?.requests ?? []).map((r) => [r.reportId, r] as const),
+    );
+    return liveRows.map((row) => {
+      const people =
+        Number(String(row.peopleLabel ?? "").replace(/[^\d]/g, "")) || 0;
+      const fromSuggestion = suggestedById.get(row.reportId);
       const suggested =
-        row.gapL > 0 && totalGap > 0 && plan.availableL > 0
-          ? Math.round((row.gapL / totalGap) * plan.availableL)
-          : 0;
+        fromSuggestion && fromSuggestion.suggestedAllocateL > 0
+          ? fromSuggestion.suggestedAllocateL
+          : row.gapL > 0 && totalGap > 0 && plan.availableL > 0
+            ? Math.round((row.gapL / totalGap) * plan.availableL)
+            : 0;
       return {
         community: row.community,
         barangayLabel: row.barangayLabel,
@@ -196,7 +219,7 @@ export function ResourceShortagePlan({
         </div>
       </div>
 
-      <section className="mt-5 overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
+      <section className="mt-5 rounded-2xl border border-[var(--border)] bg-white shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[var(--border)] px-4 py-3 sm:px-5">
           <div>
             <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
@@ -220,101 +243,93 @@ export function ResourceShortagePlan({
             View all →
           </Link>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-left text-[13px]">
-            <thead>
-              <tr className="border-b border-[var(--border)] bg-[#f8fafc] text-[12px] text-[var(--muted)]">
-                <th className="px-4 py-2.5 font-medium sm:px-5">Sitio</th>
-                <th className="px-3 py-2.5 font-medium">People</th>
-                <th className="px-3 py-2.5 font-medium">Need</th>
-                <th className="px-3 py-2.5 font-medium">Local</th>
-                <th className="px-3 py-2.5 font-medium">Gap</th>
-                <th className="px-3 py-2.5 font-medium">Suggested</th>
-                <th className="px-3 py-2.5 font-medium">Access</th>
-                <th className="px-4 py-2.5 font-medium sm:px-5" />
-              </tr>
-            </thead>
-            <tbody>
-              {tableRows.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="px-4 py-6 text-sm text-[var(--muted)] sm:px-5"
-                  >
-                    No sitio suggestions for this shortage yet.
-                  </td>
-                </tr>
-              ) : (
-                tableRows.map((row) => (
-                  <tr
-                    key={`${row.reportId}-${row.community}`}
-                    className="border-b border-[var(--border)] last:border-b-0"
-                  >
-                    <td className="px-4 py-3 sm:px-5">
-                      <div className="flex min-w-0 items-center gap-2.5">
-                        <div className="relative size-9 shrink-0 overflow-hidden rounded-lg bg-[#f1f5f9] ring-1 ring-[var(--border)]">
-                          {row.mediaUrl ? (
-                            <Image
-                              src={row.mediaUrl}
-                              alt=""
-                              fill
-                              className="object-cover"
-                              sizes="36px"
-                              unoptimized
-                            />
-                          ) : null}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="font-medium text-[var(--foreground)]">
-                            {row.community}
-                          </p>
-                          {row.barangayLabel ? (
-                            <p className="text-[11px] text-[var(--muted)]">
-                              {row.barangayLabel}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-3 py-3 tabular-nums text-[var(--muted)]">
-                      {row.people > 0 ? row.people.toLocaleString("en-PH") : "—"}
-                    </td>
-                    <td className="px-3 py-3 tabular-nums">
+        {tableRows.length === 0 ? (
+          <p className="px-4 py-6 text-sm text-[var(--muted)] sm:px-5">
+            No sitio suggestions for this shortage yet.
+          </p>
+        ) : (
+          <ul className="divide-y divide-[var(--border)]">
+            {tableRows.map((row, index) => (
+              <li
+                key={`${row.reportId}-${row.community}-${index}`}
+                className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-5"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-2.5">
+                  <div className="size-9 shrink-0 overflow-hidden rounded-lg bg-[#f1f5f9] ring-1 ring-[var(--border)]">
+                    {row.mediaUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={row.mediaUrl}
+                        alt=""
+                        className="size-9 object-cover"
+                      />
+                    ) : null}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-medium text-[var(--foreground)]">
+                      {row.community}
+                    </p>
+                    {row.barangayLabel ? (
+                      <p className="text-[11px] text-[var(--muted)]">
+                        {row.barangayLabel}
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[12px] sm:grid-cols-5 sm:gap-x-5">
+                  <p>
+                    <span className="text-[var(--muted)]">People </span>
+                    <span className="tabular-nums font-medium">
+                      {row.people > 0
+                        ? row.people.toLocaleString("en-PH")
+                        : "-"}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-[var(--muted)]">Need </span>
+                    <span className="tabular-nums font-medium">
                       {fmtL(row.needL)}
-                    </td>
-                    <td className="px-3 py-3 tabular-nums text-[var(--muted)]">
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-[var(--muted)]">Local </span>
+                    <span className="tabular-nums font-medium text-[var(--muted)]">
                       {fmtL(row.localStockL)}
-                    </td>
-                    <td className="px-3 py-3 tabular-nums font-semibold text-[#c72929]">
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-[var(--muted)]">Gap </span>
+                    <span className="tabular-nums font-semibold text-[#c72929]">
                       {fmtL(row.gapL)}
-                    </td>
-                    <td className="px-3 py-3 tabular-nums font-semibold text-[#2f5f9e]">
+                    </span>
+                  </p>
+                  <p>
+                    <span className="text-[var(--muted)]">Suggested </span>
+                    <span className="tabular-nums font-semibold text-[#2f5f9e]">
                       {fmtL(row.suggestedAllocateL)}
-                    </td>
-                    <td className="px-3 py-3">
-                      <span
-                        className={cn(
-                          "inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
-                          readinessTone(row.readiness),
-                        )}
-                      >
-                        {row.readinessLabel}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right sm:px-5">
-                      <Link
-                        href={`/admin/incidents/${encodeURIComponent(row.reportId)}`}
-                        className="inline-flex rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)]/25"
-                      >
-                        View
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                    </span>
+                  </p>
+                </div>
+                <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
+                  <span
+                    className={cn(
+                      "inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
+                      readinessTone(row.readiness),
+                    )}
+                  >
+                    {row.readinessLabel}
+                  </span>
+                  <Link
+                    href={`/admin/incidents/${encodeURIComponent(row.reportId)}`}
+                    className="inline-flex rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)]/25"
+                  >
+                    View
+                  </Link>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
         <p className="border-t border-[var(--border)] px-4 py-2.5 text-[11px] text-[var(--muted)] sm:px-5">
           Suggested liters are warehouse shares by gap. Local stock is
           provisional; confirm before allocation.
@@ -368,16 +383,21 @@ export function ResourceShortagePlan({
 
       <section className="mt-4 rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:p-5">
         <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-          View map (optional)
+          View map
         </h2>
         <p className="mt-0.5 text-sm text-[var(--muted)]">
-          Routes from Brgy. Hall to each community request.
+          Routes from Brgy. Hall, plus verified road blocks that drive Access.
         </p>
         <p className="mt-0.5 text-[12px] text-[var(--muted)]">
           Illustrative areas · Field confirmation required.
         </p>
         <div className="mt-3">
-          <ShortagePlanMap rows={plan.rows} reportScope={reportScope} />
+          <ShortagePlanMap
+            key={plan.rows.map((r) => r.reportId).join("|") || plan.code}
+            rows={plan.rows}
+            reportScope={reportScope}
+            incidents={scopedReports}
+          />
         </div>
       </section>
     </div>

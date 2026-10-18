@@ -187,7 +187,7 @@ export function IncidentBoard() {
     let cancelled = false;
     void (async () => {
       try {
-        // Nangka desk only — do not seed Consolacion queue samples onto Apas.
+        // Nangka desk only - do not seed Consolacion queue samples onto Apas.
         const onNangka =
           reportScope.mode === "barangay" &&
           /nangka/i.test(reportScope.barangay);
@@ -735,7 +735,7 @@ export function IncidentBoard() {
                     }
                   >
                     <span className="flex size-7 items-center justify-center rounded-full border border-dashed border-[var(--border)] text-[10px] text-[var(--muted)]">
-                      —
+                      -
                     </span>
                     Clear all
                   </button>

@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/auth/AuthProvider";
 import { isOfficer } from "@/lib/auth/types";
 import {
   getShortageById,
+  patchShortageAllocationLines,
   saveShortageWorkflowStep,
   setShortageReviewStatus,
 } from "@/lib/resourcesShortages/api";
@@ -27,6 +28,7 @@ import {
   reportsForEpicCode,
   type SupplyShortagePlan,
 } from "@/lib/workspace/supplyShortagePlan";
+import { verifyDeliveryAccess } from "@/lib/workspace/verifyDeliveryAccess";
 import { cn } from "@/lib/utils";
 
 function fmtL(n: number): string {
@@ -47,7 +49,10 @@ function followUpCopy(line: AllocationLine): string {
   if (line.constraint === "no_transport") {
     return "Find a vehicle, schedule a later delivery, or request partner transport.";
   }
-  return "Confirm road conditions and security before finalizing delivery.";
+  if (line.constraintLabel === "Road block nearby") {
+    return "A verified road block is nearby. Clear it on Incidents, then verify again.";
+  }
+  return "Checks the incident map for a verified road block, then saves the result.";
 }
 
 function constraintTone(constraint: AllocationLine["constraint"]) {
@@ -67,7 +72,7 @@ function constraintPill(constraint: AllocationLine["constraint"]) {
 }
 
 function optionLabel(opt: AllocationOption, index: number): string {
-  return `Option ${index + 1} — ${opt.title}`;
+  return `Option ${index + 1} - ${opt.title}`;
 }
 
 export function ReviewAllocationPlan() {
@@ -81,6 +86,10 @@ export function ReviewAllocationPlan() {
   const [lines, setLines] = useState<AllocationLine[]>([]);
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
+  const [verifyBusyId, setVerifyBusyId] = useState<string | null>(null);
+  const [verifyResults, setVerifyResults] = useState<
+    Record<string, { ok: boolean; message: string }>
+  >({});
 
   const placeHint = useMemo(() => {
     if (isOfficer(profile)) {
@@ -101,16 +110,22 @@ export function ReviewAllocationPlan() {
     if (apasDesk) {
       const apasWater = apasSitioWaterReports(reports);
       if (apasWater.length >= 2) {
-        return buildSupplyShortagePlan("water", apasWater);
+        return buildSupplyShortagePlan(
+          "water",
+          apasWater,
+          scopedReports,
+          rsCode,
+        );
       }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
-    if (!matched) {
-      const water = reportsForEpicCode("RS-001", scopedReports);
-      if (water) return buildSupplyShortagePlan(water.kind, water.reports);
-      return null;
-    }
-    return buildSupplyShortagePlan(matched.kind, matched.reports);
+    if (!matched) return null;
+    return buildSupplyShortagePlan(
+      matched.kind,
+      matched.reports,
+      scopedReports,
+      rsCode,
+    );
   }, [reports, scopedReports, rsCode, reportScope]);
 
   useEffect(() => {
@@ -174,6 +189,85 @@ export function ReviewAllocationPlan() {
       ),
     [lines],
   );
+
+  async function onVerifyAccess(line: AllocationLine) {
+    if (line.constraint !== "access_unverified" || approved) return;
+    setVerifyBusyId(line.reportId);
+    try {
+      const row = plan?.rows.find(
+        (r) =>
+          r.reportId === line.reportId || r.reportIds.includes(line.reportId),
+      );
+      const report =
+        scopedReports.find((r) => r.id === line.reportId) ||
+        reports.find((r) => r.id === line.reportId);
+      const result = verifyDeliveryAccess({
+        reports: scopedReports,
+        lat: row?.lat ?? report?.lat,
+        lng: row?.lng ?? report?.lng,
+        barangay:
+          report?.barangay ??
+          row?.barangayLabel?.replace(/^Brgy\.\s*/i, "") ??
+          null,
+      });
+      const nextLines = lines.map((l) => {
+        if (l.reportId !== line.reportId) return l;
+        if (!result.ok) {
+          return {
+            ...l,
+            constraint: "access_unverified" as const,
+            constraintLabel: "Road block nearby",
+          };
+        }
+        return {
+          ...l,
+          readiness: "ready" as const,
+          constraint: "no_blockers" as const,
+          constraintLabel: "No blockers",
+        };
+      });
+      const message = result.ok
+        ? `${line.community}: Access OK. No verified road block nearby. Saved.`
+        : `${line.community}: Road block found (${result.block.title || result.block.id}). Saved. Clear it on Incidents, then verify again.`;
+      setLines(nextLines);
+      setVerifyResults((prev) => ({
+        ...prev,
+        [line.reportId]: { ok: result.ok, message },
+      }));
+      if (!selectedOption) {
+        throw new Error("No allocation option selected to save.");
+      }
+      await patchShortageAllocationLines(
+        storageId,
+        selectedOption.id,
+        nextLines,
+      );
+      setShortage((prev) => {
+        if (!prev?.allocation) return prev;
+        return {
+          ...prev,
+          allocation: {
+            ...prev.allocation,
+            options: prev.allocation.options.map((o) =>
+              o.id === selectedOption.id ? { ...o, lines: nextLines } : o,
+            ),
+            savedAt: new Date().toISOString(),
+          },
+        };
+      });
+    } catch (err) {
+      setVerifyResults((prev) => ({
+        ...prev,
+        [line.reportId]: {
+          ok: false,
+          message:
+            err instanceof Error ? err.message : "Could not verify access",
+        },
+      }));
+    } finally {
+      setVerifyBusyId(null);
+    }
+  }
 
   async function onSaveDraft() {
     setSaving(true);
@@ -247,7 +341,7 @@ export function ReviewAllocationPlan() {
             Last updated{" "}
             {shortage?.updatedAt
               ? new Date(shortage.updatedAt).toLocaleString()
-              : "—"}
+              : "-"}
           </p>
         </div>
       </div>
@@ -469,7 +563,7 @@ export function ReviewAllocationPlan() {
                       <span className="tabular-nums text-[12px] text-[var(--muted)]">
                         {availableL > 0
                           ? `${Math.round((proposedTotal / availableL) * 100)}%`
-                          : "—"}
+                          : "-"}
                       </span>
                     </div>
                   </td>
@@ -496,6 +590,23 @@ export function ReviewAllocationPlan() {
             ) : null}
           </div>
           <div className="mt-3 space-y-3">
+            {Object.values(verifyResults).length > 0 ? (
+              <div className="space-y-2" role="status" aria-live="polite">
+                {Object.entries(verifyResults).map(([id, r]) => (
+                  <p
+                    key={id}
+                    className={cn(
+                      "rounded-lg px-3 py-2 text-[12px] leading-snug",
+                      r.ok
+                        ? "bg-[#ecfdf3] text-[#16794c] ring-1 ring-[#86efac]/60"
+                        : "bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fde68a]",
+                    )}
+                  >
+                    {r.message}
+                  </p>
+                ))}
+              </div>
+            ) : null}
             {followUps.length === 0 ? (
               <p className="text-sm text-[var(--muted)]">
                 No delivery blockers on the selected option.
@@ -506,6 +617,7 @@ export function ReviewAllocationPlan() {
                   availableL > 0
                     ? Math.round((line.allocateL / availableL) * 100)
                     : 0;
+                const result = verifyResults[line.reportId];
                 return (
                   <div
                     key={`${line.reportId}-follow`}
@@ -514,7 +626,7 @@ export function ReviewAllocationPlan() {
                     <p className="text-sm font-medium text-[var(--foreground)]">
                       {line.community}{" "}
                       <span className={constraintTone(line.constraint)}>
-                        — {line.constraintLabel}
+                        - {line.constraintLabel}
                       </span>
                     </p>
                     <p className="mt-1 text-[12px] text-[var(--muted)]">
@@ -523,18 +635,38 @@ export function ReviewAllocationPlan() {
                     <p className="mt-1 text-[12px] leading-snug text-[var(--muted)]">
                       {followUpCopy(line)}
                     </p>
-                    <Link
-                      href={
-                        line.constraint === "no_transport"
-                          ? `/admin/resources/track/${encodeURIComponent(rsCode)}/transport?report=${encodeURIComponent(line.reportId)}`
-                          : `/admin/incidents/${encodeURIComponent(line.reportId)}`
-                      }
-                      className="mt-3 inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-2 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
-                    >
-                      {line.constraint === "no_transport"
-                        ? "Explore transport options"
-                        : "Verify access"}
-                    </Link>
+                    {line.constraint === "no_transport" ? (
+                      <Link
+                        href={`/admin/resources/track/${encodeURIComponent(rsCode)}/transport?report=${encodeURIComponent(line.reportId)}`}
+                        className="mt-3 inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-2 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
+                      >
+                        Explore transport options
+                      </Link>
+                    ) : (
+                      <button
+                        type="button"
+                        disabled={approved || verifyBusyId === line.reportId}
+                        onClick={() => void onVerifyAccess(line)}
+                        className="mt-3 inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-2 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6] disabled:opacity-50"
+                      >
+                        {verifyBusyId === line.reportId
+                          ? "Checking…"
+                          : result
+                            ? "Check again"
+                            : "Verify access"}
+                      </button>
+                    )}
+                    {result ? (
+                      <p
+                        className={cn(
+                          "mt-2 text-[12px] leading-snug",
+                          result.ok ? "text-[#16794c]" : "text-[#92400e]",
+                        )}
+                        role="status"
+                      >
+                        {result.message}
+                      </p>
+                    ) : null}
                   </div>
                 );
               })

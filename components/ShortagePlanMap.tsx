@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo } from "react";
 import {
   APIProvider,
@@ -21,6 +22,7 @@ import {
 } from "@/lib/geo/mapAreas";
 import { commandHallPoint } from "@/lib/geo/safePoints";
 import type { ReportScope } from "@/lib/reports/barangayScope";
+import type { HazardReport } from "@/lib/reports/types";
 import { useRoadEscapes } from "@/lib/geo/useRoadEscapes";
 import {
   googleMapsApiKey,
@@ -28,6 +30,7 @@ import {
   hasGoogleMapsApiKey,
 } from "@/lib/map/googleMapsConfig";
 import type { SupplyCommunityRow } from "@/lib/workspace/supplyShortagePlan";
+import { verifiedRoadBlockReports } from "@/lib/workspace/verifyDeliveryAccess";
 
 const COLORS = ["#e11d48", "#2563eb", "#d97706", "#16794c", "#7c3aed"];
 const TINTS = [
@@ -169,9 +172,12 @@ function hallForScope(scope?: ReportScope | null) {
 export function ShortagePlanMap({
   rows,
   reportScope,
+  incidents = [],
 }: {
   rows: SupplyCommunityRow[];
   reportScope?: ReportScope | null;
+  /** Open reports; map overlays verified road blocks only. */
+  incidents?: HazardReport[];
 }) {
   const hall = useMemo(() => hallForScope(reportScope), [reportScope]);
 
@@ -184,6 +190,15 @@ export function ShortagePlanMap({
     [rows],
   );
 
+  const roadBlocks = useMemo(
+    () =>
+      verifiedRoadBlockReports(incidents).filter(
+        (r): r is HazardReport & { lat: number; lng: number } =>
+          r.lat != null && r.lng != null,
+      ),
+    [incidents],
+  );
+
   const crowRoutes = useMemo(
     () => routesFromHall(hall, points),
     [hall, points],
@@ -191,8 +206,12 @@ export function ShortagePlanMap({
   const mapRoutes = useRoadEscapes(crowRoutes, { deferMs: 200 });
 
   const fitPoints = useMemo(
-    () => [{ lat: hall.lat, lng: hall.lng }, ...points],
-    [hall, points],
+    () => [
+      { lat: hall.lat, lng: hall.lng },
+      ...points,
+      ...roadBlocks.map((b) => ({ lat: b.lat, lng: b.lng })),
+    ],
+    [hall, points, roadBlocks],
   );
 
   const center = useMemo(() => {
@@ -232,6 +251,7 @@ export function ShortagePlanMap({
             mapTypeControl={false}
             streetViewControl={false}
             fullscreenControl={false}
+            clickableIcons={false}
             style={{ width: "100%", height: "100%" }}
           >
             <FitAllMarkers points={fitPoints} />
@@ -300,12 +320,59 @@ export function ShortagePlanMap({
                 </AdvancedMarker>
               );
             })}
+            {roadBlocks.map((block) => (
+              <AdvancedMarker
+                key={`block-${block.id}`}
+                position={{ lat: block.lat, lng: block.lng }}
+                zIndex={30}
+              >
+                <Link
+                  href={`/admin/incidents/${encodeURIComponent(block.id)}`}
+                  className="relative flex flex-col items-center"
+                  title={block.title || "Road block"}
+                >
+                  <div
+                    className="absolute top-1/2 left-1/2 size-10 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#b45309]/45 ring-2 ring-white"
+                    aria-hidden
+                  />
+                  <div className="relative z-[1] max-w-[150px] rounded-md bg-[#b45309] px-2 py-1 text-center text-[10px] font-semibold text-white shadow-md">
+                    Road block
+                    <span className="block truncate font-normal opacity-95">
+                      {block.citizenPurok?.trim() ||
+                        block.title?.trim() ||
+                        block.id}
+                    </span>
+                  </div>
+                </Link>
+              </AdvancedMarker>
+            ))}
           </GoogleMap>
         </APIProvider>
       </div>
       <p className="text-[12px] text-[var(--muted)]">
-        Routes from Brgy. Hall · tap Directions for Google Maps
+        Routes from Brgy. Hall
+        {roadBlocks.length > 0
+          ? ` · ${roadBlocks.length} verified road block${roadBlocks.length === 1 ? "" : "s"} on map`
+          : " · no verified road blocks in scope"}
+        {" · "}
+        tap Directions for Google Maps
       </p>
+      {roadBlocks.length > 0 ? (
+        <div className="flex flex-wrap gap-2">
+          {roadBlocks.map((block) => (
+            <Link
+              key={`chip-${block.id}`}
+              href={`/admin/incidents/${encodeURIComponent(block.id)}`}
+              className="rounded-lg border border-[#fde68a] bg-[#fffbeb] px-2.5 py-1.5 text-[12px] text-[#92400e] transition hover:border-[#f59e0b]"
+            >
+              Road block
+              <span className="ml-1.5 text-[var(--muted)]">
+                {block.citizenPurok?.trim() || block.title || block.id}
+              </span>
+            </Link>
+          ))}
+        </div>
+      ) : null}
       <GapChips points={points} hall={hall} routes={mapRoutes} />
     </div>
   );

@@ -26,7 +26,12 @@ const nextConfig = {
     return [
       {
         source: "/command",
-        destination: "/admin/overview",
+        destination: "/admin/full",
+        permanent: true,
+      },
+      {
+        source: "/command-center",
+        destination: "/admin/full",
         permanent: true,
       },
       {

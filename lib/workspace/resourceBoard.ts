@@ -9,6 +9,7 @@ import type { AssistanceCommitment } from "@/lib/workspace/assistanceCommitments
 import { assistHref } from "@/lib/workspace/assistancePlan";
 import {
   parseReportNeed,
+  reviewShortageHref,
   supplyNeedEpicCode,
   supplyNeedKind,
   type SupplyNeedKind,
@@ -120,7 +121,7 @@ function toNeed(
         requestMeta: item.meta,
         shared: true,
         ctaLabel: "Review shortage",
-        ctaHref: `/admin/resources/${encodeURIComponent(item.incidentCode)}`,
+        ctaHref: reviewShortageHref(item.incidentCode),
         primaryCta: false,
         reportId: item.reportId,
         reportIds: item.reportIds,
@@ -131,7 +132,7 @@ function toNeed(
     const supply = report ? supplyNeedKind(report) : null;
     const shortageHref =
       supply != null
-        ? `/admin/resources/${encodeURIComponent(item.incidentCode.startsWith("RS-") ? item.incidentCode : supplyNeedEpicCode(supply))}`
+        ? reviewShortageHref(supply)
         : assistHref(item.reportId);
     return {
       id: item.id,
@@ -227,7 +228,7 @@ function collapseSupplyShortages(
       requestMeta: copy.meta,
       shared: true,
       ctaLabel: "Review shortage",
-      ctaHref: `/admin/resources/${encodeURIComponent(copy.incidentCode)}`,
+      ctaHref: reviewShortageHref(kind),
       primaryCta: false,
       reportId: copy.primary.id,
       reportIds: copy.reportIds,

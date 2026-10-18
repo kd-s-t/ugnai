@@ -85,7 +85,7 @@ function reportToMapPin(r: HazardReport): ScenarioReportPin | null {
     lat: r.lat,
     lng: r.lng,
     purokHint: r.citizenPurok || "Field",
-    sourceLabel: "Firestore · live",
+    sourceLabel: "Field report",
     notes: r.notes,
     reportedAt: r.createdAt,
     mediaUrl: r.mediaUrl || undefined,

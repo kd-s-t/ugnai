@@ -1,4 +1,5 @@
 import {
+  collection,
   doc,
   getDoc,
   onSnapshot,
@@ -223,6 +224,56 @@ export async function saveShortageAllocationDraft(
   );
 }
 
+/** Update lines on one allocation option (e.g. after Verify access). */
+export async function patchShortageAllocationLines(
+  shortageId: string,
+  optionId: string,
+  lines: import("@/lib/workspace/allocationOptions").AllocationLine[],
+): Promise<void> {
+  const id = shortageId.trim().toUpperCase();
+  const optId = optionId.trim();
+  if (!id || !optId || lines.length === 0) {
+    throw new Error("Missing shortage or option to save access check.");
+  }
+  const ref = doc(getClientDb(), COL, id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    throw new Error("Shortage record not found.");
+  }
+  const data = snap.data() as Record<string, unknown>;
+  const allocation =
+    data.allocation && typeof data.allocation === "object"
+      ? (data.allocation as Record<string, unknown>)
+      : null;
+  const rawOptions = Array.isArray(allocation?.options)
+    ? (allocation!.options as AllocationOption[])
+    : [];
+  if (rawOptions.length === 0) {
+    throw new Error("No allocation options saved yet. Open Compare first.");
+  }
+  const found = rawOptions.some((o) => o.id === optId);
+  if (!found) {
+    throw new Error("Selected option not found on shortage record.");
+  }
+  const options = rawOptions.map((o) =>
+    o.id === optId ? { ...o, lines } : o,
+  );
+  const now = new Date().toISOString();
+  await setDoc(
+    ref,
+    {
+      allocation: {
+        ...allocation,
+        options,
+        savedAt: now,
+      },
+      updatedAt: now,
+      updatedAtServer: serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
+
 /** Persist chosen compare option and move into plan review. */
 export async function saveSelectedAllocationOption(
   shortageId: string,
@@ -266,6 +317,28 @@ export function listenShortageById(
           ? String(snap.data()?.publicCode).toUpperCase()
           : code.split("__")[0] || code;
       onChange(mapDoc(publicCode, snap.data() as Record<string, unknown>));
+    },
+    (err) => onError?.(err),
+  );
+}
+
+/** All shortage plan docs (for suggested-board step column). */
+export function listenAllShortages(
+  onChange: (rows: ResourceShortage[]) => void,
+  onError?: (err: Error) => void,
+): Unsubscribe {
+  return onSnapshot(
+    collection(getClientDb(), COL),
+    (snap) => {
+      const rows = snap.docs.map((d) => {
+        const data = d.data() as Record<string, unknown>;
+        const publicCode =
+          typeof data.publicCode === "string"
+            ? String(data.publicCode).toUpperCase()
+            : d.id.split("__")[0] || d.id;
+        return mapDoc(publicCode, data);
+      });
+      onChange(rows);
     },
     (err) => onError?.(err),
   );

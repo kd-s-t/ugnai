@@ -8,9 +8,11 @@ import {
   parseReportNeed,
   supplyNeedEpicCode,
   supplyNeedKind,
+  supplyNeedKindFromCode,
   supplyNeedNoun,
   type SupplyNeedKind,
 } from "@/lib/workspace/reportNeed";
+import { verifyDeliveryAccess } from "@/lib/workspace/verifyDeliveryAccess";
 
 export type DeliveryReadiness = "ready" | "access_unknown" | "no_transport";
 
@@ -19,7 +21,7 @@ export type SupplyCommunityRow = {
   /** All report ids rolled into this sitio. */
   reportIds: string[];
   community: string;
-  /** e.g. Brgy. Apas — shown under the sitio name. */
+  /** e.g. Brgy. Apas - shown under the sitio name. */
   barangayLabel: string;
   mediaUrl: string | null;
   peopleLabel: string;
@@ -113,10 +115,15 @@ const READINESS_RANK: Record<DeliveryReadiness, number> = {
   no_transport: 2,
 };
 
-function readinessLabelFor(r: DeliveryReadiness): string {
+function readinessLabelFor(
+  r: DeliveryReadiness,
+  detail?: "road_block" | "ok" | "unverified",
+): string {
   if (r === "no_transport") return "No transport";
-  if (r === "access_unknown") return "Access unknown";
-  return "Ready";
+  if (detail === "road_block") return "Road block nearby";
+  if (r === "access_unknown") return "Access unverified";
+  if (detail === "ok") return "Access OK";
+  return "Access OK";
 }
 
 function readiness(report: HazardReport): {
@@ -139,9 +146,12 @@ function readiness(report: HazardReport): {
     report.lng == null ||
     (report.locationAccuracyM != null && report.locationAccuracyM > 80)
   ) {
-    return { readiness: "access_unknown", readinessLabel: "Access unknown" };
+    return {
+      readiness: "access_unknown",
+      readinessLabel: "Access unverified",
+    };
   }
-  return { readiness: "ready", readinessLabel: "Ready" };
+  return { readiness: "ready", readinessLabel: "Access OK" };
 }
 
 function resourceBlurb(kind: SupplyNeedKind): string {
@@ -157,12 +167,76 @@ function resourceBlurb(kind: SupplyNeedKind): string {
   }
 }
 
+/**
+ * Set Access column from verified road-block incidents near each sitio.
+ * Keeps "No transport"; otherwise Access OK or Road block nearby / unverified.
+ */
+export function applyIncidentAccessToRows(
+  rows: SupplyCommunityRow[],
+  accessReports: HazardReport[],
+): SupplyCommunityRow[] {
+  if (accessReports.length === 0) {
+    return rows.map((row) => {
+      if (row.readiness === "no_transport") return row;
+      if (row.lat == null || row.lng == null) {
+        return {
+          ...row,
+          readiness: "access_unknown",
+          readinessLabel: readinessLabelFor("access_unknown", "unverified"),
+        };
+      }
+      return {
+        ...row,
+        readiness: "ready",
+        readinessLabel: readinessLabelFor("ready", "ok"),
+      };
+    });
+  }
+  return rows.map((row) => {
+    if (row.readiness === "no_transport") return row;
+    if (row.lat == null || row.lng == null) {
+      return {
+        ...row,
+        readiness: "access_unknown",
+        readinessLabel: readinessLabelFor("access_unknown", "unverified"),
+      };
+    }
+    const brgy = row.barangayLabel.replace(/^Brgy\.\s*/i, "").trim() || null;
+    const result = verifyDeliveryAccess({
+      reports: accessReports,
+      lat: row.lat,
+      lng: row.lng,
+      barangay: brgy,
+    });
+    if (!result.ok) {
+      return {
+        ...row,
+        readiness: "access_unknown",
+        readinessLabel: readinessLabelFor("access_unknown", "road_block"),
+      };
+    }
+    return {
+      ...row,
+      readiness: "ready",
+      readinessLabel: readinessLabelFor("ready", "ok"),
+    };
+  });
+}
+
 /** Build the Resources shortage plan desk from shared supply reports. */
 export function buildSupplyShortagePlan(
   kind: SupplyNeedKind,
   reports: HazardReport[],
+  /** Open incidents (blockages, etc.) used for Access status. */
+  accessReports?: HazardReport[],
+  /** Unique plan id (e.g. RS-001-K7P2MQ); defaults to epic RS-001. */
+  instanceCode?: string,
 ): SupplyShortagePlan | null {
   if (reports.length === 0) return null;
+  const code = (
+    instanceCode?.trim() ||
+    supplyNeedEpicCode(kind)
+  ).toUpperCase();
 
   const sorted = [...reports].sort(
     (a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt),
@@ -250,7 +324,7 @@ export function buildSupplyShortagePlan(
     }
   }
 
-  const rows: SupplyCommunityRow[] = [...bySitio.values()]
+  const baseRows: SupplyCommunityRow[] = [...bySitio.values()]
     .sort((a, b) => b.needL - a.needL)
     .map((row) => {
       const gap = Math.max(0, row.needL - row.localStockL);
@@ -260,7 +334,7 @@ export function buildSupplyShortagePlan(
         community: row.community,
         barangayLabel: row.barangayLabel,
         mediaUrl: row.mediaUrl,
-        peopleLabel: row.people > 0 ? String(row.people) : "—",
+        peopleLabel: row.people > 0 ? String(row.people) : "-",
         requestCount: row.reportIds.length,
         needL: row.needL,
         localStockL: row.localStockL,
@@ -272,6 +346,11 @@ export function buildSupplyShortagePlan(
       };
     });
 
+  const rows = applyIncidentAccessToRows(
+    baseRows,
+    accessReports ?? reports,
+  );
+
   const shortageL = Math.max(0, totalNeededL - availableL);
   const primary = sorted[0]!;
   const noun =
@@ -280,7 +359,7 @@ export function buildSupplyShortagePlan(
     rows.length === 1 ? "community needs" : "communities need";
 
   return {
-    code: supplyNeedEpicCode(kind),
+    code,
     kind,
     resourceLabel: supplyNeedNoun(kind),
     resourceBlurb: resourceBlurb(kind),
@@ -290,7 +369,7 @@ export function buildSupplyShortagePlan(
     communityCount: rows.length,
     rows,
     advisory: `${rows.length === 1 ? "One" : rows.length === 2 ? "Two" : rows.length === 3 ? "Three" : String(rows.length)} ${communityWord} more ${noun} than the warehouse can supply. Confirm local stock and review distribution options.`,
-    compareHref: `/admin/resources/compare/${encodeURIComponent(supplyNeedEpicCode(kind))}`,
+    compareHref: `/admin/resources/compare/${encodeURIComponent(code)}`,
     primaryReportId: primary.id,
   };
 }
@@ -310,7 +389,7 @@ export function apasSitioWaterReports(reports: HazardReport[]): HazardReport[] {
   );
 }
 
-/** Resolve shared shortage reports for an epic code (e.g. RS-001). */
+/** Resolve shared shortage reports for an epic / instance code (e.g. RS-001-K7P2). */
 export function reportsForEpicCode(
   code: string,
   reports: HazardReport[],
@@ -318,6 +397,7 @@ export function reportsForEpicCode(
   const open = reports.filter(
     (r) => r.status !== "rejected" && r.status !== "done",
   );
+  const want = supplyNeedKindFromCode(code);
   const buckets = new Map<SupplyNeedKind, HazardReport[]>();
   for (const report of open) {
     const kind = supplyNeedKind(report);
@@ -325,6 +405,11 @@ export function reportsForEpicCode(
     const list = buckets.get(kind) ?? [];
     list.push(report);
     buckets.set(kind, list);
+  }
+  if (want) {
+    const rows = buckets.get(want);
+    if (rows && rows.length > 0) return { kind: want, reports: rows };
+    return null;
   }
   for (const [kind, rows] of buckets) {
     if (supplyNeedEpicCode(kind) === code.toUpperCase() && rows.length > 0) {

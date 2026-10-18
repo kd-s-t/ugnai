@@ -66,6 +66,39 @@ export function supplyNeedEpicCode(kind: SupplyNeedKind): string {
   }
 }
 
+/** Epic family from a plan id (RS-001 or RS-001-K7P2 → water). */
+export function supplyNeedKindFromCode(code: string): SupplyNeedKind | null {
+  const u = code.trim().toUpperCase();
+  if (u === "RS-001" || u.startsWith("RS-001-")) return "water";
+  if (u === "RS-002" || u.startsWith("RS-002-")) return "food";
+  if (u === "RS-003" || u.startsWith("RS-003-")) return "medical";
+  if (u === "RS-004" || u.startsWith("RS-004-")) return "relief";
+  return null;
+}
+
+/** New shortage plan id each Review shortage click (e.g. RS-001-K7P2MQ). */
+export function mintShortageInstanceId(epicCode: string): string {
+  const epic =
+    supplyNeedEpicCode(
+      supplyNeedKindFromCode(epicCode) ?? "water",
+    ) || "RS-001";
+  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `${epic}-${suffix}`;
+}
+
+/** Start a fresh shortage desk for this epic family. */
+export function reviewShortageHref(epicOrKind: string | SupplyNeedKind): string {
+  const epic =
+    typeof epicOrKind === "string" && /^RS-\d+/i.test(epicOrKind)
+      ? epicOrKind.trim().toUpperCase().split("-").slice(0, 2).join("-")
+      : supplyNeedEpicCode(
+          typeof epicOrKind === "string"
+            ? (supplyNeedKindFromCode(epicOrKind) ?? "water")
+            : epicOrKind,
+        );
+  return `/admin/resources/new?epic=${encodeURIComponent(epic)}`;
+}
+
 export function supplyNeedNoun(kind: SupplyNeedKind): string {
   switch (kind) {
     case "water":

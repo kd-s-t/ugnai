@@ -16,7 +16,7 @@ export function HomeCta() {
   }
 
   if (user) {
-    const href = profile?.role === "citizen" ? "/my-reports" : "/admin/overview";
+    const href = profile?.role === "citizen" ? "/my-reports" : "/admin/full";
     return (
       <Link
         href={href}

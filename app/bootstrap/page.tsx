@@ -149,7 +149,7 @@ export default function BootstrapKitPage() {
   const [chat, setChat] = useState<{ role: "ai" | "user"; text: string }[]>([
     {
       role: "ai",
-      text: "Kumusta — I’m Agent Nangka. Ask about Tino triage, flood belts, or who to call. Green = house owners, red = evacuate, yellow = prepare, blue = flood footprints.",
+      text: "Kumusta. I’m Agent Nangka. Ask about Tino triage, flood belts, or who to call. Green = house owners, red = evacuate, yellow = prepare, blue = flood footprints.",
     },
   ]);
 

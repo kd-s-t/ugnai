@@ -111,7 +111,7 @@ export function CommandWorkspaceProvider({
           (/apas/i.test(profileActiveBarangayId) ||
             /apas/i.test(profileAreaId) ||
             /apas/i.test(profileBarangay));
-        // Apas water/fire first — Resources shortage desk needs these soonest.
+        // Apas water/fire first - Resources shortage desk needs these soonest.
         if (apasOfficer && profileUid) {
           const { ensureApasOpsSeed } = await import(
             "@/lib/onboarding/apasSeed"
@@ -128,9 +128,16 @@ export function CommandWorkspaceProvider({
             /nangka/i.test(profileAreaId) ||
             (!profileBarangay && !profileActiveBarangayId && !profileAreaId));
         await Promise.all([
-          // Map image seeds are Nangka-tagged — only load on Nangka desks.
+          // Map image seeds are Nangka-tagged - only load on Nangka desks.
           sim && onNangkaDesk ? ensureAllMapReportsInDb() : Promise.resolve(),
-          // Nangka queue / relief samples — skip on Apas desk (water sitios only).
+          // After-Tino recovery pins for Resources access / shortage map.
+          sim && onNangkaDesk
+            ? import("@/lib/reports/seedMapReport").then(
+                ({ ensureAftermathReportsInDb }) =>
+                  ensureAftermathReportsInDb(),
+              )
+            : Promise.resolve(),
+          // Nangka queue / relief samples - skip on Apas desk (water sitios only).
           sim && onNangkaDesk
             ? import("@/lib/reports/ensureQueueSampleReports").then(
                 ({ ensureQueueSampleReports }) => ensureQueueSampleReports(),
