@@ -17,10 +17,8 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Crosshair, FileText, Loader2, LocateFixed, Tornado } from "lucide-react";
 import type { AssistEscapeRoute, AssistPriority } from "@/lib/ai/assistTypes";
-import { distKm } from "@/lib/geo/bearing";
 import { pointInFloodFootprints } from "@/lib/geo/elevFloodFootprint";
 import { DEFAULT_MAP_AREA, type MapArea } from "@/lib/geo/mapAreas";
-import { estimateElevM } from "@/lib/geo/nangkaElevation";
 import {
   phoneToTelHref,
   type ResponderMapPin,
@@ -68,16 +66,9 @@ import type {
 } from "@/lib/scenarios/types";
 import { cn } from "@/lib/utils";
 
-/** True when flood wash tiles are painted (AI elev footprints present). */
-function floodWashOn(floods: FloodSample[]): boolean {
-  return floods.some(
-    (f) => (f.footprints?.length ?? 0) > 0 || Boolean(f.footprint?.length),
-  );
-}
-
 /**
- * True when a facility sits in / under the blue flood wash.
- * Matches FloodTilesLayer (bbox of each ring), not only point-in-polygon.
+ * True when a facility sits inside a painted flood footprint ring.
+ * Do not use bbox / elev heuristics — those flagged dry schools (e.g. Nangka ES).
  */
 function facilityInFlood(
   lat: number,
@@ -85,44 +76,10 @@ function facilityInFlood(
   floods: FloodSample[],
 ): boolean {
   const pt = { lat, lng };
-  const hasTiles = floodWashOn(floods);
-
   for (const fl of floods) {
     if (pointInFloodFootprints(pt, fl.footprints)) return true;
     if (fl.footprint && pointInFloodFootprints(pt, [fl.footprint])) return true;
-    const rings = fl.footprints?.length
-      ? fl.footprints
-      : fl.footprint
-        ? [fl.footprint]
-        : [];
-    for (const ring of rings) {
-      if (ring.length < 3) continue;
-      let minLat = Infinity;
-      let maxLat = -Infinity;
-      let minLng = Infinity;
-      let maxLng = -Infinity;
-      let cLat = 0;
-      let cLng = 0;
-      for (const p of ring) {
-        minLat = Math.min(minLat, p.lat);
-        maxLat = Math.max(maxLat, p.lat);
-        minLng = Math.min(minLng, p.lng);
-        maxLng = Math.max(maxLng, p.lng);
-        cLat += p.lat;
-        cLng += p.lng;
-      }
-      cLat /= ring.length;
-      cLng /= ring.length;
-      if (lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng) {
-        return true;
-      }
-      if (distKm(pt, { lat: cLat, lng: cLng }) * 1000 <= 120) return true;
-    }
-    const radiusM = fl.radiusM && fl.radiusM > 0 ? fl.radiusM : 120;
-    if (distKm(pt, { lat: fl.lat, lng: fl.lng }) * 1000 <= radiusM) return true;
   }
-
-  if (hasTiles && estimateElevM(lat, lng) <= 13) return true;
   return false;
 }
 
@@ -1035,10 +992,9 @@ function CommandAreaMapInner({
           sp.isEvacCenter ||
           sp.kind === "evac_center" ||
           (sp.kind === "school" && sp.isEvacCenter);
-        const washOn = floodWashOn(layerFloods);
         const inFlood = facilityInFlood(sp.lat, sp.lng, layerFloods);
-        // Tino flood warning only in Before/During drill — not No storm
-        // (EE baseline flood samples must not mark every EC as flooded).
+        // Tino flood warning only when the pin is inside blue wash — not every
+        // shelter during landfall (Nangka ES sits dry outside the tiles).
         const tinoFloodPhase =
           scenarioPhase === "before" || scenarioPhase === "during";
         const markedUnusable =
@@ -1047,9 +1003,7 @@ function CommandAreaMapInner({
           sp.condition === "unusable";
         const floodedPin =
           Boolean(isShelter) &&
-          (markedUnusable ||
-            (tinoFloodPhase &&
-              (scenarioPhase === "during" || washOn || inFlood)));
+          (markedUnusable || (tinoFloodPhase && inFlood));
         const iconKind: FacilityMarkerKind =
           floodedPin && isShelter ? "evac_center" : sp.kind;
         const z =
