@@ -13,8 +13,8 @@ import { EMPTY_REACTION_COUNTS } from "@/lib/reports/socialTypes";
 import { NANGKA_REPORT_PREFIX } from "@/lib/reports/reportId";
 import { computeReportTrust } from "@/lib/reports/trustScore";
 
-/** Firestore seed author (rules allow rpt-* and place ids with status legit). */
-const SEED_UID = "demo-map-seed";
+/** Firestore seed author (not Tino map demos; see scenarioDemo resource-seed). */
+const SEED_UID = "demo-resource-seed";
 
 /**
  * Demo incidents for Resources shortage desk.

@@ -19,11 +19,15 @@ export function isTinoScenarioDemoReport(
   }
   // Nangka RS-001 drinking-water shortage desk (not a Tino map pin).
   if (r.aiModel === "resource-seed") return false;
+  if (r.citizenUid === "demo-resource-seed") return false;
   if (r.citizenUid === "demo-map-seed") return true;
   if (r.id.startsWith("rpt-")) return true;
   if (r.aiModel === "sample-seed") return true;
-  // Queue samples: …-YYMMDD-9xxx (9001–9999)
-  if (/^[A-Z]{2,4}-[A-Z0-9]{2,8}-[A-Z0-9]{2,10}-\d{6}-9\d{3}$/.test(r.id)) {
+  // Queue samples: …-YYMMDD-9xxx, but 9201–9299 are shortage-desk water seeds.
+  if (
+    /^[A-Z]{2,4}-[A-Z0-9]{2,8}-[A-Z0-9]{2,10}-\d{6}-9\d{3}$/.test(r.id) &&
+    !/-\d{6}-92\d{2}$/.test(r.id)
+  ) {
     return true;
   }
   return false;
