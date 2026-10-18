@@ -130,20 +130,20 @@ export default function DeveloperBenchmarkPage() {
                     }
                   />
                   <StatBlock
-                    label="Gemini p50"
-                    value={formatLatencyMs(summary.p50)}
+                    label="Gemini median"
+                    value={formatLatencyReadable(summary.p50)}
                     detail={
                       showGeminiLatency
-                        ? `${summary.withLatency} timed`
+                        ? `Typical response · ${summary.withLatency} timed`
                         : "Not recorded on these docs"
                     }
                   />
                   <StatBlock
-                    label="Vertex p50"
-                    value={formatLatencyMs(summary.vertexP50)}
+                    label="Vertex AI median"
+                    value={formatLatencyReadable(summary.vertexP50)}
                     detail={
                       showVertexLatency
-                        ? `${summary.withVertex} timed`
+                        ? `Typical response · ${summary.withVertex} timed`
                         : "Not recorded on these docs"
                     }
                   />
@@ -317,14 +317,13 @@ function BenchmarkIncident({
         <div className="flex flex-wrap items-center gap-2">
           <VerdictPill verdict={row.ai} />
           {showVertex ? (
-            <span className="font-mono text-[11px] tabular-nums text-[var(--muted)]">
-              V {formatLatencyMs(row.vertexLatencyMs)}
-            </span>
+            <LatencyChip
+              name="Vertex AI"
+              latencyMs={row.vertexLatencyMs}
+            />
           ) : null}
           {showGemini ? (
-            <span className="font-mono text-[11px] tabular-nums text-[var(--muted)]">
-              G {formatLatencyMs(row.latencyMs)}
-            </span>
+            <LatencyChip name="Gemini" latencyMs={row.latencyMs} />
           ) : null}
           <MatchPill match={row.match} />
           <span className="font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase">
@@ -367,6 +366,8 @@ function BenchmarkIncident({
                 latencyMs={row.vertexLatencyMs!}
                 prompt={row.vertexPrompt}
                 rawReturn={row.vertexRaw}
+                requestLabel="API request"
+                returnLabel="API response"
               />
             ) : null}
             {showGemini ? (
@@ -384,16 +385,50 @@ function BenchmarkIncident({
   );
 }
 
+function formatLatencyReadable(ms: number | null | undefined): string {
+  if (ms == null || !Number.isFinite(ms)) return "—";
+  if (ms < 1000) return `${Math.round(ms)} ms`;
+  const seconds = ms / 1000;
+  const n = seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1);
+  return `${n} seconds`;
+}
+
+function LatencyChip({
+  name,
+  latencyMs,
+}: {
+  name: string;
+  latencyMs: number | null;
+}) {
+  return (
+    <span
+      className="inline-flex flex-col border border-[var(--border)] bg-white px-2 py-1 leading-tight"
+      title={`${name} response time`}
+    >
+      <span className="text-[10px] font-medium text-[var(--foreground)]">
+        {name}
+      </span>
+      <span className="font-mono text-[11px] tabular-nums text-[var(--foreground)]">
+        {formatLatencyReadable(latencyMs)}
+      </span>
+    </span>
+  );
+}
+
 function AiCallPanel({
   title,
   latencyMs,
   prompt,
   rawReturn,
+  requestLabel = "Raw prompt",
+  returnLabel = "Raw return",
 }: {
   title: string;
   latencyMs: number;
   prompt: string | null;
   rawReturn: string | null;
+  requestLabel?: string;
+  returnLabel?: string;
 }) {
   return (
     <div className="rounded-xl border border-[var(--border)] bg-white p-3">
@@ -409,10 +444,10 @@ function AiCallPanel({
         </p>
       </div>
       {prompt?.trim() ? (
-        <TraceBlock label="Raw prompt" value={prompt} />
+        <TraceBlock label={requestLabel} value={prompt} />
       ) : null}
       {rawReturn?.trim() ? (
-        <TraceBlock label="Raw return" value={rawReturn} />
+        <TraceBlock label={returnLabel} value={rawReturn} />
       ) : null}
     </div>
   );

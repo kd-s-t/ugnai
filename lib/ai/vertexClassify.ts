@@ -22,9 +22,9 @@ export type VertexClassifyResult = {
   source: "vertex" | "automl" | "skipped" | "error";
   /** Wall time for the Vertex call (null when skipped / not run). */
   latencyMs: number | null;
-  /** Text prompt sent (image bytes omitted). */
+  /** API request sent (image bytes omitted). */
   prompt: string | null;
-  /** Raw model / API text return. */
+  /** API response body / model text. */
   rawReturn: string | null;
   reason?: string;
   endpoint?: string;
@@ -271,7 +271,16 @@ async function classifyWithAutomlEndpoint(input: {
 
   const url = `https://${input.env.location}-aiplatform.googleapis.com/v1/${resource}:predict`;
   const prompt = clipAiTrace(
-    `Vertex AutoML :predict\nendpoint: ${resource}\ninstances: [{ content: <image base64 omitted> }]`,
+    [
+      `POST ${url}`,
+      JSON.stringify(
+        {
+          instances: [{ content: "<image base64 omitted>" }],
+        },
+        null,
+        2,
+      ),
+    ].join("\n"),
   );
   const res = await fetch(url, {
     method: "POST",
@@ -334,16 +343,59 @@ async function classifyWithVertexGemini(input: {
   const resource = publisherModelResource(input.env);
   const url = `https://${input.env.location}-aiplatform.googleapis.com/v1/${resource}:generateContent`;
   const mimeType = input.mimeType?.trim() || "image/jpeg";
-  const promptText = `Classify this citizen field-report photo for barangay disaster response in Consolacion / metro Cebu (Philippines).
+  const instruction = `Classify this citizen field-report photo for barangay disaster response in Consolacion / metro Cebu (Philippines).
 Return ONLY JSON:
 {"className":"${VISION_CLASSES.join("|")}","confidence":0-1,"locationLabel":"short place from visual cues","locationConfidence":0-1}
 Rules:
 - className: single best hazard class. Prefer "unrelated" if not a hazard scene.
 - locationLabel: where the photo appears to be (barangay, landmark, street type, subdivision, mall, coast, etc.). Use Philippine place cues when visible. If unknown, use "unknown".
-- locationConfidence: how sure you are about the place (0-1).
-
-[attached: inline image ${mimeType}]`;
-  const prompt = clipAiTrace(promptText);
+- locationConfidence: how sure you are about the place (0-1).`;
+  const requestBody = {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: instruction },
+          {
+            inlineData: {
+              mimeType,
+              data: input.imageBase64,
+            },
+          },
+        ],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.1,
+      maxOutputTokens: 320,
+    },
+  };
+  const prompt = clipAiTrace(
+    [
+      `POST ${url}`,
+      JSON.stringify(
+        {
+          ...requestBody,
+          contents: [
+            {
+              role: "user",
+              parts: [
+                { text: instruction },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: "<image base64 omitted>",
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        null,
+        2,
+      ),
+    ].join("\n"),
+  );
 
   const res = await fetch(url, {
     method: "POST",
@@ -351,26 +403,7 @@ Rules:
       Authorization: `Bearer ${input.token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [
-            { text: promptText.replace(/\n\n\[attached:.*$/, "") },
-            {
-              inlineData: {
-                mimeType,
-                data: input.imageBase64,
-              },
-            },
-          ],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.1,
-        maxOutputTokens: 320,
-      },
-    }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!res.ok) {

@@ -850,6 +850,8 @@ export function IncidentDetail({
               <AiTraceBlocks
                 prompt={selected.vertexPrompt}
                 rawReturn={selected.vertexRaw}
+                requestLabel="API request"
+                returnLabel="API response"
               />
             ) : null}
           </div>
@@ -1740,9 +1742,13 @@ function formatAiLatencyMs(ms: number | null | undefined): string | null {
 function AiTraceBlocks({
   prompt,
   rawReturn,
+  requestLabel = "Raw prompt",
+  returnLabel = "Raw return",
 }: {
   prompt: string | null;
   rawReturn: string | null;
+  requestLabel?: string;
+  returnLabel?: string;
 }) {
   if (!prompt?.trim() && !rawReturn?.trim()) return null;
   return (
@@ -1750,7 +1756,7 @@ function AiTraceBlocks({
       {prompt?.trim() ? (
         <div>
           <p className="font-mono text-[9px] tracking-wider text-[var(--muted)] uppercase">
-            Raw prompt
+            {requestLabel}
           </p>
           <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded bg-[#0f1b2d] px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90">
             {prompt}
@@ -1760,7 +1766,7 @@ function AiTraceBlocks({
       {rawReturn?.trim() ? (
         <div>
           <p className="font-mono text-[9px] tracking-wider text-[var(--muted)] uppercase">
-            Raw return
+            {returnLabel}
           </p>
           <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded bg-[#0f1b2d] px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90">
             {rawReturn}
