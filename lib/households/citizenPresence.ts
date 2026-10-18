@@ -1,3 +1,4 @@
+import { clampToOpsCoverage } from "@/lib/geo/cebu";
 import { DEFAULT_MAP_AREA, type MapArea } from "@/lib/geo/mapAreas";
 import { updateHouseholdPresenceForCitizen } from "@/lib/households/api";
 
@@ -44,8 +45,12 @@ export async function syncCitizenPresenceFromDevice(
     return false;
   }
 
-  const lat = pos.coords.latitude;
-  const lng = pos.coords.longitude;
+  const clamped = clampToOpsCoverage(
+    pos.coords.latitude,
+    pos.coords.longitude,
+  );
+  const lat = clamped.lat;
+  const lng = clamped.lng;
   let area: MapArea = DEFAULT_MAP_AREA;
   try {
     const res = await fetch(

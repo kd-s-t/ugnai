@@ -8,6 +8,8 @@ const STEPS = [
   { n: 3, label: "Track assistance" },
 ] as const;
 
+const BLUE = "#2f5f9e";
+
 export function AllocationPlanStepper({
   current,
   className,
@@ -32,23 +34,29 @@ export function AllocationPlanStepper({
                 <span
                   className={cn(
                     "pointer-events-none absolute top-[13px] left-[13px] z-0 h-0.5 w-full",
-                    done ? "bg-[#16794c]" : "bg-[#e2e8f0]",
+                    done || active ? "bg-[#93c5fd]" : "bg-[#e2e8f0]",
                   )}
                   aria-hidden
                 >
-                  {active ? (
-                    <span className="absolute inset-y-0 left-0 w-[38%] bg-[#2f5f9e]" />
-                  ) : null}
+                  <span
+                    className="absolute inset-y-0 left-0"
+                    style={{
+                      width: done ? "100%" : active ? "38%" : "0%",
+                      background: BLUE,
+                    }}
+                  />
                 </span>
               ) : null}
               <span
                 className={cn(
                   "relative z-[1] flex size-[26px] shrink-0 items-center justify-center rounded-full text-[12px] font-semibold",
-                  done && "bg-[#16794c] text-white",
-                  active && "bg-[#2f5f9e] text-white",
+                  (done || active) && "text-white",
                   upcoming &&
                     "border-2 border-[#cbd5e1] bg-white text-[var(--muted)]",
                 )}
+                style={
+                  done || active ? { background: BLUE } : undefined
+                }
                 aria-current={active ? "step" : undefined}
               >
                 {done ? (
@@ -73,7 +81,7 @@ export function AllocationPlanStepper({
               <p
                 className={cn(
                   "mt-2 text-[13px] font-semibold leading-snug",
-                  active
+                  active || done
                     ? "text-[#2f5f9e]"
                     : "text-[var(--foreground)]",
                 )}

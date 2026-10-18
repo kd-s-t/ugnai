@@ -17,6 +17,7 @@ import {
 } from "@vis.gl/react-google-maps";
 import { Crosshair, FileText, Loader2, LocateFixed, Tornado } from "lucide-react";
 import type { AssistEscapeRoute, AssistPriority } from "@/lib/ai/assistTypes";
+import { clampToOpsCoverage } from "@/lib/geo/cebu";
 import { pointInFloodFootprints } from "@/lib/geo/elevFloodFootprint";
 import { DEFAULT_MAP_AREA, type MapArea } from "@/lib/geo/mapAreas";
 import {
@@ -371,7 +372,11 @@ function LocateMeButton({
     setError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        const { latitude: lat, longitude: lng } = pos.coords;
+        const clamped = clampToOpsCoverage(
+          pos.coords.latitude,
+          pos.coords.longitude,
+        );
+        const { lat, lng } = clamped;
         onLocated(lat, lng);
         if (!pinOnly) flyRef.current?.(lat, lng);
         setStatus("idle");

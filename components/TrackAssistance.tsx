@@ -33,34 +33,41 @@ type DemoDelivery = {
   vehicle: string;
   vehicleCapL: number;
   status: "dispatched" | "en_route" | "delivered";
-  etaLabel: string;
+  etaDate: string;
+  etaTime: string;
 };
 
 function fmtL(n: number): string {
   return `${n.toLocaleString("en-PH")} L`;
 }
 
-function etaTomorrowLabel(): string {
+function etaTomorrowParts(): { date: string; time: string } {
   const d = new Date();
   d.setDate(d.getDate() + 1);
   d.setHours(10, 0, 0, 0);
-  return new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    timeZone: "Asia/Manila",
-  }).format(d);
+  return {
+    date: new Intl.DateTimeFormat("en-PH", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "Asia/Manila",
+    }).format(d),
+    time: new Intl.DateTimeFormat("en-PH", {
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "Asia/Manila",
+    }).format(d),
+  };
 }
 
-function clockLabel(offsetMin: number): string {
+function activityTimeLabel(offsetMin: number): string {
   const d = new Date(Date.now() - offsetMin * 60 * 1000);
-  return new Intl.DateTimeFormat("en-PH", {
+  const clock = new Intl.DateTimeFormat("en-PH", {
     hour: "numeric",
     minute: "2-digit",
     timeZone: "Asia/Manila",
   }).format(d);
+  return `Today, ${clock}`;
 }
 
 export function TrackAssistance() {
@@ -234,6 +241,7 @@ export function TrackAssistance() {
   const deliveries: DemoDelivery[] = useMemo(() => {
     const first = readyLines[0];
     if (!first) return [];
+    const eta = etaTomorrowParts();
     return [
       {
         community: first.community,
@@ -243,7 +251,8 @@ export function TrackAssistance() {
         vehicle: "LGU Water Truck 01",
         vehicleCapL: 2000,
         status: "dispatched",
-        etaLabel: etaTomorrowLabel(),
+        etaDate: eta.date,
+        etaTime: eta.time,
       },
     ];
   }, [readyLines]);
@@ -253,10 +262,12 @@ export function TrackAssistance() {
     planMeta?.totalNeededL ??
     lines.reduce((s, l) => s + l.needL, 0);
   const committedL = deliveries.reduce((s, d) => s + d.quantityL, 0);
-  const pendingL = pendingLines
-    .filter((l) => l.constraint === "access_unverified")
-    .reduce((s, l) => s + Math.max(l.allocateL, l.needL), 0);
+  const pendingL = pendingLines.reduce(
+    (s, l) => s + Math.max(l.allocateL, l.needL),
+    0,
+  );
   const unmetL = Math.max(0, totalNeededL - committedL - pendingL);
+  const pendingCommunityCount = pendingLines.length;
   const communityCount =
     shortage?.communityCount ?? planMeta?.communityCount ?? lines.length;
 
@@ -274,21 +285,21 @@ export function TrackAssistance() {
 
   const activity = [
     {
-      time: clockLabel(0),
+      time: activityTimeLabel(0),
       title: "Delivery dispatched",
       detail: deliveries[0]
         ? `${deliveries[0].community} · ${fmtL(deliveries[0].quantityL)} · ${deliveries[0].vehicle}`
         : "Plan approved",
     },
     {
-      time: clockLabel(75),
+      time: activityTimeLabel(75),
       title: "Access verification requested",
       detail: pendingLines.find((l) => l.constraint === "access_unverified")
         ? `${pendingLines.find((l) => l.constraint === "access_unverified")!.community} · ground check`
         : "Pending communities flagged",
     },
     {
-      time: clockLabel(120),
+      time: activityTimeLabel(120),
       title: "Transport needed",
       detail: pendingLines.find((l) => l.constraint === "no_transport")
         ? `${pendingLines.find((l) => l.constraint === "no_transport")!.community} · no vehicle confirmed`
@@ -296,19 +307,49 @@ export function TrackAssistance() {
     },
   ];
 
+  const lastUpdated = shortage?.updatedAt
+    ? new Date(shortage.updatedAt).toLocaleString("en-PH", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "Asia/Manila",
+      })
+    : "—";
+  const placeLabel =
+    reportScope.mode === "barangay"
+      ? `${reportScope.barangay}, ${reportScope.lgu}`
+      : reportScope.lgu;
+  const targetDateLabel = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    return new Intl.DateTimeFormat("en-PH", {
+      month: "short",
+      day: "numeric",
+      timeZone: "Asia/Manila",
+    }).format(d);
+  })();
+
   return (
-    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
-      <Link
-        href="/admin/resources"
-        className="text-sm font-medium text-[#2f5f9e] hover:underline"
-      >
-        ← Back to resources
-      </Link>
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-[#f5f7fb] px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <Link
+          href="/admin/resources"
+          className="text-sm font-medium text-[#2f5f9e] hover:underline"
+        >
+          ← Back to resources
+        </Link>
+        <div className="text-right text-[12px] text-[var(--muted)]">
+          <p className="font-medium text-[var(--foreground)]">{placeLabel}</p>
+          <p className="mt-0.5">Last updated {lastUpdated}</p>
+        </div>
+      </div>
 
       <AllocationPlanStepper current={3} className="mt-4" />
 
       <div className="mt-5">
-        <h1 className="font-[family-name:var(--font-display)] text-2xl font-semibold tracking-wide text-[var(--foreground)] sm:text-[2rem]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[var(--foreground)] sm:text-[1.75rem]">
           Track assistance
         </h1>
         <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
@@ -323,29 +364,30 @@ export function TrackAssistance() {
           value={fmtL(totalNeededL)}
           hint={`From ${communityCount} ${communityCount === 1 ? "community" : "communities"}`}
           tone="blue"
+          icon="box"
         />
         <KpiCard
           label="Committed for delivery"
           value={fmtL(committedL)}
           hint={`${deliveries.length} ${deliveries.length === 1 ? "delivery" : "deliveries"}`}
           tone="green"
+          icon="truck"
         />
         <KpiCard
           label="Pending"
           value={fmtL(pendingL)}
-          hint={`${pendingLines.filter((l) => l.constraint === "access_unverified").length} ${
-            pendingLines.filter((l) => l.constraint === "access_unverified")
-              .length === 1
-              ? "community"
-              : "communities"
+          hint={`${pendingCommunityCount} ${
+            pendingCommunityCount === 1 ? "community" : "communities"
           }`}
           tone="amber"
+          icon="clock"
         />
         <KpiCard
           label="Unmet need"
           value={fmtL(unmetL)}
           hint="After this plan"
           tone="red"
+          icon="warn"
         />
       </div>
 
@@ -373,9 +415,9 @@ export function TrackAssistance() {
           </div>
 
           {(tab === "deliveries" || tab === "all") && (
-            <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
-              <div className="border-b border-[var(--border)] px-4 py-3 sm:px-5">
-                <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
+            <section className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className="border-b border-[#eef2f7] px-4 py-3 sm:px-5">
+                <h2 className="text-[15px] font-semibold text-[var(--foreground)]">
                   Approved deliveries
                 </h2>
               </div>
@@ -385,54 +427,70 @@ export function TrackAssistance() {
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[640px] text-left text-[13px]">
+                  <table className="w-full min-w-[720px] text-left text-[13px]">
                     <thead>
-                      <tr className="border-b border-[var(--border)] bg-[#f8fafc] text-[12px] text-[var(--muted)]">
-                        <th className="px-4 py-2.5 font-medium sm:px-5">
-                          Community
-                        </th>
-                        <th className="px-3 py-2.5 font-medium">Quantity</th>
-                        <th className="px-3 py-2.5 font-medium">Vehicle</th>
-                        <th className="px-3 py-2.5 font-medium">Status</th>
-                        <th className="px-3 py-2.5 font-medium">
-                          ETA / delivery date
-                        </th>
-                        <th className="px-4 py-2.5 font-medium sm:px-5">
-                          Action
-                        </th>
+                      <tr className="border-b border-[#eef2f7] bg-[#f8fafc] text-[11px] font-medium tracking-wide text-[var(--muted)] uppercase">
+                        <th className="px-4 py-2.5 sm:px-5">Community</th>
+                        <th className="px-3 py-2.5">Quantity</th>
+                        <th className="px-3 py-2.5">Vehicle</th>
+                        <th className="px-3 py-2.5">Status</th>
+                        <th className="px-3 py-2.5">ETA / delivery date</th>
+                        <th className="px-4 py-2.5 sm:px-5">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
                       {deliveries.map((d) => (
                         <tr
                           key={d.reportId}
-                          className="border-b border-[var(--border)]"
+                          className="border-b border-[#eef2f7] last:border-b-0"
                         >
-                          <td className="px-4 py-3 sm:px-5">
-                            <p className="font-medium">{d.community}</p>
-                            <p className="text-[11px] text-[var(--muted)]">
-                              {fmtL(d.needL)} needed
-                            </p>
+                          <td className="px-4 py-3.5 sm:px-5">
+                            <div className="flex items-center gap-2.5">
+                              <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#e8eef8] text-[11px] font-semibold text-[#2f5f9e]">
+                                {d.community.replace(/^Sitio\s+/i, "").slice(0, 2).toUpperCase()}
+                              </span>
+                              <div>
+                                <p className="font-semibold text-[var(--foreground)]">
+                                  {d.community}
+                                </p>
+                                <p className="text-[11px] text-[var(--muted)]">
+                                  {fmtL(d.needL)} needed
+                                </p>
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-3 py-3 tabular-nums font-medium">
+                          <td className="px-3 py-3.5 tabular-nums font-semibold">
                             {fmtL(d.quantityL)}
                           </td>
-                          <td className="px-3 py-3">
-                            <p className="font-medium">{d.vehicle}</p>
-                            <p className="text-[11px] text-[var(--muted)]">
-                              {fmtL(d.vehicleCapL)} capacity
-                            </p>
+                          <td className="px-3 py-3.5">
+                            <div className="flex items-center gap-2.5">
+                              <span
+                                className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-[#eef2ff] text-[#2f5f9e]"
+                                aria-hidden
+                              >
+                                <KpiGlyph kind="truck" />
+                              </span>
+                              <div>
+                                <p className="font-semibold">{d.vehicle}</p>
+                                <p className="text-[11px] text-[var(--muted)]">
+                                  {fmtL(d.vehicleCapL)} capacity
+                                </p>
+                              </div>
+                            </div>
                           </td>
-                          <td className="px-3 py-3">
+                          <td className="px-3 py-3.5">
                             <DeliveryStatus status={d.status} />
                           </td>
-                          <td className="px-3 py-3 text-[12px] text-[var(--muted)]">
-                            {d.etaLabel}
+                          <td className="px-3 py-3.5 text-[12px] leading-snug text-[var(--muted)]">
+                            <span className="block font-medium text-[var(--foreground)]">
+                              {d.etaDate}
+                            </span>
+                            <span className="block">{d.etaTime}</span>
                           </td>
-                          <td className="px-4 py-3 sm:px-5">
+                          <td className="px-4 py-3.5 sm:px-5">
                             <Link
                               href={`/admin/incidents/${encodeURIComponent(d.reportId)}`}
-                              className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
+                              className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-semibold text-[#2f5f9e] transition hover:bg-[#eff6ff]"
                             >
                               View details
                             </Link>
@@ -447,15 +505,15 @@ export function TrackAssistance() {
           )}
 
           {(tab === "pending" || tab === "all" || tab === "deliveries") && (
-            <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
-              <div className="border-b border-[var(--border)] px-4 py-3 sm:px-5">
-                <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-                  Pending needs
+            <section className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+              <div className="border-b border-[#eef2f7] px-4 py-3 sm:px-5">
+                <h2 className="text-[15px] font-semibold text-[var(--foreground)]">
+                  {tab === "deliveries" ? "Operational issues" : "Pending needs"}
                 </h2>
               </div>
               {Object.values(verifyResults).length > 0 ? (
                 <div
-                  className="space-y-2 border-b border-[var(--border)] px-4 py-3 sm:px-5"
+                  className="space-y-2 border-b border-[#eef2f7] px-4 py-3 sm:px-5"
                   role="status"
                   aria-live="polite"
                 >
@@ -465,8 +523,8 @@ export function TrackAssistance() {
                       className={cn(
                         "rounded-lg px-3 py-2 text-[12px] leading-snug",
                         r.ok
-                          ? "bg-[#ecfdf3] text-[#16794c] ring-1 ring-[#86efac]/60"
-                          : "bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fde68a]",
+                          ? "bg-[#ecfdf3] text-[#16794c]"
+                          : "bg-[#fffbeb] text-[#92400e]",
                       )}
                     >
                       {r.message}
@@ -480,18 +538,24 @@ export function TrackAssistance() {
                 </p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[640px] text-left text-[13px]">
+                  <table
+                    className={cn(
+                      "w-full text-left text-[13px]",
+                      tab === "deliveries" ? "min-w-[640px]" : "min-w-[760px]",
+                    )}
+                  >
                     <thead>
-                      <tr className="border-b border-[var(--border)] bg-[#f8fafc] text-[12px] text-[var(--muted)]">
-                        <th className="px-4 py-2.5 font-medium sm:px-5">
-                          Community
-                        </th>
-                        <th className="px-3 py-2.5 font-medium">Quantity</th>
-                        <th className="px-3 py-2.5 font-medium">Issue</th>
-                        <th className="px-3 py-2.5 font-medium">Next step</th>
-                        <th className="px-4 py-2.5 font-medium sm:px-5">
-                          Action
-                        </th>
+                      <tr className="border-b border-[#eef2f7] bg-[#f8fafc] text-[11px] font-medium tracking-wide text-[var(--muted)] uppercase">
+                        {tab !== "deliveries" ? (
+                          <>
+                            <th className="px-4 py-2.5 sm:px-5">Community</th>
+                            <th className="px-3 py-2.5">Quantity</th>
+                          </>
+                        ) : null}
+                        <th className="px-4 py-2.5 sm:px-5">Issue</th>
+                        <th className="px-3 py-2.5">Next step</th>
+                        <th className="px-3 py-2.5">Target date</th>
+                        <th className="px-4 py-2.5 sm:px-5">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -502,38 +566,57 @@ export function TrackAssistance() {
                         return (
                           <tr
                             key={l.reportId}
-                            className="border-b border-[var(--border)]"
+                            className="border-b border-[#eef2f7] last:border-b-0"
                           >
-                            <td className="px-4 py-3 font-medium sm:px-5">
-                              {l.community}
+                            {tab !== "deliveries" ? (
+                              <>
+                                <td className="px-4 py-3.5 font-semibold sm:px-5">
+                                  {l.community}
+                                </td>
+                                <td className="px-3 py-3.5 tabular-nums font-semibold">
+                                  {fmtL(qty)}
+                                </td>
+                              </>
+                            ) : null}
+                            <td className="px-4 py-3.5 sm:px-5">
+                              <div className="flex items-start gap-2">
+                                <IssueGlyph
+                                  kind={isTransport ? "block" : "warn"}
+                                />
+                                <div className="min-w-0">
+                                  <p
+                                    className={cn(
+                                      "text-[13px] font-semibold",
+                                      isTransport
+                                        ? "text-[#b91c1c]"
+                                        : "text-[#b45309]",
+                                    )}
+                                  >
+                                    {l.constraintLabel}
+                                  </p>
+                                  <p className="mt-0.5 text-[11px] leading-snug text-[var(--muted)]">
+                                    {isTransport
+                                      ? "No vehicle available for delivery."
+                                      : "Road conditions and security status unknown."}
+                                  </p>
+                                </div>
+                              </div>
                             </td>
-                            <td className="px-3 py-3 tabular-nums font-medium">
-                              {fmtL(qty)}
-                            </td>
-                            <td className="px-3 py-3">
-                              <span
-                                className={cn(
-                                  "inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium ring-1",
-                                  isTransport
-                                    ? "bg-[#fef2f2] text-[#b91c1c] ring-[#fecaca]"
-                                    : "bg-[#fffbeb] text-[#b45309] ring-[#fde68a]",
-                                )}
-                              >
-                                {l.constraintLabel}
-                              </span>
-                            </td>
-                            <td className="px-3 py-3 text-[12px] text-[var(--muted)]">
+                            <td className="max-w-[14rem] px-3 py-3.5 text-[12px] leading-snug text-[var(--muted)]">
                               {result
                                 ? result.message
                                 : isTransport
                                   ? "Find a vehicle, schedule a later delivery, or request partner transport."
-                                  : "Checks the incident map for a verified road block, then saves the result."}
+                                  : "Verify access with local authorities."}
                             </td>
-                            <td className="px-4 py-3 sm:px-5">
+                            <td className="px-3 py-3.5 text-[12px] text-[var(--muted)]">
+                              {targetDateLabel}
+                            </td>
+                            <td className="px-4 py-3.5 sm:px-5">
                               {isTransport ? (
                                 <Link
                                   href={transportHref(l.reportId)}
-                                  className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
+                                  className="inline-flex rounded-lg border border-[#93c5fd] px-3 py-1.5 text-[12px] font-semibold text-[#2f5f9e] hover:bg-[#eff6ff]"
                                 >
                                   Resolve transport
                                 </Link>
@@ -542,7 +625,7 @@ export function TrackAssistance() {
                                   type="button"
                                   disabled={verifyBusyId === l.reportId}
                                   onClick={() => void onVerifyAccess(l)}
-                                  className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6] disabled:opacity-50"
+                                  className="inline-flex rounded-lg border border-[#93c5fd] px-3 py-1.5 text-[12px] font-semibold text-[#2f5f9e] hover:bg-[#eff6ff] disabled:opacity-50"
                                 >
                                   {verifyBusyId === l.reportId
                                     ? "Checking…"
@@ -562,53 +645,62 @@ export function TrackAssistance() {
             </section>
           )}
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm sm:p-5">
-            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-              Total progress
-            </h2>
-            <div className="mt-3 flex h-3 overflow-hidden rounded-full bg-[#e2e8f0]">
+          <section className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)] sm:p-5">
+            <div className="flex items-baseline justify-between gap-3">
+              <h2 className="text-[15px] font-semibold text-[var(--foreground)]">
+                Total progress
+              </h2>
+              <p className="text-[12px] text-[var(--muted)]">
+                Total needed {fmtL(totalNeededL)}
+              </p>
+            </div>
+            <div className="mt-3 flex h-3.5 overflow-hidden rounded-full bg-[#e8edf5]">
               <span
                 className="bg-[#2f5f9e]"
                 style={{ width: `${pct(committedL)}%` }}
+                title="Committed"
               />
               <span
                 className="bg-[#eab308]"
                 style={{ width: `${pct(pendingL)}%` }}
+                title="Pending"
               />
               <span
-                className="bg-[#94a3b8]"
+                className="bg-[#cbd5e1]"
                 style={{ width: `${pct(unmetL)}%` }}
+                title="Unmet"
               />
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-[var(--muted)]">
-              <span>
-                <span className="font-medium text-[#2f5f9e]">
+            <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 text-[12px] text-[var(--muted)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#2f5f9e]" />
+                <span className="font-semibold text-[#2f5f9e]">
                   {pct(committedL)}%
                 </span>{" "}
                 Committed
               </span>
-              <span>
-                <span className="font-medium text-[#b45309]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#eab308]" />
+                <span className="font-semibold text-[#b45309]">
                   {pct(pendingL)}%
                 </span>{" "}
                 Pending
               </span>
-              <span>
-                <span className="font-medium text-[var(--foreground)]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2 rounded-full bg-[#cbd5e1]" />
+                <span className="font-semibold text-[var(--foreground)]">
                   {pct(unmetL)}%
                 </span>{" "}
-                Unmet need
+                Unmet
               </span>
             </div>
           </section>
         </div>
 
         <aside className="space-y-3 lg:sticky lg:top-4">
-          <section className="overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
-            <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
-              <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-                Map view
-              </h2>
+          <section className="overflow-hidden rounded-xl border border-[#e2e8f0] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            <div className="flex items-center justify-between border-b border-[#eef2f7] px-4 py-3">
+              <h2 className="text-[15px] font-semibold">Map view</h2>
               <Link
                 href={`/admin/resources/${encodeURIComponent(rsCode)}`}
                 className="text-[12px] font-medium text-[#2f5f9e] hover:underline"
@@ -616,84 +708,62 @@ export function TrackAssistance() {
                 View full map
               </Link>
             </div>
-            <div className="relative h-44 bg-[linear-gradient(165deg,#c7d9f0_0%,#e8eef6_45%,#d4dde8_100%)]">
-              <div className="absolute inset-0 flex items-center justify-center gap-6 px-4">
-                {(["A", "B", "C"] as const).map((letter, i) => {
-                  const tones = [
-                    "bg-[#2f5f9e] ring-[#93c5fd]",
-                    "bg-[#eab308] ring-[#fde68a]",
-                    "bg-[#b91c1c] ring-[#fecaca]",
-                  ];
-                  const labels = [
-                    deliveries[0]?.community ?? "Sitio A",
-                    pendingLines.find((l) => l.constraint === "access_unverified")
-                      ?.community ?? "Sitio B",
-                    pendingLines.find((l) => l.constraint === "no_transport")
-                      ?.community ?? "Sitio C",
-                  ];
-                  const statuses = [
-                    "Dispatched",
-                    "Pending",
-                    "Not scheduled",
-                  ];
-                  return (
-                    <div key={letter} className="flex flex-col items-center gap-1">
-                      <span
-                        className={cn(
-                          "flex size-8 items-center justify-center rounded-full text-[12px] font-semibold text-white ring-2",
-                          tones[i],
-                        )}
-                      >
-                        {letter}
-                      </span>
-                      <p className="max-w-[5.5rem] truncate text-center text-[10px] font-medium text-[var(--foreground)]">
-                        {labels[i]}
-                      </p>
-                      <p className="text-[10px] text-[var(--muted)]">
-                        {statuses[i]}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <TrackMapPanel lines={lines} deliveries={deliveries} />
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-              Community progress
-            </h2>
-            <ul className="mt-3 space-y-3">
+          <section className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            <h2 className="text-[15px] font-semibold">Community progress</h2>
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-[var(--muted)]">
+              <span className="inline-flex items-center gap-1">
+                <span className="size-1.5 rounded-full bg-[#2f5f9e]" /> Committed
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="size-1.5 rounded-full bg-[#eab308]" /> Pending
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <span className="size-1.5 rounded-full bg-[#cbd5e1]" /> Unmet
+              </span>
+            </div>
+            <ul className="mt-3 space-y-3.5">
               {(lines.length > 0 ? lines : []).slice(0, 5).map((l) => {
-                const filled =
-                  l.needL > 0
-                    ? Math.min(
-                        100,
-                        Math.round((l.allocateL / l.needL) * 100),
-                      )
+                const need = Math.max(l.needL, 1);
+                const delivered =
+                  l.constraint === "no_blockers" ? l.allocateL : 0;
+                const pending =
+                  l.constraint === "access_unverified" ||
+                  l.constraint === "no_transport"
+                    ? Math.max(l.allocateL, 0)
                     : 0;
-                const bar =
-                  l.constraint === "no_blockers"
-                    ? "bg-[#2f5f9e]"
-                    : l.constraint === "access_unverified"
-                      ? "bg-[#eab308]"
-                      : "bg-[#94a3b8]";
+                const deliveredPct = Math.min(100, (delivered / need) * 100);
+                const pendingPct = Math.min(
+                  100 - deliveredPct,
+                  (pending / need) * 100,
+                );
+                const shownL =
+                  delivered > 0 ? delivered : pending > 0 ? pending : 0;
                 return (
                   <li key={l.reportId}>
                     <div className="flex items-center justify-between gap-2 text-[12px]">
-                      <span className="truncate font-medium">
+                      <span className="truncate font-semibold">
                         {l.community}
                       </span>
-                      <span className="tabular-nums text-[var(--muted)]">
-                        {filled}%
+                      <span className="shrink-0 tabular-nums text-[var(--muted)]">
+                        {fmtL(l.needL)} needed
                       </span>
                     </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#e2e8f0]">
-                      <div
-                        className={cn("h-full rounded-full", bar)}
-                        style={{ width: `${filled}%` }}
+                    <div className="mt-1.5 flex h-2 overflow-hidden rounded-full bg-[#e8edf5]">
+                      <span
+                        className="bg-[#2f5f9e]"
+                        style={{ width: `${deliveredPct}%` }}
+                      />
+                      <span
+                        className="bg-[#eab308]"
+                        style={{ width: `${pendingPct}%` }}
                       />
                     </div>
+                    <p className="mt-1 text-[11px] font-medium tabular-nums text-[var(--muted)]">
+                      {fmtL(shownL)}
+                    </p>
                   </li>
                 );
               })}
@@ -705,20 +775,23 @@ export function TrackAssistance() {
             </ul>
           </section>
 
-          <section className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
-            <h2 className="font-[family-name:var(--font-display)] text-base font-semibold tracking-wide">
-              Recent activity
-            </h2>
-            <ul className="mt-3 space-y-3">
-              {activity.map((a) => (
+          <section className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-[15px] font-semibold">Recent activity</h2>
+              <span className="text-[11px] font-medium text-[#2f5f9e]">
+                View all
+              </span>
+            </div>
+            <ul className="mt-3 space-y-3.5">
+              {activity.map((a, i) => (
                 <li key={a.title} className="flex gap-3">
-                  <span className="mt-1 size-2 shrink-0 rounded-full bg-[#2f5f9e]" />
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-baseline gap-x-2">
-                      <p className="text-sm font-medium">{a.title}</p>
+                  <ActivityGlyph index={i} />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                      <p className="text-sm font-semibold">{a.title}</p>
                       <p className="text-[11px] text-[var(--muted)]">{a.time}</p>
                     </div>
-                    <p className="mt-0.5 text-[12px] text-[var(--muted)]">
+                    <p className="mt-0.5 text-[12px] leading-snug text-[var(--muted)]">
                       {a.detail}
                     </p>
                   </div>
@@ -737,36 +810,258 @@ function KpiCard({
   value,
   hint,
   tone,
+  icon,
 }: {
   label: string;
   value: string;
   hint: string;
   tone: "blue" | "green" | "amber" | "red";
+  icon: "box" | "truck" | "clock" | "warn";
 }) {
+  const shell =
+    tone === "blue"
+      ? "border-[#bfdbfe] bg-[#eff6ff]"
+      : tone === "green"
+        ? "border-[#bbf7d0] bg-[#f0fdf4]"
+        : tone === "amber"
+          ? "border-[#fde68a] bg-[#fffbeb]"
+          : "border-[#fecaca] bg-[#fef2f2]";
   const valueColor =
     tone === "blue"
-      ? "text-[#2f5f9e]"
+      ? "text-[#1d4ed8]"
       : tone === "green"
-        ? "text-[#16794c]"
+        ? "text-[#15803d]"
         : tone === "amber"
           ? "text-[#b45309]"
           : "text-[#b91c1c]";
-  const ring =
-    tone === "red"
-      ? "border-[#fecaca] bg-[#fff7f7]"
-      : "border-[var(--border)] bg-white";
+  const iconShell =
+    tone === "blue"
+      ? "bg-[#dbeafe] text-[#1d4ed8]"
+      : tone === "green"
+        ? "bg-[#dcfce7] text-[#15803d]"
+        : tone === "amber"
+          ? "bg-[#fef3c7] text-[#b45309]"
+          : "bg-[#fee2e2] text-[#b91c1c]";
   return (
-    <div className={cn("rounded-2xl border px-4 py-4 shadow-sm", ring)}>
-      <p className="text-[12px] text-[var(--muted)]">{label}</p>
-      <p
-        className={cn(
-          "mt-1 font-[family-name:var(--font-display)] text-3xl font-semibold tabular-nums tracking-wide",
-          valueColor,
-        )}
-      >
+    <div className={cn("rounded-xl border px-4 py-3.5", shell)}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-[12px] font-medium text-[var(--muted)]">{label}</p>
+        <span
+          className={cn(
+            "flex size-7 shrink-0 items-center justify-center rounded-lg",
+            iconShell,
+          )}
+          aria-hidden
+        >
+          <KpiGlyph kind={icon} />
+        </span>
+      </div>
+      <p className={cn("mt-1 text-[1.75rem] font-semibold tabular-nums leading-none", valueColor)}>
         {value}
       </p>
-      <p className="mt-1 text-[12px] text-[var(--muted)]">{hint}</p>
+      <p className="mt-1.5 text-[12px] text-[var(--muted)]">{hint}</p>
+    </div>
+  );
+}
+
+function KpiGlyph({ kind }: { kind: "box" | "truck" | "clock" | "warn" }) {
+  if (kind === "box") {
+    return (
+      <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden>
+        <path d="M2.5 5.5 8 2.5l5.5 3v6L8 14.5 2.5 11.5v-6Z" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M8 8v6.5M2.5 5.5 8 8.5l5.5-3" stroke="currentColor" strokeWidth="1.4" />
+      </svg>
+    );
+  }
+  if (kind === "truck") {
+    return (
+      <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden>
+        <path d="M1.5 10.5V4.5h8v6h-8Z" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M9.5 6.5h2.5l2 2.5v1.5H9.5V6.5Z" stroke="currentColor" strokeWidth="1.4" />
+        <circle cx="4.5" cy="11.5" r="1.2" stroke="currentColor" strokeWidth="1.2" />
+        <circle cx="12" cy="11.5" r="1.2" stroke="currentColor" strokeWidth="1.2" />
+      </svg>
+    );
+  }
+  if (kind === "clock") {
+    return (
+      <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden>
+        <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M8 5v3.2L10 10" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 16 16" className="size-3.5" fill="none" aria-hidden>
+      <path d="M8 2.5 14 13.5H2L8 2.5Z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+      <path d="M8 6.5v3.2M8 11.2h.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IssueGlyph({ kind }: { kind: "warn" | "block" }) {
+  if (kind === "block") {
+    return (
+      <span
+        className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[#fee2e2] text-[11px] font-bold text-[#b91c1c]"
+        aria-hidden
+      >
+        ×
+      </span>
+    );
+  }
+  return (
+    <span
+      className="mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[#fef3c7] text-[#b45309]"
+      aria-hidden
+    >
+      <KpiGlyph kind="warn" />
+    </span>
+  );
+}
+
+function ActivityGlyph({ index }: { index: number }) {
+  const tone =
+    index === 0
+      ? "bg-[#dbeafe] text-[#1d4ed8]"
+      : index === 1
+        ? "bg-[#fef3c7] text-[#b45309]"
+        : "bg-[#fee2e2] text-[#b91c1c]";
+  return (
+    <span
+      className={cn(
+        "mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full",
+        tone,
+      )}
+      aria-hidden
+    >
+      {index === 0 ? (
+        <KpiGlyph kind="truck" />
+      ) : index === 1 ? (
+        <KpiGlyph kind="warn" />
+      ) : (
+        <span className="text-[12px] font-bold">×</span>
+      )}
+    </span>
+  );
+}
+
+function TrackMapPanel({
+  lines,
+  deliveries,
+}: {
+  lines: AllocationLine[];
+  deliveries: DemoDelivery[];
+}) {
+  const deliveredIds = new Set(deliveries.map((d) => d.reportId));
+  const ranked = [...lines].sort((a, b) => {
+    const rank = (l: AllocationLine) =>
+      deliveredIds.has(l.reportId)
+        ? 0
+        : l.constraint === "access_unverified"
+          ? 1
+          : l.constraint === "no_transport"
+            ? 2
+            : 3;
+    return rank(a) - rank(b);
+  });
+  const slots = [
+    { x: 22, y: 58 },
+    { x: 52, y: 34 },
+    { x: 78, y: 62 },
+  ];
+  const pins = ranked.slice(0, 3).map((l, i) => {
+    const delivered = deliveredIds.has(l.reportId);
+    const color = delivered
+      ? "#2f5f9e"
+      : l.constraint === "access_unverified"
+        ? "#eab308"
+        : l.constraint === "no_transport"
+          ? "#b91c1c"
+          : "#64748b";
+    const status = delivered
+      ? "Dispatched"
+      : l.constraint === "access_unverified"
+        ? "Pending"
+        : l.constraint === "no_transport"
+          ? "Not scheduled"
+          : "Queued";
+    return {
+      letter: String.fromCharCode(65 + i),
+      label: l.community,
+      status,
+      color,
+      ...slots[i]!,
+    };
+  });
+
+  return (
+    <div className="relative h-52 overflow-hidden bg-[linear-gradient(165deg,#c5d8ee_0%,#e8eef6_42%,#d5dee9_100%)]">
+      <div
+        className="absolute inset-0 opacity-[0.35]"
+        style={{
+          backgroundImage:
+            "linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
+        }}
+        aria-hidden
+      />
+      <svg
+        className="absolute inset-0 size-full"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <path
+          d="M5 72 C 18 40, 35 80, 48 36 S 72 28, 95 60"
+          fill="none"
+          stroke="#64748b"
+          strokeWidth="1.4"
+          opacity="0.45"
+        />
+        {pins.length >= 2 ? (
+          <path
+            d={pins
+              .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+              .join(" ")}
+            fill="none"
+            stroke="#2f5f9e"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        ) : null}
+      </svg>
+      {pins.map((p) => (
+        <div
+          key={p.letter}
+          className="absolute flex -translate-x-1/2 -translate-y-[85%] flex-col items-center"
+          style={{ left: `${p.x}%`, top: `${p.y}%` }}
+        >
+          <span className="relative">
+            <span
+              className="flex size-8 items-center justify-center rounded-full text-[12px] font-bold text-white shadow-md ring-2 ring-white"
+              style={{ background: p.color }}
+            >
+              {p.letter}
+            </span>
+            <span
+              className="absolute left-1/2 top-[85%] h-2 w-2 -translate-x-1/2 rotate-45"
+              style={{ background: p.color }}
+              aria-hidden
+            />
+          </span>
+          <p className="mt-2 max-w-[5rem] truncate text-center text-[10px] font-semibold text-[var(--foreground)]">
+            {p.label}
+          </p>
+          <p className="text-[9px] text-[var(--muted)]">{p.status}</p>
+        </div>
+      ))}
+      {pins.length === 0 ? (
+        <p className="absolute inset-0 flex items-center justify-center text-sm text-[var(--muted)]">
+          No communities on this plan yet.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -783,27 +1078,45 @@ function DeliveryStatus({
   ] as const;
   const idx = steps.findIndex((s) => s.id === status);
   return (
-    <div>
-      <p className="text-[12px] font-semibold text-[#2f5f9e]">
+    <div className="min-w-[12rem]">
+      <span className="inline-flex items-center gap-1 rounded-full bg-[#dbeafe] px-2.5 py-0.5 text-[11px] font-semibold text-[#1d4ed8]">
+        <span
+          className="flex size-3.5 items-center justify-center rounded-full bg-[#2563eb] text-[8px] font-bold text-white"
+          aria-hidden
+        >
+          ✓
+        </span>
         {steps[idx]?.label ?? status}
-      </p>
-      <div className="mt-1.5 flex items-center gap-1">
+      </span>
+      <div className="mt-2 flex items-start gap-0">
         {steps.map((s, i) => (
-          <span key={s.id} className="flex items-center gap-1">
-            <span
-              className={cn(
-                "size-2 rounded-full",
-                i <= idx ? "bg-[#2f5f9e]" : "bg-[#cbd5e1]",
-              )}
-            />
-            {i < steps.length - 1 ? (
+          <span key={s.id} className="flex min-w-0 flex-1 flex-col">
+            <span className="flex items-center">
               <span
                 className={cn(
-                  "h-0.5 w-4",
-                  i < idx ? "bg-[#2f5f9e]" : "bg-[#e2e8f0]",
+                  "size-2.5 shrink-0 rounded-full",
+                  i <= idx ? "bg-[#2f5f9e]" : "bg-[#cbd5e1]",
                 )}
               />
-            ) : null}
+              {i < steps.length - 1 ? (
+                <span
+                  className={cn(
+                    "mx-0.5 h-0.5 flex-1",
+                    i < idx ? "bg-[#2f5f9e]" : "bg-[#e2e8f0]",
+                  )}
+                />
+              ) : null}
+            </span>
+            <span
+              className={cn(
+                "mt-1 pr-1 text-[9px] leading-tight",
+                i === idx
+                  ? "font-semibold text-[#2f5f9e]"
+                  : "text-[var(--muted)]",
+              )}
+            >
+              {s.label}
+            </span>
           </span>
         ))}
       </div>
