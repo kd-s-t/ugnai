@@ -833,10 +833,6 @@ function CommandAreaMapInner({
           {ls.mediaUrl ? (
             <>
               <br />
-              <span className="font-mono text-xs uppercase">
-                Image report · live
-              </span>
-              <br />
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={ls.mediaUrl}
@@ -979,21 +975,25 @@ function CommandAreaMapInner({
           >
             <strong>{rp.title}</strong>
             <br />
-            {href ? (
-              <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                className="font-mono text-xs uppercase underline"
-              >
-                {rp.sourceLabel}
-              </a>
-            ) : (
-              <span className="font-mono text-xs uppercase">
-                {rp.sourceLabel}
-              </span>
-            )}
-            <br />
+            {rp.sourceLabel.trim() ? (
+              <>
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="font-mono text-xs uppercase underline"
+                  >
+                    {rp.sourceLabel}
+                  </a>
+                ) : (
+                  <span className="font-mono text-xs uppercase">
+                    {rp.sourceLabel}
+                  </span>
+                )}
+                <br />
+              </>
+            ) : null}
             {rp.kind === "evac_status" &&
             typeof rp.occupancy === "number" &&
             typeof rp.capacity === "number" ? (

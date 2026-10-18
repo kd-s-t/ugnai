@@ -31,7 +31,7 @@ export default function PendingValidationPage() {
           ? "/my-reports"
           : isDeveloper(profile)
             ? "/dev"
-            : "/admin/overview",
+            : "/admin/full",
       );
     }
   }, [loading, user, profile, router]);

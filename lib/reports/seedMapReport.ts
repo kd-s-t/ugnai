@@ -24,7 +24,7 @@ import type {
   ReportHazardHint,
 } from "@/lib/reports/types";
 import type { ScenarioReportPin } from "@/lib/scenarios/types";
-import { CAT5_DURING } from "@/lib/scenarios";
+import { CAT5_AFTER, CAT5_DURING } from "@/lib/scenarios";
 
 /** Firestore seed author uid (rules allow rpt-* creates for this uid). */
 const SEED_UID = "demo-map-seed";
@@ -69,7 +69,10 @@ export function nearbyCitizenForPin(pin: ScenarioReportPin): DemoCitizen {
 
 /** Lookup curated map pin by id (for ensure-seed). */
 export function findMapReportPin(id: string): ScenarioReportPin | undefined {
-  return CAT5_DURING.reportPins.find((p) => p.id === id);
+  return (
+    CAT5_DURING.reportPins.find((p) => p.id === id) ||
+    CAT5_AFTER.reportPins.find((p) => p.id === id)
+  );
 }
 
 /** Curated map image reports that should appear in the public feed. */
@@ -81,6 +84,136 @@ export function listMapReportPinsWithMedia(): ScenarioReportPin[] {
 export async function ensureAllMapReportsInDb(): Promise<void> {
   const pins = listMapReportPinsWithMedia();
   await Promise.all(pins.map((pin) => ensureMapReportInDb(pin)));
+}
+
+/**
+ * Seed After-Tino recovery pins (blockages, residual fire, welfare).
+ * Used by Resources shortage map for access / aftermath context.
+ */
+export async function ensureAftermathReportsInDb(): Promise<void> {
+  await Promise.all(
+    CAT5_AFTER.reportPins.map((pin) => ensureAftermathReportInDb(pin)),
+  );
+}
+
+/** Create-if-missing aftermath pin (media optional). */
+export async function ensureAftermathReportInDb(
+  pin: ScenarioReportPin,
+): Promise<void> {
+  if (pin.mediaUrl) {
+    await ensureMapReportInDb(pin);
+    return;
+  }
+  const citizen = nearbyCitizenForPin(pin);
+  const ref = doc(getClientDb(), "reports", pin.id);
+  const existing = await getDoc(ref);
+  const now = new Date().toISOString();
+  const hazardHint = hazardForKind(pin.kind);
+  if (existing.exists()) {
+    const data = existing.data() as Record<string, unknown>;
+    if (
+      data.hazardHint !== hazardHint ||
+      data.lat !== pin.lat ||
+      data.lng !== pin.lng ||
+      data.title !== pin.title ||
+      data.status === "done" ||
+      data.status === "rejected"
+    ) {
+      await updateDoc(ref, {
+        title: pin.title,
+        notes: pin.notes,
+        hazardHint,
+        lat: pin.lat,
+        lng: pin.lng,
+        citizenPurok: citizen.purok,
+        status: "legit",
+        aiVerdict: "legit",
+        updatedAt: now,
+        updatedAtServer: serverTimestamp(),
+      });
+    }
+    return;
+  }
+  const trust = computeReportTrust({
+    registered: true,
+    idVerified: true,
+    email: citizen.email,
+    phone: citizen.phone,
+    emailVerified: true,
+    mediaSource: "mobile-camera",
+    lat: pin.lat,
+    lng: pin.lng,
+    locationAccuracyM: 25,
+    aiConfidence: 0.9,
+    aiVerdict: "legit",
+  });
+  await setDoc(ref, {
+    citizenUid: SEED_UID,
+    citizenName: citizen.displayName,
+    citizenPurok: citizen.purok,
+    barangay: DEFAULT_REPORT_BARANGAY,
+    lgu: DEFAULT_REPORT_LGU,
+    citizenPhotoURL: null,
+    title: pin.title,
+    notes: pin.notes,
+    hazardHint,
+    mediaType: "photo",
+    mediaPath: null,
+    mediaUrl: null,
+    mediaMime: null,
+    mediaSource: "mobile-camera",
+    voiceNoteLabel: null,
+    voicePath: null,
+    voiceUrl: null,
+    voiceMime: null,
+    voiceTranscript: null,
+    lat: pin.lat,
+    lng: pin.lng,
+    locationAccuracyM: 25,
+    locationLabel: `${pin.lat.toFixed(5)}, ${pin.lng.toFixed(5)}`,
+    device: "Android · mobile",
+    ipAddress: null,
+    status: "legit",
+    aiVerdict: "legit",
+    aiConfidence: 0.9,
+    aiReason: "Seeded from After Tino aftermath pin",
+    aiSource: "local",
+    aiModel: null,
+    aiPriority: null,
+    aiPriorityFactors: null,
+    vertexClass: null,
+    vertexConfidence: null,
+    vertexLocationLabel: null,
+    vertexLocationConfidence: null,
+    vertexLocationPlaceId: null,
+    vertexLocationPlaceLabel: null,
+    validatedAt: pin.reportedAt,
+    assignees: [],
+    investigatorUid: null,
+    investigatorName: null,
+    investigatedAt: null,
+    autoResponderCallAt: null,
+    dispatchedAt: null,
+    reporterDispatchNotifiedAt: null,
+    dispatchLog: null,
+    manualDispatchChecked: false,
+    proposalChecklist: {},
+    fieldEvidence: [],
+    fieldNotes: null,
+    fieldNotesAt: null,
+    reporterIdVerified: true,
+    reporterEmail: citizen.email,
+    reporterPhone: citizen.phone,
+    reporterEmailVerified: true,
+    trustScore: trust.total,
+    trustBreakdown: trust,
+    reactionCounts: { ...EMPTY_REACTION_COUNTS },
+    commentCount: 0,
+    createdAt: pin.reportedAt,
+    updatedAt: now,
+    createdAtServer: serverTimestamp(),
+    updatedAtServer: serverTimestamp(),
+  });
 }
 
 /**

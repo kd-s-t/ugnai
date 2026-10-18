@@ -32,6 +32,7 @@ import {
 } from "@/lib/workspace/supplyShortagePlan";
 import { cn } from "@/lib/utils";
 
+/** Local / emulator only - not shown on prod officer desks. */
 const SHOW_GEMINI_DEBUG =
   process.env.NEXT_PUBLIC_USE_EMULATORS === "true" ||
   process.env.NODE_ENV !== "production";
@@ -127,16 +128,22 @@ export function AllocationCompare() {
     if (apasDesk) {
       const apasWater = apasSitioWaterReports(reports);
       if (apasWater.length >= 2) {
-        return buildSupplyShortagePlan("water", apasWater);
+        return buildSupplyShortagePlan(
+          "water",
+          apasWater,
+          scopedReports,
+          rsCode,
+        );
       }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
-    if (!matched) {
-      const water = reportsForEpicCode("RS-001", scopedReports);
-      if (water) return buildSupplyShortagePlan(water.kind, water.reports);
-      return null;
-    }
-    return buildSupplyShortagePlan(matched.kind, matched.reports);
+    if (!matched) return null;
+    return buildSupplyShortagePlan(
+      matched.kind,
+      matched.reports,
+      scopedReports,
+      rsCode,
+    );
   }, [apasDesk, reports, scopedReports, rsCode]);
 
   const planKey = useMemo(() => {
@@ -644,13 +651,18 @@ export function AllocationCompare() {
       </div>
 
       {SHOW_GEMINI_DEBUG ? (
-        <section className="mt-6 space-y-3 rounded-2xl border border-dashed border-[#93c5fd] bg-[#f8fafc] p-4">
-          <p className="flex items-center gap-2 text-[11px] font-semibold tracking-wide text-[#2f5f9e] uppercase">
+        <section
+          className="mt-6 space-y-3 rounded-2xl border border-dashed border-[#93c5fd] bg-[#f8fafc] p-4"
+          title="Only developers can see this"
+        >
+          <p
+            className="flex cursor-help items-center gap-2 text-[11px] font-semibold tracking-wide text-[#2f5f9e] uppercase"
+            title="Only developers can see this"
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/brands/gemini.png"
               alt=""
-              title="Gemini"
               className="h-4 w-auto shrink-0"
             />
             Local debug · Gemini prompt &amp; return

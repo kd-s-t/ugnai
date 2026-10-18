@@ -7,6 +7,7 @@ import { AllocationPlanStepper } from "@/components/AllocationPlanStepper";
 import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
 import {
   getShortageById,
+  patchShortageAllocationLines,
   saveShortageWorkflowStep,
 } from "@/lib/resourcesShortages/api";
 import type { ResourceShortage } from "@/lib/resourcesShortages/types";
@@ -19,6 +20,7 @@ import {
   buildSupplyShortagePlan,
   reportsForEpicCode,
 } from "@/lib/workspace/supplyShortagePlan";
+import { verifyDeliveryAccess } from "@/lib/workspace/verifyDeliveryAccess";
 import { cn } from "@/lib/utils";
 
 type TabId = "deliveries" | "pending" | "all";
@@ -73,6 +75,13 @@ export function TrackAssistance() {
 
   const [shortage, setShortage] = useState<ResourceShortage | null>(null);
   const [tab, setTab] = useState<TabId>("deliveries");
+  const [linesOverride, setLinesOverride] = useState<AllocationLine[] | null>(
+    null,
+  );
+  const [verifyBusyId, setVerifyBusyId] = useState<string | null>(null);
+  const [verifyResults, setVerifyResults] = useState<
+    Record<string, { ok: boolean; message: string }>
+  >({});
 
   useEffect(() => {
     let cancelled = false;
@@ -80,6 +89,7 @@ export function TrackAssistance() {
       const doc = await getShortageById(storageId);
       if (cancelled) return;
       setShortage(doc);
+      setLinesOverride(null);
       try {
         await saveShortageWorkflowStep(storageId, 3);
       } catch {
@@ -91,12 +101,18 @@ export function TrackAssistance() {
     };
   }, [storageId]);
 
-  const lines = useMemo((): AllocationLine[] => {
+  const selectedOptionId = useMemo(() => {
     const options = shortage?.allocation?.options ?? [];
-    const id = shortage?.selectedOptionId || options[0]?.id || "";
-    const opt = options.find((o) => o.id === id) ?? options[0];
-    return opt?.lines ?? [];
+    return shortage?.selectedOptionId || options[0]?.id || "";
   }, [shortage]);
+
+  const lines = useMemo((): AllocationLine[] => {
+    if (linesOverride) return linesOverride;
+    const options = shortage?.allocation?.options ?? [];
+    const opt =
+      options.find((o) => o.id === selectedOptionId) ?? options[0];
+    return opt?.lines ?? [];
+  }, [shortage, selectedOptionId, linesOverride]);
 
   const planMeta = useMemo(() => {
     const apasDesk =
@@ -104,15 +120,102 @@ export function TrackAssistance() {
     if (apasDesk) {
       const apasWater = apasSitioWaterReports(reports);
       if (apasWater.length >= 2) {
-        return buildSupplyShortagePlan("water", apasWater);
+        return buildSupplyShortagePlan(
+          "water",
+          apasWater,
+          scopedReports,
+          rsCode,
+        );
       }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
-    if (matched) return buildSupplyShortagePlan(matched.kind, matched.reports);
-    const water = reportsForEpicCode("RS-001", scopedReports);
-    if (water) return buildSupplyShortagePlan(water.kind, water.reports);
-    return null;
+    if (!matched) return null;
+    return buildSupplyShortagePlan(
+      matched.kind,
+      matched.reports,
+      scopedReports,
+      rsCode,
+    );
   }, [reports, scopedReports, rsCode, reportScope]);
+
+  async function onVerifyAccess(line: AllocationLine) {
+    if (line.constraint !== "access_unverified") return;
+    setVerifyBusyId(line.reportId);
+    try {
+      const row = planMeta?.rows.find(
+        (r) =>
+          r.reportId === line.reportId || r.reportIds.includes(line.reportId),
+      );
+      const report =
+        scopedReports.find((r) => r.id === line.reportId) ||
+        reports.find((r) => r.id === line.reportId);
+      const result = verifyDeliveryAccess({
+        reports: scopedReports,
+        lat: row?.lat ?? report?.lat,
+        lng: row?.lng ?? report?.lng,
+        barangay:
+          report?.barangay ??
+          row?.barangayLabel?.replace(/^Brgy\.\s*/i, "") ??
+          null,
+      });
+      const nextLines = lines.map((l) => {
+        if (l.reportId !== line.reportId) return l;
+        if (!result.ok) {
+          return {
+            ...l,
+            constraint: "access_unverified" as const,
+            constraintLabel: "Road block nearby",
+          };
+        }
+        return {
+          ...l,
+          readiness: "ready" as const,
+          constraint: "no_blockers" as const,
+          constraintLabel: "No blockers",
+        };
+      });
+      const message = result.ok
+        ? `${line.community}: Access OK. No verified road block nearby. Saved.`
+        : `${line.community}: Road block found (${result.block.title || result.block.id}). Saved. Clear it on Incidents, then verify again.`;
+      setLinesOverride(nextLines);
+      setVerifyResults((prev) => ({
+        ...prev,
+        [line.reportId]: { ok: result.ok, message },
+      }));
+      if (!selectedOptionId) {
+        throw new Error("No allocation option selected to save.");
+      }
+      await patchShortageAllocationLines(
+        storageId,
+        selectedOptionId,
+        nextLines,
+      );
+      setShortage((prev) => {
+        if (!prev?.allocation) return prev;
+        return {
+          ...prev,
+          allocation: {
+            ...prev.allocation,
+            options: prev.allocation.options.map((o) =>
+              o.id === selectedOptionId ? { ...o, lines: nextLines } : o,
+            ),
+            savedAt: new Date().toISOString(),
+          },
+        };
+      });
+    } catch (err) {
+      setVerifyResults((prev) => ({
+        ...prev,
+        [line.reportId]: {
+          ok: false,
+          message:
+            err instanceof Error ? err.message : "Could not verify access",
+        },
+      }));
+    } finally {
+      setVerifyBusyId(null);
+    }
+  }
 
   const readyLines = useMemo(
     () => lines.filter((l) => l.constraint === "no_blockers" && l.allocateL > 0),
@@ -350,6 +453,27 @@ export function TrackAssistance() {
                   Pending needs
                 </h2>
               </div>
+              {Object.values(verifyResults).length > 0 ? (
+                <div
+                  className="space-y-2 border-b border-[var(--border)] px-4 py-3 sm:px-5"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {Object.entries(verifyResults).map(([id, r]) => (
+                    <p
+                      key={id}
+                      className={cn(
+                        "rounded-lg px-3 py-2 text-[12px] leading-snug",
+                        r.ok
+                          ? "bg-[#ecfdf3] text-[#16794c] ring-1 ring-[#86efac]/60"
+                          : "bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fde68a]",
+                      )}
+                    >
+                      {r.message}
+                    </p>
+                  ))}
+                </div>
+              ) : null}
               {pendingLines.length === 0 ? (
                 <p className="px-4 py-8 text-center text-sm text-[var(--muted)] sm:px-5">
                   No pending blockers on this plan.
@@ -374,6 +498,7 @@ export function TrackAssistance() {
                       {pendingLines.map((l) => {
                         const qty = Math.max(l.allocateL, l.needL);
                         const isTransport = l.constraint === "no_transport";
+                        const result = verifyResults[l.reportId];
                         return (
                           <tr
                             key={l.reportId}
@@ -398,23 +523,34 @@ export function TrackAssistance() {
                               </span>
                             </td>
                             <td className="px-3 py-3 text-[12px] text-[var(--muted)]">
-                              {isTransport
-                                ? "Find a vehicle, schedule a later delivery, or request partner transport."
-                                : "Verify access with local authorities."}
+                              {result
+                                ? result.message
+                                : isTransport
+                                  ? "Find a vehicle, schedule a later delivery, or request partner transport."
+                                  : "Checks the incident map for a verified road block, then saves the result."}
                             </td>
                             <td className="px-4 py-3 sm:px-5">
-                              <Link
-                                href={
-                                  isTransport
-                                    ? transportHref(l.reportId)
-                                    : `/admin/incidents/${encodeURIComponent(l.reportId)}`
-                                }
-                                className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
-                              >
-                                {isTransport
-                                  ? "Resolve transport"
-                                  : "Verify access"}
-                              </Link>
+                              {isTransport ? (
+                                <Link
+                                  href={transportHref(l.reportId)}
+                                  className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6]"
+                                >
+                                  Resolve transport
+                                </Link>
+                              ) : (
+                                <button
+                                  type="button"
+                                  disabled={verifyBusyId === l.reportId}
+                                  onClick={() => void onVerifyAccess(l)}
+                                  className="inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-1.5 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6] disabled:opacity-50"
+                                >
+                                  {verifyBusyId === l.reportId
+                                    ? "Checking…"
+                                    : result
+                                      ? "Check again"
+                                      : "Verify access"}
+                                </button>
+                              )}
                             </td>
                           </tr>
                         );

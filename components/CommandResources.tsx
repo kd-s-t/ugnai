@@ -273,46 +273,49 @@ export function CommandResources() {
 
   const shortagePlan = useMemo(() => {
     if (!rsCode) return null;
-    // Apas Sitio* demos only when this desk is Apas — never override Nangka.
+    // Apas Sitio* demos only when this desk is Apas - never override Nangka.
     if (apasDesk) {
       const apasWater = apasSitioWaterReports(reports);
       if (apasWater.length >= 2) {
-        return buildSupplyShortagePlan("water", apasWater);
+        return buildSupplyShortagePlan(
+          "water",
+          apasWater,
+          scopedReports,
+          rsCode,
+        );
       }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
-    const water = reportsForEpicCode("RS-001", scopedReports);
-    if (water && water.reports.length >= 2 && rsCode !== "RS-001") {
-      return buildSupplyShortagePlan(water.kind, water.reports);
-    }
-    if (!matched) {
-      if (water) return buildSupplyShortagePlan(water.kind, water.reports);
-      return null;
-    }
-    return buildSupplyShortagePlan(matched.kind, matched.reports);
+    if (!matched) return null;
+    return buildSupplyShortagePlan(
+      matched.kind,
+      matched.reports,
+      scopedReports,
+      rsCode,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rsCode, scopedReports, reports, sitioSeedTick, apasDesk]);
 
+  // Seed sitio water demos so the shortage table gets all puroks / sitios.
   useEffect(() => {
-    if (!shortagePlan) return;
-    if (shortagePlan.code === "RS-001" && rsCode !== "RS-001") {
-      router.replace("/admin/resources/RS-001");
-    }
-  }, [shortagePlan, rsCode, router]);
-
-  // Seed Apas Sitio water demos only on the Apas desk.
-  useEffect(() => {
-    if (!isOfficer(profile) || !profile || !apasDesk) return;
+    if (!isOfficer(profile) || !profile) return;
     let cancelled = false;
     void (async () => {
       try {
-        const { ensureApasWaterAndFireReports } = await import(
-          "@/lib/onboarding/apasSeed"
-        );
-        await ensureApasWaterAndFireReports();
+        if (apasDesk) {
+          const { ensureApasWaterAndFireReports } = await import(
+            "@/lib/onboarding/apasSeed"
+          );
+          await ensureApasWaterAndFireReports();
+        } else {
+          const { ensureResourceShortageReport } = await import(
+            "@/lib/reports/ensureResourceShortageReport"
+          );
+          await ensureResourceShortageReport();
+        }
         if (!cancelled) setSitioSeedTick((n) => n + 1);
       } catch (err) {
-        if (!cancelled) console.warn("Apas sitio water seed failed", err);
+        if (!cancelled) console.warn("Shortage sitio seed failed", err);
       }
     })();
     return () => {
@@ -332,7 +335,7 @@ export function CommandResources() {
         timeZone: "Asia/Manila",
       }).format(new Date());
     } catch {
-      return "—";
+      return "-";
     }
   }, []);
 
@@ -359,7 +362,7 @@ export function CommandResources() {
         />
       );
     }
-    // Brief wait for first report snapshot only — seedReady is not a gate.
+    // Brief wait for first report snapshot only - seedReady is not a gate.
     if (scopedReports.length === 0 && !seedReady) {
       return (
         <div className="flex h-full min-h-0 flex-1 flex-col items-center justify-center px-4 py-10 text-center">

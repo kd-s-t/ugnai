@@ -1,6 +1,7 @@
 import {
   collection,
   doc,
+  getDoc,
   onSnapshot,
   serverTimestamp,
   setDoc,
@@ -139,6 +140,9 @@ export async function upsertSuggestionsFromPlan(
     lng: row.lng,
   }));
   const now = new Date().toISOString();
+  const ref = doc(getClientDb(), COL, id);
+  const existing = await getDoc(ref);
+  const prev = existing.exists() ? existing.data() : null;
   const payload = {
     shortageId: publicCode,
     epicCode: publicCode,
@@ -151,10 +155,12 @@ export async function upsertSuggestionsFromPlan(
     requests,
     updatedAt: now,
     updatedAtServer: serverTimestamp(),
-    createdAt: now,
-    createdAtServer: serverTimestamp(),
+    createdAt:
+      typeof prev?.createdAt === "string" ? prev.createdAt : now,
+    createdAtServer: prev?.createdAtServer ?? serverTimestamp(),
   };
-  await setDoc(doc(getClientDb(), COL, id), payload, { merge: true });
+  // Replace doc so `requests` cannot stay stuck on a stale 1-sitio array.
+  await setDoc(ref, payload);
   return mapDoc(id, payload as unknown as Record<string, unknown>);
 }
 

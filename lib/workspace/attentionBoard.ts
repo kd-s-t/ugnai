@@ -4,6 +4,7 @@ import { unknownsForReport } from "@/lib/workspace/incidentDerived";
 import {
   aggregateSupplyNeed,
   parseReportNeed,
+  reviewShortageHref,
   supplyNeedEpicCode,
   supplyNeedKind,
   supplyNeedNoun,
@@ -290,7 +291,7 @@ function buildSoloItem(
   if (kind === "resource") {
     const supply = supplyNeedKind(report);
     const shortageHref = supply
-      ? `/admin/resources/${encodeURIComponent(supplyNeedEpicCode(supply))}`
+      ? reviewShortageHref(supply)
       : `/admin/resources/assist?report=${encodeURIComponent(report.id)}`;
     return {
       id: `resource-${report.id}`,
@@ -349,7 +350,7 @@ function buildEpicItem(
     timeLabel: timeLabelPht(copy.primary.createdAt),
     meta: copy.meta,
     ctaLabel: "Review shortage",
-    ctaHref: `/admin/resources/${encodeURIComponent(copy.incidentCode)}`,
+    ctaHref: reviewShortageHref(kind),
     primaryCta: false,
     lat: copy.primary.lat,
     lng: copy.primary.lng,

@@ -42,6 +42,21 @@ export type ResourceShortage = {
   updatedAt: string;
 };
 
+export const SHORTAGE_WORKFLOW_STEPS = [
+  { n: 1 as const, label: "Compare options", short: "Compare" },
+  { n: 2 as const, label: "Review & approve", short: "Review" },
+  { n: 3 as const, label: "Track assistance", short: "Track" },
+];
+
+export function shortageWorkflowStepLabel(
+  step: 1 | 2 | 3 | null | undefined,
+): string {
+  if (step === 1) return "1 · Compare options";
+  if (step === 2) return "2 · Review & approve";
+  if (step === 3) return "3 · Track assistance";
+  return "Desk";
+}
+
 export function hrefForShortageWorkflow(
   shortageId: string,
   step: 1 | 2 | 3 | null | undefined,
@@ -54,7 +69,10 @@ export function hrefForShortageWorkflow(
   if (step === 2) {
     return `/admin/resources/review/${encodeURIComponent(id)}`;
   }
-  return `/admin/resources/compare/${encodeURIComponent(id)}`;
+  if (step === 1) {
+    return `/admin/resources/compare/${encodeURIComponent(id)}`;
+  }
+  return `/admin/resources/${encodeURIComponent(id)}`;
 }
 
 export function hrefForShortageDesk(shortageId: string): string {

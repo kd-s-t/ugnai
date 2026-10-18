@@ -165,14 +165,22 @@ export function ResolveTransportConstraint() {
     if (apasDesk) {
       const apasWater = apasSitioWaterReports(reports);
       if (apasWater.length >= 2) {
-        return buildSupplyShortagePlan("water", apasWater);
+        return buildSupplyShortagePlan(
+          "water",
+          apasWater,
+          scopedReports,
+          rsCode,
+        );
       }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
-    if (matched) return buildSupplyShortagePlan(matched.kind, matched.reports);
-    const water = reportsForEpicCode("RS-001", scopedReports);
-    if (water) return buildSupplyShortagePlan(water.kind, water.reports);
-    return null;
+    if (!matched) return null;
+    return buildSupplyShortagePlan(
+      matched.kind,
+      matched.reports,
+      scopedReports,
+      rsCode,
+    );
   }, [reports, scopedReports, rsCode, reportScope]);
 
   useEffect(() => {
