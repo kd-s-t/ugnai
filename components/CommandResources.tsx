@@ -23,6 +23,11 @@ import {
 import { listenAllSuggestions } from "@/lib/resourcesSuggestions/api";
 import type { ResourceSuggestion } from "@/lib/resourcesSuggestions/types";
 import {
+  filterSuggestionsForScope,
+  resourceEpicStorageId,
+} from "@/lib/workspace/resourceEpicScope";
+import {
+  apasSitioWaterReports,
   buildSupplyShortagePlan,
   reportsForEpicCode,
 } from "@/lib/workspace/supplyShortagePlan";
@@ -202,17 +207,39 @@ export function CommandResources() {
     router.replace(`/admin/resources/${encodeURIComponent(queryRs)}`);
   }, [queryRs, rsCode, router]);
 
+  const scopedReportIds = useMemo(
+    () => new Set(scopedReports.map((r) => r.id)),
+    [scopedReports],
+  );
+
+  const scopedCommitments = useMemo(
+    () => commitments.filter((c) => scopedReportIds.has(c.reportId)),
+    [commitments, scopedReportIds],
+  );
+
+  const scopedSuggestions = useMemo(
+    () =>
+      filterSuggestionsForScope(suggestions, reportScope, scopedReportIds),
+    [suggestions, reportScope, scopedReportIds],
+  );
+
   const board = useMemo(
     () =>
       buildResourceBoard(
         scopedReports,
         activeOfficers.length,
-        commitments,
+        scopedCommitments,
       ),
-    [scopedReports, activeOfficers.length, commitments],
+    [scopedReports, activeOfficers.length, scopedCommitments],
   );
 
-  const lastCommitment = commitments[0] ?? null;
+  const lastCommitment = scopedCommitments[0] ?? null;
+
+  const epicStorageId = useMemo(
+    () =>
+      rsCode ? resourceEpicStorageId(rsCode, reportScope) : "",
+    [rsCode, reportScope],
+  );
 
   const placeHint = useMemo(() => {
     if (isOfficer(profile)) {
@@ -228,40 +255,30 @@ export function CommandResources() {
   );
 
   const apasDesk = useMemo(() => {
+    if (reportScope.mode === "barangay" && /apas/i.test(reportScope.barangay)) {
+      return true;
+    }
     if (isOfficer(profile)) {
-      if (
+      return (
         profile.activeBarangayId === "cebu-city/apas" ||
         profile.areaId === "cebu-city/apas" ||
         /apas/i.test(profile.barangay ?? "") ||
         /apas/i.test(profile.orgName ?? "")
-      ) {
-        return true;
-      }
+      );
     }
-    if (/apas/i.test(reportScope.mode === "barangay" ? reportScope.barangay : "")) {
-      return true;
-    }
-    return scopedReports.some((r) => /apas/i.test(r.barangay ?? ""));
-  }, [profile, scopedReports, reportScope]);
+    return false;
+  }, [profile, reportScope]);
 
   const [sitioSeedTick, setSitioSeedTick] = useState(0);
 
   const shortagePlan = useMemo(() => {
     if (!rsCode) return null;
-    // Prefer Apas Sitio* water demos (5 sitios) over Nangka Purok seeds.
-    const apasWater = reports.filter(
-      (r) =>
-        r.status !== "rejected" &&
-        r.status !== "done" &&
-        /apas/i.test(r.barangay ?? "") &&
-        /^Sitio\b/i.test(r.citizenPurok ?? "") &&
-        /drinking\s+water|Need\s+\d+\s*L/i.test(
-          `${r.title ?? ""}\n${r.notes ?? ""}`,
-        ) &&
-        !/food\s+packs/i.test(`${r.title ?? ""}\n${r.notes ?? ""}`),
-    );
-    if (apasWater.length >= 2) {
-      return buildSupplyShortagePlan("water", apasWater);
+    // Apas Sitio* demos only when this desk is Apas — never override Nangka.
+    if (apasDesk) {
+      const apasWater = apasSitioWaterReports(reports);
+      if (apasWater.length >= 2) {
+        return buildSupplyShortagePlan("water", apasWater);
+      }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
     const water = reportsForEpicCode("RS-001", scopedReports);
@@ -274,7 +291,7 @@ export function CommandResources() {
     }
     return buildSupplyShortagePlan(matched.kind, matched.reports);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rsCode, scopedReports, reports, sitioSeedTick]);
+  }, [rsCode, scopedReports, reports, sitioSeedTick, apasDesk]);
 
   useEffect(() => {
     if (!shortagePlan) return;
@@ -283,9 +300,9 @@ export function CommandResources() {
     }
   }, [shortagePlan, rsCode, router]);
 
-  // Always seed Apas Sitio water demos for the shortage desk.
+  // Seed Apas Sitio water demos only on the Apas desk.
   useEffect(() => {
-    if (!isOfficer(profile) || !profile) return;
+    if (!isOfficer(profile) || !profile || !apasDesk) return;
     let cancelled = false;
     void (async () => {
       try {
@@ -301,7 +318,7 @@ export function CommandResources() {
     return () => {
       cancelled = true;
     };
-  }, [profile, rsCode]);
+  }, [profile, rsCode, apasDesk]);
 
   const updatedLabel = useMemo(() => {
     try {
@@ -337,6 +354,8 @@ export function CommandResources() {
           plan={shortagePlan}
           placeLine={placeHint}
           updatedLabel={updatedLabel}
+          storageId={epicStorageId || undefined}
+          reportScope={reportScope}
         />
       );
     }
@@ -567,8 +586,8 @@ export function CommandResources() {
               Resources suggested
             </h2>
             <p className="mt-1 text-[12px] text-[var(--muted)]">
-              {suggestions.length}{" "}
-              {suggestions.length === 1 ? "plan" : "plans"}
+              {scopedSuggestions.length}{" "}
+              {scopedSuggestions.length === 1 ? "plan" : "plans"}
             </p>
             <Link
               href="/admin/resources/suggestions"
@@ -637,8 +656,8 @@ export function CommandResources() {
               Resources suggested
             </h2>
             <p className="mt-0.5 text-[12px] text-[var(--muted)]">
-              {suggestions.length}{" "}
-              {suggestions.length === 1 ? "plan" : "plans"}
+              {scopedSuggestions.length}{" "}
+              {scopedSuggestions.length === 1 ? "plan" : "plans"}
             </p>
           </div>
           <Link
@@ -660,7 +679,7 @@ export function CommandResources() {
               </tr>
             </thead>
             <tbody>
-              {suggestions.length === 0 ? (
+              {scopedSuggestions.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -670,7 +689,7 @@ export function CommandResources() {
                   </td>
                 </tr>
               ) : (
-                suggestions.slice(0, 5).map((row) => (
+                scopedSuggestions.slice(0, 5).map((row) => (
                   <tr
                     key={row.id}
                     className="border-b border-[var(--border)]/70 last:border-0"

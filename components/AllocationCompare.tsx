@@ -22,6 +22,10 @@ import {
   type AllocationOption,
 } from "@/lib/workspace/allocationOptions";
 import {
+  resourceEpicStorageId,
+} from "@/lib/workspace/resourceEpicScope";
+import {
+  apasSitioWaterReports,
   buildSupplyShortagePlan,
   reportsForEpicCode,
   type SupplyShortagePlan,
@@ -111,20 +115,20 @@ export function AllocationCompare() {
     return scopeLabel(reportScope);
   }, [profile, reportScope]);
 
+  const apasDesk =
+    reportScope.mode === "barangay" && /apas/i.test(reportScope.barangay);
+
+  const storageId = useMemo(
+    () => resourceEpicStorageId(rsCode, reportScope),
+    [rsCode, reportScope],
+  );
+
   const plan = useMemo((): SupplyShortagePlan | null => {
-    const apasWater = reports.filter(
-      (r) =>
-        r.status !== "rejected" &&
-        r.status !== "done" &&
-        /apas/i.test(r.barangay ?? "") &&
-        /^Sitio\b/i.test(r.citizenPurok ?? "") &&
-        /drinking\s+water|Need\s+\d+\s*L/i.test(
-          `${r.title ?? ""}\n${r.notes ?? ""}`,
-        ) &&
-        !/food\s+packs/i.test(`${r.title ?? ""}\n${r.notes ?? ""}`),
-    );
-    if (apasWater.length >= 2) {
-      return buildSupplyShortagePlan("water", apasWater);
+    if (apasDesk) {
+      const apasWater = apasSitioWaterReports(reports);
+      if (apasWater.length >= 2) {
+        return buildSupplyShortagePlan("water", apasWater);
+      }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
     if (!matched) {
@@ -133,7 +137,7 @@ export function AllocationCompare() {
       return null;
     }
     return buildSupplyShortagePlan(matched.kind, matched.reports);
-  }, [reports, scopedReports, rsCode]);
+  }, [apasDesk, reports, scopedReports, rsCode]);
 
   const planKey = useMemo(() => {
     if (!plan) return "";
@@ -174,8 +178,8 @@ export function AllocationCompare() {
     };
     writeAllocationCache(planKey, payload);
     try {
-      await upsertShortageFromPlan(plan);
-      await saveShortageAllocationDraft(plan.code, {
+      await upsertShortageFromPlan(plan, storageId);
+      await saveShortageAllocationDraft(storageId, {
         planKey,
         options: next,
         source: nextSource,
@@ -194,7 +198,7 @@ export function AllocationCompare() {
     if (!plan || !planKey) return;
 
     if (!force) {
-      const fromDb = await getShortageById(plan.code);
+      const fromDb = await getShortageById(storageId);
       if (
         fromDb?.allocation &&
         fromDb.allocation.planKey === planKey &&
@@ -273,12 +277,12 @@ export function AllocationCompare() {
     void (async () => {
       // 1) Firestore draft for this shortage id + plan fingerprint
       try {
-        const fromDb = await getShortageById(plan.code);
+        const fromDb = await getShortageById(storageId);
         if (
           fromDb &&
           (fromDb.workflowStep == null || fromDb.workflowStep === 1)
         ) {
-          void saveShortageWorkflowStep(plan.code, 1).catch(() => {
+          void saveShortageWorkflowStep(storageId, 1).catch(() => {
             /* offline */
           });
         }
@@ -339,7 +343,7 @@ export function AllocationCompare() {
     };
     // planKey is the stable fingerprint; plan is read inside fetch/persist.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [planKey]);
+  }, [planKey, storageId]);
 
   if (!plan) {
     return (
@@ -623,7 +627,7 @@ export function AllocationCompare() {
           disabled={!selected || options.length === 0}
           onClick={() => {
             if (!selected) return;
-            void saveSelectedAllocationOption(plan.code, selected.id)
+            void saveSelectedAllocationOption(storageId, selected.id)
               .catch(() => {
                 /* still navigate; review loads option from DB */
               })

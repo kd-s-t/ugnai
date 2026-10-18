@@ -19,6 +19,10 @@ import type {
   AllocationOption,
 } from "@/lib/workspace/allocationOptions";
 import {
+  resourceEpicStorageId,
+} from "@/lib/workspace/resourceEpicScope";
+import {
+  apasSitioWaterReports,
   buildSupplyShortagePlan,
   reportsForEpicCode,
   type SupplyShortagePlan,
@@ -86,20 +90,19 @@ export function ReviewAllocationPlan() {
     return scopeLabel(reportScope);
   }, [profile, reportScope]);
 
+  const storageId = useMemo(
+    () => resourceEpicStorageId(rsCode, reportScope),
+    [rsCode, reportScope],
+  );
+
   const plan = useMemo((): SupplyShortagePlan | null => {
-    const apasWater = reports.filter(
-      (r) =>
-        r.status !== "rejected" &&
-        r.status !== "done" &&
-        /apas/i.test(r.barangay ?? "") &&
-        /^Sitio\b/i.test(r.citizenPurok ?? "") &&
-        /drinking\s+water|Need\s+\d+\s*L/i.test(
-          `${r.title ?? ""}\n${r.notes ?? ""}`,
-        ) &&
-        !/food\s+packs/i.test(`${r.title ?? ""}\n${r.notes ?? ""}`),
-    );
-    if (apasWater.length >= 2) {
-      return buildSupplyShortagePlan("water", apasWater);
+    const apasDesk =
+      reportScope.mode === "barangay" && /apas/i.test(reportScope.barangay);
+    if (apasDesk) {
+      const apasWater = apasSitioWaterReports(reports);
+      if (apasWater.length >= 2) {
+        return buildSupplyShortagePlan("water", apasWater);
+      }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
     if (!matched) {
@@ -108,21 +111,21 @@ export function ReviewAllocationPlan() {
       return null;
     }
     return buildSupplyShortagePlan(matched.kind, matched.reports);
-  }, [reports, scopedReports, rsCode]);
+  }, [reports, scopedReports, rsCode, reportScope]);
 
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const existing = await getShortageById(rsCode);
+      const existing = await getShortageById(storageId);
       if (cancelled) return;
       setShortage(existing);
       if (existing?.reviewStatus === "approved" || existing?.workflowStep === 3) {
         return;
       }
       try {
-        await saveShortageWorkflowStep(rsCode, 2);
+        await saveShortageWorkflowStep(storageId, 2);
         if (!cancelled) {
-          setShortage(await getShortageById(rsCode));
+          setShortage(await getShortageById(storageId));
         }
       } catch {
         /* offline */
@@ -131,7 +134,7 @@ export function ReviewAllocationPlan() {
     return () => {
       cancelled = true;
     };
-  }, [rsCode]);
+  }, [storageId]);
 
   const selectedOption = useMemo(() => {
     const options = shortage?.allocation?.options ?? [];
@@ -175,8 +178,8 @@ export function ReviewAllocationPlan() {
   async function onSaveDraft() {
     setSaving(true);
     try {
-      await setShortageReviewStatus(rsCode, "review_draft");
-      const next = await getShortageById(rsCode);
+      await setShortageReviewStatus(storageId, "review_draft");
+      const next = await getShortageById(storageId);
       setShortage(next);
     } finally {
       setSaving(false);
@@ -186,8 +189,8 @@ export function ReviewAllocationPlan() {
   async function onApprove() {
     setApproving(true);
     try {
-      await setShortageReviewStatus(rsCode, "approved");
-      const next = await getShortageById(rsCode);
+      await setShortageReviewStatus(storageId, "approved");
+      const next = await getShortageById(storageId);
       setShortage(next);
       router.push(
         `/admin/resources/track/${encodeURIComponent(rsCode)}`,

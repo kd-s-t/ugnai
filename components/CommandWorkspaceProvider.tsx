@@ -86,11 +86,14 @@ export function CommandWorkspaceProvider({
   const canSync = isOfficer(profile) && isAccountActive(profile);
   const barangay = canSync && profile ? officerScopeBarangay(profile) : "";
   const areaId =
-    canSync && profile ? profile.areaId ?? profile.activeBarangayId : null;
+    canSync && isOfficer(profile)
+      ? profile.areaId ?? profile.activeBarangayId
+      : null;
   const profileUid = profile?.uid ?? "";
   const profileBarangay = profile?.barangay ?? "";
-  const profileActiveBarangayId = profile?.activeBarangayId ?? "";
-  const profileAreaId = profile?.areaId ?? "";
+  const profileActiveBarangayId =
+    isOfficer(profile) ? (profile.activeBarangayId ?? "") : "";
+  const profileAreaId = isOfficer(profile) ? (profile.areaId ?? "") : "";
   const reportScope = useMemo(() => scopeForProfile(profile), [profile]);
 
   useEffect(() => {
@@ -118,15 +121,22 @@ export function CommandWorkspaceProvider({
           });
           if (!cancelled) setSeedReady(true);
         }
+        const onNangkaDesk =
+          !apasOfficer &&
+          (/nangka/i.test(profileBarangay) ||
+            /nangka/i.test(profileActiveBarangayId) ||
+            /nangka/i.test(profileAreaId) ||
+            (!profileBarangay && !profileActiveBarangayId && !profileAreaId));
         await Promise.all([
-          sim ? ensureAllMapReportsInDb() : Promise.resolve(),
+          // Map image seeds are Nangka-tagged — only load on Nangka desks.
+          sim && onNangkaDesk ? ensureAllMapReportsInDb() : Promise.resolve(),
           // Nangka queue / relief samples — skip on Apas desk (water sitios only).
-          sim && !apasOfficer
+          sim && onNangkaDesk
             ? import("@/lib/reports/ensureQueueSampleReports").then(
                 ({ ensureQueueSampleReports }) => ensureQueueSampleReports(),
               )
             : Promise.resolve(),
-          sim && !apasOfficer
+          sim && onNangkaDesk
             ? import("@/lib/reports/ensureResourceShortageReport").then(
                 ({ ensureResourceShortageReport }) =>
                   ensureResourceShortageReport(),

@@ -4,7 +4,7 @@ import { useEffect, useMemo } from "react";
 import {
   APIProvider,
   AdvancedMarker,
-  Map,
+  Map as GoogleMap,
   Polyline,
   useMap,
 } from "@vis.gl/react-google-maps";
@@ -14,8 +14,13 @@ import {
   compassLabel,
   distKm,
 } from "@/lib/geo/bearing";
-import { DEFAULT_MAP_AREA } from "@/lib/geo/mapAreas";
+import {
+  DEFAULT_MAP_AREA,
+  listMapAreaOptions,
+  resolveKnownMapArea,
+} from "@/lib/geo/mapAreas";
 import { commandHallPoint } from "@/lib/geo/safePoints";
+import type { ReportScope } from "@/lib/reports/barangayScope";
 import { useRoadEscapes } from "@/lib/geo/useRoadEscapes";
 import {
   googleMapsApiKey,
@@ -149,8 +154,26 @@ function FitAllMarkers({
   return null;
 }
 
-export function ShortagePlanMap({ rows }: { rows: SupplyCommunityRow[] }) {
-  const hall = useMemo(() => commandHallPoint(DEFAULT_MAP_AREA), []);
+function hallForScope(scope?: ReportScope | null) {
+  if (scope?.mode === "barangay") {
+    const option = listMapAreaOptions().find(
+      (o) =>
+        o.barangay.toLowerCase() === scope.barangay.toLowerCase() &&
+        o.lgu.toLowerCase() === scope.lgu.toLowerCase(),
+    );
+    if (option) return commandHallPoint(resolveKnownMapArea(option));
+  }
+  return commandHallPoint(DEFAULT_MAP_AREA);
+}
+
+export function ShortagePlanMap({
+  rows,
+  reportScope,
+}: {
+  rows: SupplyCommunityRow[];
+  reportScope?: ReportScope | null;
+}) {
+  const hall = useMemo(() => hallForScope(reportScope), [reportScope]);
 
   const points = useMemo(
     () =>
@@ -200,7 +223,7 @@ export function ShortagePlanMap({ rows }: { rows: SupplyCommunityRow[] }) {
     <div className="space-y-3">
       <div className="relative h-[300px] overflow-hidden rounded-xl border border-[var(--border)]">
         <APIProvider apiKey={googleMapsApiKey()} libraries={["marker"]}>
-          <Map
+          <GoogleMap
             className="h-full w-full"
             defaultCenter={center}
             defaultZoom={14}
@@ -277,7 +300,7 @@ export function ShortagePlanMap({ rows }: { rows: SupplyCommunityRow[] }) {
                 </AdvancedMarker>
               );
             })}
-          </Map>
+          </GoogleMap>
         </APIProvider>
       </div>
       <p className="text-[12px] text-[var(--muted)]">

@@ -108,12 +108,15 @@ function suggestedAllocateL(
 }
 
 /**
- * One doc per plan: resources_suggestions/RS-001 with all sitio requests nested.
+ * One doc per plan + barangay: resources_suggestions/RS-001__lgu__brgy.
+ * `storageId` defaults to the public epic code for older callers.
  */
 export async function upsertSuggestionsFromPlan(
   plan: SupplyShortagePlan,
+  storageId?: string,
 ): Promise<ResourceSuggestion> {
-  const id = plan.code.trim().toUpperCase();
+  const publicCode = plan.code.trim().toUpperCase();
+  const id = (storageId?.trim() || publicCode).toUpperCase();
   const totalGap = plan.rows.reduce((sum, r) => sum + Math.max(0, r.gapL), 0);
   const requests: ResourceSuggestionRequest[] = plan.rows.map((row) => ({
     community: row.community,
@@ -137,8 +140,8 @@ export async function upsertSuggestionsFromPlan(
   }));
   const now = new Date().toISOString();
   const payload = {
-    shortageId: id,
-    epicCode: id,
+    shortageId: publicCode,
+    epicCode: publicCode,
     kind: plan.kind,
     resourceLabel: plan.resourceLabel,
     totalNeededL: plan.totalNeededL,

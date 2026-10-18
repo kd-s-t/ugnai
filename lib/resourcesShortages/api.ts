@@ -102,15 +102,16 @@ function mapDoc(id: string, data: Record<string, unknown>): ResourceShortage {
 }
 
 /**
- * Write shortage under doc id = plan.code (e.g. RS-001).
- * That id is what `/admin/resources/RS-001` loads.
+ * Write shortage under a barangay storage id (e.g. RS-001__consolacion__nangka).
+ * Public URL stays `/admin/resources/RS-001`.
  */
 export async function upsertShortageFromPlan(
   plan: SupplyShortagePlan,
+  storageId?: string,
 ): Promise<ResourceShortage> {
-  const id = plan.code.trim().toUpperCase();
-  const db = getClientDb();
-  const ref = doc(db, COL, id);
+  const publicCode = plan.code.trim().toUpperCase();
+  const id = (storageId?.trim() || publicCode).toUpperCase();
+  const ref = doc(getClientDb(), COL, id);
   const existing = await getDoc(ref);
   const now = new Date().toISOString();
   const reportIds = [
@@ -130,7 +131,8 @@ export async function upsertShortageFromPlan(
       advisory: plan.advisory,
       reportIds,
       primaryReportId: plan.primaryReportId,
-      compareHref: `/admin/resources/compare/${encodeURIComponent(id)}`,
+      publicCode,
+      compareHref: `/admin/resources/compare/${encodeURIComponent(publicCode)}`,
       updatedAt: now,
       updatedAtServer: serverTimestamp(),
       ...(existing.exists()
@@ -145,7 +147,7 @@ export async function upsertShortageFromPlan(
   );
 
   const snap = await getDoc(ref);
-  return mapDoc(id, (snap.data() ?? {}) as Record<string, unknown>);
+  return mapDoc(publicCode, (snap.data() ?? {}) as Record<string, unknown>);
 }
 
 /** Persist current allocation-plan stepper step (1–3). */
@@ -182,7 +184,11 @@ export async function getShortageById(
   if (!code) return null;
   const snap = await getDoc(doc(getClientDb(), COL, code));
   if (!snap.exists()) return null;
-  return mapDoc(snap.id, snap.data() as Record<string, unknown>);
+  const publicCode =
+    typeof snap.data()?.publicCode === "string"
+      ? String(snap.data()?.publicCode).toUpperCase()
+      : code.split("__")[0] || code;
+  return mapDoc(publicCode, snap.data() as Record<string, unknown>);
 }
 
 /** Persist compare-options Gemini prompt + return on resources_shortages/{id}. */
@@ -255,7 +261,11 @@ export function listenShortageById(
         onChange(null);
         return;
       }
-      onChange(mapDoc(snap.id, snap.data() as Record<string, unknown>));
+      const publicCode =
+        typeof snap.data()?.publicCode === "string"
+          ? String(snap.data()?.publicCode).toUpperCase()
+          : code.split("__")[0] || code;
+      onChange(mapDoc(publicCode, snap.data() as Record<string, unknown>));
     },
     (err) => onError?.(err),
   );

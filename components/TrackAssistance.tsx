@@ -12,6 +12,10 @@ import {
 import type { ResourceShortage } from "@/lib/resourcesShortages/types";
 import type { AllocationLine } from "@/lib/workspace/allocationOptions";
 import {
+  resourceEpicStorageId,
+} from "@/lib/workspace/resourceEpicScope";
+import {
+  apasSitioWaterReports,
   buildSupplyShortagePlan,
   reportsForEpicCode,
 } from "@/lib/workspace/supplyShortagePlan";
@@ -59,9 +63,13 @@ function clockLabel(offsetMin: number): string {
 
 export function TrackAssistance() {
   const params = useParams();
-  const { reports, scopedReports } = useCommandWorkspace();
+  const { reports, scopedReports, reportScope } = useCommandWorkspace();
   const rsCode =
     String(params.id ?? "RS-001").trim().toUpperCase() || "RS-001";
+  const storageId = useMemo(
+    () => resourceEpicStorageId(rsCode, reportScope),
+    [rsCode, reportScope],
+  );
 
   const [shortage, setShortage] = useState<ResourceShortage | null>(null);
   const [tab, setTab] = useState<TabId>("deliveries");
@@ -69,11 +77,11 @@ export function TrackAssistance() {
   useEffect(() => {
     let cancelled = false;
     void (async () => {
-      const doc = await getShortageById(rsCode);
+      const doc = await getShortageById(storageId);
       if (cancelled) return;
       setShortage(doc);
       try {
-        await saveShortageWorkflowStep(rsCode, 3);
+        await saveShortageWorkflowStep(storageId, 3);
       } catch {
         /* offline */
       }
@@ -81,7 +89,7 @@ export function TrackAssistance() {
     return () => {
       cancelled = true;
     };
-  }, [rsCode]);
+  }, [storageId]);
 
   const lines = useMemo((): AllocationLine[] => {
     const options = shortage?.allocation?.options ?? [];
@@ -91,26 +99,20 @@ export function TrackAssistance() {
   }, [shortage]);
 
   const planMeta = useMemo(() => {
-    const apasWater = reports.filter(
-      (r) =>
-        r.status !== "rejected" &&
-        r.status !== "done" &&
-        /apas/i.test(r.barangay ?? "") &&
-        /^Sitio\b/i.test(r.citizenPurok ?? "") &&
-        /drinking\s+water|Need\s+\d+\s*L/i.test(
-          `${r.title ?? ""}\n${r.notes ?? ""}`,
-        ) &&
-        !/food\s+packs/i.test(`${r.title ?? ""}\n${r.notes ?? ""}`),
-    );
-    if (apasWater.length >= 2) {
-      return buildSupplyShortagePlan("water", apasWater);
+    const apasDesk =
+      reportScope.mode === "barangay" && /apas/i.test(reportScope.barangay);
+    if (apasDesk) {
+      const apasWater = apasSitioWaterReports(reports);
+      if (apasWater.length >= 2) {
+        return buildSupplyShortagePlan("water", apasWater);
+      }
     }
     const matched = reportsForEpicCode(rsCode, scopedReports);
     if (matched) return buildSupplyShortagePlan(matched.kind, matched.reports);
     const water = reportsForEpicCode("RS-001", scopedReports);
     if (water) return buildSupplyShortagePlan(water.kind, water.reports);
     return null;
-  }, [reports, scopedReports, rsCode]);
+  }, [reports, scopedReports, rsCode, reportScope]);
 
   const readyLines = useMemo(
     () => lines.filter((l) => l.constraint === "no_blockers" && l.allocateL > 0),
