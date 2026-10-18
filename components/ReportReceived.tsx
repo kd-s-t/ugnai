@@ -120,9 +120,9 @@ export function ReportReceived({
     <div className="flex min-h-0 flex-1 flex-col">
     <motion.div
       className="space-y-5"
-      initial={motionSafe ? { opacity: 0, y: 18 } : false}
+      initial={motionSafe ? { opacity: 0, y: 6 } : false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: easeOut }}
+      transition={{ duration: 0.2, ease: easeOut }}
     >
       <CitizenHeader
         language={language}
@@ -139,7 +139,7 @@ export function ReportReceived({
         </p>
       </div>
 
-      <FadeIn delay={0.12} y={12}>
+      <FadeIn light delay={0.04}>
         <div className="rounded-[14px] bg-[#eff6ff] px-4 py-4">
           <span
             className="mb-2.5 flex size-9 items-center justify-center rounded-full bg-white"
@@ -179,7 +179,7 @@ export function ReportReceived({
         </div>
       </FadeIn>
 
-      <FadeIn delay={0.2} y={10}>
+      <FadeIn light delay={0.06}>
         <div className="flex gap-2.5 rounded-xl border border-[#f0d9a8] bg-[#fff8e8] px-3.5 py-3.5">
           <span
             className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-[#8a6a2f] text-[11px] font-bold text-white"
@@ -198,7 +198,7 @@ export function ReportReceived({
         </div>
       </FadeIn>
 
-      <FadeIn delay={0.26} y={10} className="space-y-3">
+      <FadeIn light delay={0.08} className="space-y-3">
         <button
           type="button"
           className="flex w-full items-center justify-center rounded-xl bg-[var(--foreground)] px-4 py-[16px] text-[17px] font-semibold text-white"
@@ -224,7 +224,7 @@ export function ReportReceived({
         </button>
       </FadeIn>
 
-      <FadeIn delay={0.3} y={10}>
+      <FadeIn light delay={0.1}>
         <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-4">
           <p className="text-sm font-semibold text-[var(--foreground)]">
             {t(language, "confirm.nextTitle")}
@@ -250,7 +250,7 @@ export function ReportReceived({
         </div>
       </FadeIn>
 
-      <FadeIn delay={0.34} y={10}>
+      <FadeIn light delay={0.12}>
         <div className="rounded-[14px] border border-[var(--border)] bg-[var(--surface)] p-4">
           <p className="text-sm font-semibold text-[var(--foreground)]">
             {t(language, "confirm.keepTitle")}

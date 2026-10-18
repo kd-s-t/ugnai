@@ -347,7 +347,7 @@ export function StepProgress({
           animate={{ width: `${(step / 3) * 100}%` }}
           transition={
             motionSafe
-              ? { type: "spring", stiffness: 280, damping: 28 }
+              ? { duration: 0.2, ease: [0.22, 1, 0.36, 1] }
               : { duration: 0 }
           }
         />
