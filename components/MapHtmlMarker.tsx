@@ -13,6 +13,8 @@ type MapHtmlMarkerProps = {
   zIndex?: number;
   /** Popup body when the marker is clicked. */
   children?: ReactNode;
+  /** Compact controls left of the close control (e.g. open report). */
+  headerActions?: ReactNode;
   title?: string;
   anchorPoint?: (typeof AdvancedMarkerAnchorPoint)[keyof typeof AdvancedMarkerAnchorPoint];
 };
@@ -23,6 +25,7 @@ export function MapHtmlMarker({
   html,
   zIndex,
   children,
+  headerActions,
   title,
   anchorPoint = AdvancedMarkerAnchorPoint.CENTER,
 }: MapHtmlMarkerProps) {
@@ -52,14 +55,17 @@ export function MapHtmlMarker({
           headerDisabled
         >
           <div className="dro-gmap-popup">
-            <button
-              type="button"
-              className="dro-gmap-popup-close"
-              aria-label="Close"
-              onClick={() => setOpen(false)}
-            >
-              ×
-            </button>
+            <div className="dro-gmap-popup-actions">
+              {headerActions}
+              <button
+                type="button"
+                className="dro-gmap-popup-close"
+                aria-label="Close"
+                onClick={() => setOpen(false)}
+              >
+                ×
+              </button>
+            </div>
             {children}
           </div>
         </InfoWindow>

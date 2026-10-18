@@ -6,7 +6,7 @@ import {
 
 export { NANGKA_ELEV_RANGE };
 
-/** Inverse-distance elevation estimate from EE cache or static elev grid. */
+/** Inverse-distance elevation estimate from EE dataset or static elev grid. */
 export function estimateElevM(lat: number, lng: number): number {
   const grid = getNangkaElevGrid();
   let wSum = 0;

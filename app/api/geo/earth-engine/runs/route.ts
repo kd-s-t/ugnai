@@ -5,7 +5,7 @@ import {
   earthEngineProjectId,
 } from "@/lib/geo/earthEngine";
 import {
-  listActiveEeCacheFiles,
+  listActiveEeDatasets,
   listEeRuns,
 } from "@/lib/geo/eeRunHistory";
 import type { EeRunJob } from "@/lib/geo/eeRunTypes";
@@ -30,8 +30,8 @@ export async function GET() {
     error = probe.error ?? null;
   }
 
-  const [activeFiles, runs] = await Promise.all([
-    listActiveEeCacheFiles(),
+  const [datasets, runs] = await Promise.all([
+    listActiveEeDatasets(),
     listEeRuns(),
   ]);
 
@@ -41,8 +41,7 @@ export async function GET() {
     projectId,
     error,
     storageBucket: mediaStorageBucket(),
-    activeFiles,
-    datasets: activeFiles,
+    datasets,
     runs,
   });
 }

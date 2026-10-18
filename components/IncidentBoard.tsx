@@ -299,7 +299,8 @@ export function IncidentBoard() {
   }, [activeOfficers, profile]);
 
   const ranked = useMemo(() => {
-    const hideDemo = hideScenarioDemoReportsInUi();
+    // Live (No storm): hide Tino/queue seeds. Drill phases keep them for the demo.
+    const hideDemo = !tinoActive || hideScenarioDemoReportsInUi();
     const list = hideDemo
       ? scopedReports.filter((r) => !isTinoScenarioDemoReport(r))
       : scopedReports;
@@ -309,7 +310,7 @@ export function IncidentBoard() {
       if (pa !== pb) return pa - pb;
       return Date.parse(b.createdAt) - Date.parse(a.createdAt);
     });
-  }, [scopedReports]);
+  }, [scopedReports, tinoActive]);
 
   const queueCount = ranked.filter((r) =>
     COLUMNS[0]!.match(r),

@@ -15,7 +15,7 @@ import {
   Polyline,
   useMap,
 } from "@vis.gl/react-google-maps";
-import { Crosshair, Loader2, LocateFixed, Tornado } from "lucide-react";
+import { Crosshair, FileText, Loader2, LocateFixed, Tornado } from "lucide-react";
 import type { AssistEscapeRoute, AssistPriority } from "@/lib/ai/assistTypes";
 import { distKm } from "@/lib/geo/bearing";
 import { pointInFloodFootprints } from "@/lib/geo/elevFloodFootprint";
@@ -972,28 +972,23 @@ function CommandAreaMapInner({
             position={{ lat: rp.lat, lng: rp.lng }}
             html={reportHtml(rp.kind)}
             zIndex={860}
+            headerActions={
+              href ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="dro-gmap-popup-report"
+                  aria-label={rp.sourceLabel.trim() || "Field report"}
+                  title={rp.sourceLabel.trim() || "Field report"}
+                >
+                  <FileText size={14} strokeWidth={2} aria-hidden />
+                </a>
+              ) : undefined
+            }
           >
             <strong>{rp.title}</strong>
             <br />
-            {rp.sourceLabel.trim() ? (
-              <>
-                {href ? (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="font-mono text-xs uppercase underline"
-                  >
-                    {rp.sourceLabel}
-                  </a>
-                ) : (
-                  <span className="font-mono text-xs uppercase">
-                    {rp.sourceLabel}
-                  </span>
-                )}
-                <br />
-              </>
-            ) : null}
             {rp.kind === "evac_status" &&
             typeof rp.occupancy === "number" &&
             typeof rp.capacity === "number" ? (
@@ -1004,8 +999,13 @@ function CommandAreaMapInner({
                 <br />
               </>
             ) : null}
-            {rp.purokHint}
-            <br />
+            {rp.purokHint.trim() &&
+            rp.purokHint.trim().toLowerCase() !== "no login" ? (
+              <>
+                {rp.purokHint}
+                <br />
+              </>
+            ) : null}
             {rp.notes}
             {rp.mediaUrl ? (
               <>

@@ -177,7 +177,7 @@ Ugnai: AutoML image class on report photos. Estimate if you run ~1 hour/month an
 
 ## Earth Engine
 
-App does **not** call EE per page load. Only manual `ee:dem` / `ee:hazards` (or admin run) spend compute. Map reads JSON caches.
+App does **not** call EE per page load. Only manual `ee:dem` / `ee:hazards` (or admin run) spend compute. Map reads Firestore `ee_datasets`.
 
 | Plan | Monthly |
 |------|---------|
@@ -185,7 +185,7 @@ App does **not** call EE per page load. Only manual `ee:dem` / `ee:hazards` (or 
 | Limited (usage only) | ~$0.40 / EECU-hour |
 | Basic platform | $500 / month + credits |
 
-For Ugnai-sized Cebu / Nangka cache refreshes, Limited compute stays under a few dollars if commercial. Basic is only needed if you buy that plan.
+For Ugnai-sized Cebu / Nangka dataset refreshes, Limited compute stays under a few dollars if commercial. Basic is only needed if you buy that plan.
 
 ---
 

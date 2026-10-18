@@ -80,12 +80,12 @@ See [docs/GOOGLE_CHECKLIST.md](docs/GOOGLE_CHECKLIST.md) for Firebase, Gemini, V
 
 ## Earth Engine (offline Cebu DEM)
 
-Flood footprints use a cached elevation grid. Optionally refresh from Google Earth Engine (SRTM) in **one** offline call (whole Cebu coarse + Nangka fine):
+Flood footprints use a stored elevation grid. Optionally refresh from Google Earth Engine (SRTM) in **one** offline call (whole Cebu coarse + Nangka fine):
 
 1. Enable Earth Engine API on project `nice-pen-181017` and register a **service account** for EE ([guide](https://developers.google.com/earth-engine/guides/service_account)).
 2. Set `EARTH_ENGINE_PROJECT_ID=nice-pen-181017` and `GOOGLE_APPLICATION_CREDENTIALS=/path/to/sa.json` in `.env.local`.
 3. Run `npm run ee:dem` once → writes `data/cebu-ee-dem.json` + Nangka slice `data/nangka-ee-dem.json`.
-4. Run `npm run ee:hazards` → floods/landslides from DEM cache + one FIRMS fire pull → `data/cebu-ee-hazards.json` (map shows nearby pins per barangay).
+4. Run `npm run ee:hazards` → floods/landslides from DEM + one FIRMS fire pull → Firestore `ee_datasets` / seed JSON (map shows nearby pins per barangay).
 5. Map / flood elev logic prefers the Nangka JSON when `samples` is non-empty; otherwise falls back to `lib/geo/nangkaElevationGrid.ts`.
 
 Check auth only (no DEM job): `GET /api/geo/earth-engine`.

@@ -111,13 +111,13 @@ export async function ensureAftermathReportInDb(
   const hazardHint = hazardForKind(pin.kind);
   if (existing.exists()) {
     const data = existing.data() as Record<string, unknown>;
+    // Leave closed tickets alone so done/rejected stay off the live map.
+    if (data.status === "done" || data.status === "rejected") return;
     if (
       data.hazardHint !== hazardHint ||
       data.lat !== pin.lat ||
       data.lng !== pin.lng ||
-      data.title !== pin.title ||
-      data.status === "done" ||
-      data.status === "rejected"
+      data.title !== pin.title
     ) {
       await updateDoc(ref, {
         title: pin.title,
@@ -126,8 +126,6 @@ export async function ensureAftermathReportInDb(
         lat: pin.lat,
         lng: pin.lng,
         citizenPurok: citizen.purok,
-        status: "legit",
-        aiVerdict: "legit",
         updatedAt: now,
         updatedAtServer: serverTimestamp(),
       });

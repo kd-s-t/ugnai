@@ -3,8 +3,8 @@ import { distKm } from "@/lib/geo/bearing";
 import {
   createEeRunStub,
   finalizeEeRun,
-  readActiveEeCacheFile,
-  writeActiveEeCacheFile,
+  readActiveEeDataset,
+  writeActiveEeDataset,
   writeEeRunFile,
 } from "@/lib/geo/eeRunHistory";
 import type { EeRunJob, EeRunMeta } from "@/lib/geo/eeRunTypes";
@@ -52,8 +52,8 @@ async function runDemJob(runId: string): Promise<{
     samples: nangkaSamples,
   };
 
-  await writeActiveEeCacheFile("cebu-ee-dem.json", result);
-  await writeActiveEeCacheFile("nangka-ee-dem.json", nangka);
+  await writeActiveEeDataset("cebu-ee-dem.json", result);
+  await writeActiveEeDataset("nangka-ee-dem.json", nangka);
 
   const files = [
     await writeEeRunFile(runId, "cebu-ee-dem.json", result),
@@ -77,7 +77,7 @@ async function runHazardsJob(runId: string): Promise<{
   counts: Record<string, number>;
   files: Awaited<ReturnType<typeof writeEeRunFile>>[];
 }> {
-  const demFile = await readActiveEeCacheFile("cebu-ee-dem.json");
+  const demFile = await readActiveEeDataset("cebu-ee-dem.json");
   if (!demFile) {
     throw new Error("Missing Cebu DEM in ee_datasets. Run DEM first.");
   }
@@ -122,7 +122,7 @@ async function runHazardsJob(runId: string): Promise<{
     fires,
   };
 
-  await writeActiveEeCacheFile("cebu-ee-hazards.json", out);
+  await writeActiveEeDataset("cebu-ee-hazards.json", out);
   const files = [await writeEeRunFile(runId, "cebu-ee-hazards.json", out)];
 
   return {

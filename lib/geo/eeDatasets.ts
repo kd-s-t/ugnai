@@ -1,6 +1,6 @@
 /**
  * Earth Engine active datasets live in Firestore `ee_datasets/{id}`.
- * Not a file cache: command center and EE admin read this table.
+ * Command center and EE admin read this table.
  */
 import { GoogleAuth } from "google-auth-library";
 import {

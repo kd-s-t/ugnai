@@ -36,7 +36,6 @@ export async function GET() {
       ready: false,
       projectId: null,
       datasets,
-      cache: datasets,
       error: "EARTH_ENGINE_PROJECT_ID not set",
     });
   }
@@ -46,7 +45,6 @@ export async function GET() {
     ready: probe.ready,
     projectId: probe.projectId ?? projectId,
     datasets,
-    cache: datasets,
     error: probe.error,
   });
 }

@@ -1,4 +1,4 @@
-/** Google Elevation samples over Brgy. Nangka (cached). */
+/** Google Elevation samples over Brgy. Nangka (static seed). */
 export type ElevSample = { lat: number; lng: number; elevM: number };
 
 export const NANGKA_ELEVATION_GRID: ElevSample[] = [

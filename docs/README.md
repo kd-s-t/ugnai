@@ -56,7 +56,7 @@ Set `NEXT_PUBLIC_SIMULATION_ON=false` for live ops only (no scenario bar, no dum
 |------|------|
 | **Firestore** | Live ops DB |
 | **BigQuery** | Mirror after report verdict (`legit` / `rejected` / `needs_review`) |
-| **Earth Engine** | Offline SRTM DEM + Cebu hazard caches for flood / triage |
+| **Earth Engine** | Offline SRTM DEM + Cebu hazards for flood / triage |
 | **Maps JS** | Basemap |
 
 ## Elevations (map flood / triage)
@@ -64,7 +64,7 @@ Set `NEXT_PUBLIC_SIMULATION_ON=false` for live ops only (no scenario bar, no dum
 | Source | Role |
 |--------|------|
 | `data/nangka-ee-dem.json` | Active grid when present (Earth Engine SRTM, offline) |
-| `lib/geo/nangkaElevationGrid.ts` | Fallback: cached **Google Elevation** samples |
+| `lib/geo/nangkaElevationGrid.ts` | Fallback: static **Google Elevation** samples |
 | Google Maps JS | Basemap tiles only, not the DEM |
 
-Refresh EE caches: `npm run ee:dem` / `npm run ee:hazards` (see GOOGLE_CHECKLIST).
+Refresh EE datasets: `npm run ee:dem` / `npm run ee:hazards` (see GOOGLE_CHECKLIST).

@@ -18,7 +18,7 @@ Gemini orchestrates needs and resources; Firebase hosts auth, data, and the live
 | **Cloud Firestore** | Officer profiles; later barangays, contacts, incidents, resources, alert logs |
 | **Firebase App Hosting** | Host Next.js command center (Cup-valid deploy target) |
 | **Gemini 2.5 Flash** | Needs triage, resource allocation suggestions, alert copy (later) |
-| **Earth Engine** | Offline Cebu DEM + hazards (`npm run ee:dem`, `npm run ee:hazards` → `data/cebu-ee-*.json`); map reads cache only |
+| **Earth Engine** | Cebu DEM + hazards (`npm run ee:dem`, `npm run ee:hazards` → Firestore `ee_datasets`); map reads stored datasets only |
 | **Vertex AI** | Optional report photo classification before Gemini |
 | **Maps Platform** | Optional Weather / Elevation (`GOOGLE_WEATHER_API_KEY`) |
 | **Cloud Functions for Firebase** | Server-side Gemini + multi-channel dispatch (later) |
@@ -135,7 +135,7 @@ Full Google tech boxes: **[GOOGLE_CHECKLIST.md](./GOOGLE_CHECKLIST.md)**.
 2. Enable email/password in Firebase Auth
 3. Deploy Firestore rules (`gh` Actions Deploy, or `firebase deploy --only firestore`)
 4. Set Gemini API key in Secret Manager / App Hosting secrets
-5. Refresh EE caches before demo if needed (`npm run ee:dem`, `npm run ee:hazards`)
+5. Refresh EE datasets before demo if needed (`npm run ee:dem`, `npm run ee:hazards`)
 6. Deploy Next.js via Firebase App Hosting (connect [kd-s-t/ugnai](https://github.com/kd-s-t/ugnai))
 7. Verify live URL for submission package
 8. Keep demo framing: orchestration for barangay responders

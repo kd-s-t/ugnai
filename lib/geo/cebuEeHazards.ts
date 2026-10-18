@@ -15,13 +15,13 @@ export type CebuEeHazardsFile = {
   fires: FireSample[];
 };
 
-const cached = cebuHazards as CebuEeHazardsFile;
+const seed = cebuHazards as CebuEeHazardsFile;
 
 export function hasCebuEeHazards(): boolean {
   return (
-    (cached.floods?.length ?? 0) +
-      (cached.landslides?.length ?? 0) +
-      (cached.fires?.length ?? 0) >
+    (seed.floods?.length ?? 0) +
+      (seed.landslides?.length ?? 0) +
+      (seed.fires?.length ?? 0) >
     0
   );
 }
@@ -31,20 +31,20 @@ export function getCebuEeHazardsMeta(): Omit<
   "floods" | "landslides" | "fires"
 > {
   return {
-    provider: cached.provider ?? null,
-    fetchedAt: cached.fetchedAt ?? null,
-    projectId: cached.projectId ?? null,
+    provider: seed.provider ?? null,
+    fetchedAt: seed.fetchedAt ?? null,
+    projectId: seed.projectId ?? null,
   };
 }
 
 export function getCebuEeHazards(): CebuEeHazardsFile {
   return {
-    provider: cached.provider ?? null,
-    fetchedAt: cached.fetchedAt ?? null,
-    projectId: cached.projectId ?? null,
-    floods: cached.floods ?? [],
-    landslides: cached.landslides ?? [],
-    fires: cached.fires ?? [],
+    provider: seed.provider ?? null,
+    fetchedAt: seed.fetchedAt ?? null,
+    projectId: seed.projectId ?? null,
+    floods: seed.floods ?? [],
+    landslides: seed.landslides ?? [],
+    fires: seed.fires ?? [],
   };
 }
 
@@ -59,14 +59,14 @@ export function cebuEeHazardsNear(
   const near = <T extends { lat: number; lng: number }>(rows: T[]) =>
     rows.filter((r) => distKm(area.center, r) <= maxKm);
   return {
-    floods: near(cached.floods ?? []),
-    landslides: near(cached.landslides ?? []),
-    fires: near(cached.fires ?? []),
+    floods: near(seed.floods ?? []),
+    landslides: near(seed.landslides ?? []),
+    fires: near(seed.fires ?? []),
   };
 }
 
 /**
- * Build flood + landslide pins from the offline Cebu DEM cache (no EE call).
+ * Build flood + landslide pins from the offline Cebu DEM dataset (no EE call).
  * Thinned so the map stays usable.
  */
 export function hazardsFromCebuDem(samples: ElevSample[]): {
@@ -103,7 +103,7 @@ export function hazardsFromCebuDem(samples: ElevSample[]): {
     .map((s, i) => ({
       id: `ee-fl-cebu-${i}`,
       name: `Flood-prone · ${s.elevM.toFixed(0)} m elev`,
-      place: "SRTM low ground (Earth Engine cache)",
+      place: "SRTM low ground (Earth Engine)",
       purokHint: "Cebu",
       severity: s.severity,
       lat: s.lat,
@@ -143,7 +143,7 @@ export function hazardsFromCebuDem(samples: ElevSample[]): {
     .map((s, i) => ({
       id: `ee-ls-cebu-${i}`,
       name: `Slope risk · Δ${s.slope.toFixed(0)} m`,
-      place: "SRTM neighbor relief (Earth Engine cache)",
+      place: "SRTM neighbor relief (Earth Engine)",
       purokHint: "Cebu",
       severity: s.severity,
       lat: s.lat,
