@@ -7,11 +7,27 @@ const REPORT_PHOTO_JPEG_QUALITY = 0.82;
  * Downscale + JPEG-encode report photos before upload (storage + AI payload).
  * Voices / videos / tiny images pass through unchanged.
  */
-export async function compressReportImage(file: File): Promise<File> {
-  const isImage =
+function isReportPhotoCandidate(file: File): boolean {
+  return (
     file.type.startsWith("image/") ||
-    /\.(jpe?g|png|webp|bmp|heic|heif)$/i.test(file.name);
-  if (!isImage || file.type === "image/gif") return file;
+    /\.(jpe?g|png|webp|bmp|heic|heif|avif)$/i.test(file.name)
+  );
+}
+
+/** AVIF High/10-bit/4:4:4 and HEIC fail on some Chrome Mac builds; always JPEG. */
+function mustReencodeAsJpeg(file: File): boolean {
+  const type = (file.type || "").toLowerCase();
+  const name = (file.name || "").toLowerCase();
+  return (
+    type.includes("avif") ||
+    type.includes("heic") ||
+    type.includes("heif") ||
+    /\.(avif|heic|heif)$/i.test(name)
+  );
+}
+
+export async function compressReportImage(file: File): Promise<File> {
+  if (!isReportPhotoCandidate(file) || file.type === "image/gif") return file;
 
   try {
     const bitmap = await createImageBitmap(file);
@@ -24,7 +40,9 @@ export async function compressReportImage(file: File): Promise<File> {
     const scale = Math.min(1, REPORT_PHOTO_MAX_EDGE / Math.max(width, height));
     const outW = Math.max(1, Math.round(width * scale));
     const outH = Math.max(1, Math.round(height * scale));
+    const forceJpeg = mustReencodeAsJpeg(file);
     const alreadySmall =
+      !forceJpeg &&
       scale === 1 &&
       file.size <= 450 * 1024 &&
       (file.type === "image/jpeg" || file.type === "image/jpg");
@@ -48,8 +66,8 @@ export async function compressReportImage(file: File): Promise<File> {
       canvas.toBlob(resolve, "image/jpeg", REPORT_PHOTO_JPEG_QUALITY);
     });
     if (!blob || blob.size < 1) return file;
-    // Keep original if compression somehow grew the file.
-    if (blob.size >= file.size && scale === 1) return file;
+    // Keep original JPEG/PNG if compression grew the file; never keep AVIF/HEIC.
+    if (!forceJpeg && blob.size >= file.size && scale === 1) return file;
 
     const base =
       (file.name || "photo").replace(/\.[^.]+$/, "") || "photo";
