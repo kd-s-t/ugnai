@@ -325,6 +325,7 @@ export async function ensureApasWaterAndFireReports(): Promise<number> {
       aiReason: sample.aiReason,
       aiSource: "local",
       aiModel: sample.aiModel,
+      aiLatencyMs: 820,
       aiPriority: sample.priority,
       aiPriorityFactors: {
         immediateSeverity:
@@ -341,6 +342,7 @@ export async function ensureApasWaterAndFireReports(): Promise<number> {
       },
       vertexClass: sample.hazardHint === "fire" ? "fire" : null,
       vertexConfidence: sample.hazardHint === "fire" ? 0.88 : null,
+      vertexLatencyMs: sample.hazardHint === "fire" ? 1240 : null,
       vertexLocationLabel: null,
       vertexLocationConfidence: null,
       vertexLocationPlaceId: null,
@@ -461,6 +463,7 @@ async function ensureApasReports(): Promise<number> {
       aiReason: sample.aiReason,
       aiSource: "local",
       aiModel: "apas-sample-seed",
+      aiLatencyMs: sample.status === "queued" ? null : 710,
       aiPriority:
         sample.status === "rejected"
           ? "low"
@@ -476,6 +479,7 @@ async function ensureApasReports(): Promise<number> {
       },
       vertexClass: null,
       vertexConfidence: null,
+      vertexLatencyMs: null,
       vertexLocationLabel: null,
       vertexLocationConfidence: null,
       vertexLocationPlaceId: null,

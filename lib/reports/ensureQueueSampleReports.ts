@@ -283,6 +283,7 @@ export async function ensureQueueSampleReports(): Promise<{
       aiReason: sample.aiReason,
       aiSource: "local",
       aiModel: "sample-seed",
+      aiLatencyMs: 890,
       aiPriority: (() => {
         if (sample.status === "rejected") {
           return sample.hazardHint === "flood" ||
@@ -309,6 +310,7 @@ export async function ensureQueueSampleReports(): Promise<{
       },
       vertexClass: null,
       vertexConfidence: null,
+      vertexLatencyMs: null,
       vertexLocationLabel: null,
       vertexLocationConfidence: null,
       vertexLocationPlaceId: null,

@@ -43,6 +43,24 @@ function formatWhen(iso: string | null): string {
   });
 }
 
+function formatRunLatency(run: EeRunMeta): string | null {
+  if (!run.finishedAt || !run.startedAt) return null;
+  const start = Date.parse(run.startedAt);
+  const end = Date.parse(run.finishedAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) {
+    return null;
+  }
+  const ms = Math.round(end - start);
+  if (ms < 1000) return `${ms}ms`;
+  const seconds = ms / 1000;
+  if (seconds < 60) {
+    return `${seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+  }
+  const mins = Math.floor(seconds / 60);
+  const rem = Math.round(seconds % 60);
+  return `${mins}m ${rem}s`;
+}
+
 function fileLabel(name: string): string {
   if (name === "cebu-ee-dem.json") return "Cebu DEM";
   if (name === "nangka-ee-dem.json") return "Nangka DEM";
@@ -287,6 +305,10 @@ export function EarthEngineAdminPanel() {
                     <p className="mt-1 text-[12px] text-[var(--muted)]">
                       {formatWhen(run.startedAt)}
                       {run.triggeredBy ? ` · ${run.triggeredBy}` : ""}
+                      {(() => {
+                        const t = formatRunLatency(run);
+                        return t ? ` · ${t}` : "";
+                      })()}
                     </p>
                     {run.error ? (
                       <p className="mt-2 max-w-xl text-[11px] text-[var(--danger)]">

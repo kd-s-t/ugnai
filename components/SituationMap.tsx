@@ -458,10 +458,17 @@ export function SituationMap({
     : {};
   // Escape polylines / chevrons off the map (keep data for triage logic only).
   const mapEscapes = EMPTY_ESCAPES;
-  // Before: flood tiles only after Agent triage. During: rebuild elev-grid.
+  // Before: tiles after Agent chat. During: peak elev wash. After: residual wash.
   const mapFloods = useMemo((): FloodSample[] => {
     if (!nangkaOps) return [];
     if (phase === "before" && !hasAiOverlay) return [];
+    if (phase === "after") {
+      return predictAiFloods({
+        typhoons: pack.typhoons,
+        source: result?.source === "gemini" ? "gemini" : "local",
+        residual: true,
+      });
+    }
     if (!triageLive) return pack.floods;
     return predictAiFloods({
       typhoons: pack.typhoons,

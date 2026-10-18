@@ -153,6 +153,7 @@ function buildRow(
     aiReason: "Verified · drinking water shortage for Resources desk demo.",
     aiSource: "local" as const,
     aiModel: "resource-seed",
+    aiLatencyMs: 640,
     aiPriority: "high",
     aiPriorityFactors: {
       immediateSeverity: "Drinking water shortage · households need supply.",
@@ -163,6 +164,7 @@ function buildRow(
     },
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,

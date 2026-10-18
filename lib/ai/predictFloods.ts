@@ -37,43 +37,73 @@ export function floodsForMapPaint(input: {
 export function predictAiFloods(input: {
   typhoons?: TyphoonSample[];
   source?: "gemini" | "local";
+  /** After landfall: standing water on lows even when the eye is far west. */
+  residual?: boolean;
 }): FloodSample[] {
   const ty = [...(input.typhoons ?? [])].sort(
     (a, b) => a.distanceKm - b.distanceKm,
   )[0];
   const source = input.source ?? "local";
+  const residual = Boolean(input.residual);
 
   // Closer / stronger storm → deeper inundation (keep fringe tight — ≤13 m
   // painted ~58% of the Nangka elev grid and read as “whole map blue”).
-  const near = ty ? ty.distanceKm < 120 : false;
+  const near = residual ? true : ty ? ty.distanceKm < 120 : false;
   const intense =
-    ty &&
-    (ty.category === "super_typhoon" ||
-      ty.category === "typhoon" ||
-      ty.maxWindsKmh >= 150);
+    residual ||
+    (ty &&
+      (ty.category === "super_typhoon" ||
+        ty.category === "typhoon" ||
+        ty.maxWindsKmh >= 150));
 
   const fringeMax = near && intense ? 10 : near ? 9 : 8;
   const coreMax = near && intense ? 7 : near ? 6 : 5;
-  const fringeDepth = near && intense ? 55 : near ? 35 : 15;
-  const coreDepth = near && intense ? 95 : near ? 70 : 25;
-  const fringeSev: FloodSample["severity"] =
-    near && intense ? "warning" : "watch";
-  const coreSev: FloodSample["severity"] =
-    near && intense ? "critical" : near ? "warning" : "watch";
+  const fringeDepth = residual
+    ? 40
+    : near && intense
+      ? 55
+      : near
+        ? 35
+        : 15;
+  const coreDepth = residual
+    ? 70
+    : near && intense
+      ? 95
+      : near
+        ? 70
+        : 25;
+  const fringeSev: FloodSample["severity"] = residual
+    ? "warning"
+    : near && intense
+      ? "warning"
+      : "watch";
+  const coreSev: FloodSample["severity"] = residual
+    ? "warning"
+    : near && intense
+      ? "critical"
+      : near
+        ? "warning"
+        : "watch";
 
   const fringe = elevFloodCellPolygons(fringeMax);
   const core = elevFloodCellPolygons(coreMax);
   const lowEast = nearestLowSpot({ lat: 10.3684, lng: 123.9661 }, coreMax);
   const lowSouth = nearestLowSpot({ lat: 10.3669, lng: 123.9675 }, coreMax);
 
-  const stormNote = ty
-    ? `${ty.name} · ${Math.round(ty.distanceKm)} km · ${ty.maxWindsKmh} km/h`
-    : "No active typhoon pin — baseline flood-prone lows";
+  const stormNote = residual
+    ? ty
+      ? `Post-landfall residual · ${ty.name} now ${Math.round(ty.distanceKm)} km west`
+      : "Post-landfall residual ponding on elev lows"
+    : ty
+      ? `${ty.name} · ${Math.round(ty.distanceKm)} km · ${ty.maxWindsKmh} km/h`
+      : "No active typhoon pin — baseline flood-prone lows";
 
   return [
     {
-      id: "ai-flood-fringe",
-      name: "AI flood prediction · fringe",
+      id: residual ? "ai-flood-residual-fringe" : "ai-flood-fringe",
+      name: residual
+        ? "Residual flood · fringe"
+        : "AI flood prediction · fringe",
       place: `Elev ≤ ~${fringeMax} m · ${source === "gemini" ? "Gemini triage" : "local AI rules"}`,
       purokHint: "Purok 5–6 corridor",
       severity: fringeSev,
@@ -82,11 +112,15 @@ export function predictAiFloods(input: {
       depthCm: fringeDepth,
       reportedAt: new Date().toISOString(),
       footprints: fringe,
-      notes: `Predicted inundation fringe from elevation + storm context. ${stormNote}.`,
+      notes: residual
+        ? `Standing water / ponding after Tino. ${stormNote}.`
+        : `Predicted inundation fringe from elevation + storm context. ${stormNote}.`,
     },
     {
-      id: "ai-flood-core",
-      name: "AI flood prediction · core",
+      id: residual ? "ai-flood-residual-core" : "ai-flood-core",
+      name: residual
+        ? "Residual flood · core"
+        : "AI flood prediction · core",
       place: `Elev ≤ ~${coreMax} m · Cansaga lows`,
       purokHint: "Purok 6",
       severity: coreSev,
@@ -95,7 +129,9 @@ export function predictAiFloods(input: {
       depthCm: coreDepth,
       reportedAt: new Date().toISOString(),
       footprints: core,
-      notes: `Predicted core flood belt — first to wet when runoff / river rise hits. ${stormNote}.`,
+      notes: residual
+        ? `Lowest corridors still inundated after landfall. ${stormNote}.`
+        : `Predicted core flood belt — first to wet when runoff / river rise hits. ${stormNote}.`,
     },
   ];
 }

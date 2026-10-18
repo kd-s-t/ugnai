@@ -131,11 +131,31 @@ function decodeDoc(fields: Record<string, unknown> | undefined): {
 
 async function authHeaders(): Promise<HeadersInit> {
   const { emu } = docUrl("x");
-  if (emu) return { "Content-Type": "application/json" };
+  if (emu) {
+    // Emulator accepts any bearer; "owner" bypasses security rules.
+    return {
+      Authorization: "Bearer owner",
+      "Content-Type": "application/json",
+    };
+  }
   const token = await googleAccessToken();
   return {
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
+  };
+}
+
+function emptyDatasetRow(id: EeDatasetId): EeDatasetRow {
+  const meta = META[id];
+  return {
+    id,
+    label: meta.label,
+    fileName: meta.fileName,
+    updatedAt: null,
+    bytes: 0,
+    provider: null,
+    projectId: null,
+    payload: null,
   };
 }
 
@@ -147,6 +167,14 @@ export async function getEeDataset(
   if (res.status === 404) return null;
   if (!res.ok) {
     const text = await res.text();
+    // User ADC hits security rules (not Admin). Treat as missing so the
+    // Earth Engine panel still loads; Cloud Run SA bypasses rules via IAM.
+    if (res.status === 403 || /PERMISSION_DENIED/i.test(text)) {
+      console.warn(
+        `[ee] ee_datasets/${id} read denied (${res.status}); treating as empty`,
+      );
+      return null;
+    }
     throw new Error(`ee_datasets/${id} read ${res.status}: ${text.slice(0, 300)}`);
   }
   const json = (await res.json()) as { fields?: Record<string, unknown> };
@@ -175,21 +203,12 @@ export async function getEeDataset(
 export async function listEeDatasets(): Promise<EeDatasetRow[]> {
   const rows: EeDatasetRow[] = [];
   for (const id of EE_DATASET_IDS) {
-    const row = await getEeDataset(id);
-    if (row) {
-      rows.push(row);
-    } else {
-      const meta = META[id];
-      rows.push({
-        id,
-        label: meta.label,
-        fileName: meta.fileName,
-        updatedAt: null,
-        bytes: 0,
-        provider: null,
-        projectId: null,
-        payload: null,
-      });
+    try {
+      const row = await getEeDataset(id);
+      rows.push(row ?? emptyDatasetRow(id));
+    } catch (err) {
+      console.warn(`[ee] listEeDatasets ${id}`, err);
+      rows.push(emptyDatasetRow(id));
     }
   }
   return rows;

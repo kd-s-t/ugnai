@@ -19,6 +19,8 @@ export type VertexClassifyResult = {
   locationPlaceLabel: string | null;
   /** automl = custom endpoint class; vertex = Vertex Gemini (class + location). */
   source: "vertex" | "automl" | "skipped" | "error";
+  /** Wall time for the Vertex call (null when skipped / not run). */
+  latencyMs: number | null;
   reason?: string;
   endpoint?: string;
 };
@@ -58,6 +60,7 @@ function emptyResult(
     locationConfidence: null,
     locationPlaceId: null,
     locationPlaceLabel: null,
+    latencyMs: null,
     ...partial,
   };
 }
@@ -397,6 +400,7 @@ Rules:
     confidences: [parsed.confidence],
     ...location,
     source: "vertex",
+    latencyMs: null,
     endpoint: resource,
     reason: input.env.endpointId
       ? undefined
@@ -438,6 +442,8 @@ export async function classifyImageWithVertex(input: {
     });
   }
 
+  const started = Date.now();
+
   // Run Gemini (class + place) and AutoML (class) together so submit is not
   // blocked on two back-to-back ~5s round trips.
   const geminiPromise = classifyWithVertexGemini({
@@ -455,6 +461,7 @@ export async function classifyImageWithVertex(input: {
     : Promise.resolve(null);
 
   const [gemini, automl] = await Promise.all([geminiPromise, automlPromise]);
+  const latencyMs = Date.now() - started;
 
   if (automl?.source === "automl" && automl.className) {
     return {
@@ -465,13 +472,14 @@ export async function classifyImageWithVertex(input: {
       confidences: automl.confidences,
       source: "automl",
       endpoint: automl.endpoint,
+      latencyMs,
       reason: gemini.locationLabel
         ? "AutoML hazard class · Vertex Gemini location."
         : automl.reason,
     };
   }
 
-  return gemini;
+  return { ...gemini, latencyMs };
 }
 
 /** Map claim + Vertex class / location into a short signal for Gemini / officers. */

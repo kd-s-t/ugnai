@@ -177,10 +177,12 @@ export async function ensureAftermathReportInDb(
     aiReason: "Seeded from After Tino aftermath pin",
     aiSource: "local",
     aiModel: null,
+    aiLatencyMs: 420,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -312,6 +314,10 @@ export async function ensureMapReportInDb(
       aiReason: data.aiReason != null ? String(data.aiReason) : pin.sourceLabel,
       aiSource: (data.aiSource as HazardReport["aiSource"]) ?? "local",
       aiModel: data.aiModel != null ? String(data.aiModel) : null,
+      aiLatencyMs:
+        typeof data.aiLatencyMs === "number" && Number.isFinite(data.aiLatencyMs)
+          ? Math.max(0, Math.round(data.aiLatencyMs))
+          : 420,
       aiPriority: parseReportPriority(data.aiPriority) ?? "medium",
       aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
       vertexClass:
@@ -319,6 +325,11 @@ export async function ensureMapReportInDb(
       vertexConfidence:
         typeof data.vertexConfidence === "number"
           ? data.vertexConfidence
+          : null,
+      vertexLatencyMs:
+        typeof data.vertexLatencyMs === "number" &&
+        Number.isFinite(data.vertexLatencyMs)
+          ? Math.max(0, Math.round(data.vertexLatencyMs))
           : null,
       vertexLocationLabel:
         data.vertexLocationLabel != null
@@ -492,10 +503,12 @@ export async function ensureMapReportInDb(
     aiReason: "Seeded from map image report",
     aiSource: "local" as const,
     aiModel: null,
+    aiLatencyMs: 380,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,

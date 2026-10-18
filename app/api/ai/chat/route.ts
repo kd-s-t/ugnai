@@ -85,7 +85,15 @@ function parseGeminiJson(text: string): GeminiChatPayload | null {
   }
 }
 
+function chatJson(data: ChatApiResponse, started: number) {
+  return NextResponse.json({
+    ...data,
+    latencyMs: Date.now() - started,
+  } satisfies ChatApiResponse);
+}
+
 export async function POST(req: Request) {
+  const started = Date.now();
   let body: Body;
   try {
     body = (await req.json()) as Body;
@@ -111,7 +119,7 @@ export async function POST(req: Request) {
 
   const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    return NextResponse.json(runLocalChat(message, situation));
+    return chatJson(runLocalChat(message, situation), started);
   }
 
   const model = resolveGeminiModel(body.model ?? DEFAULT_GEMINI_MODEL);
@@ -186,28 +194,37 @@ Officer: ${message}`;
     const parsed = parseGeminiJson(text);
     if (!parsed?.reply) {
       const local = runLocalChat(message, situation);
-      return NextResponse.json({
-        ...local,
-        reply: `${local.reply} (Gemini parse fallback)`,
-      } satisfies ChatApiResponse);
+      return chatJson(
+        {
+          ...local,
+          reply: `${local.reply} (Gemini parse fallback)`,
+        },
+        started,
+      );
     }
 
     if (!parsed.updateMap) {
-      return NextResponse.json({
-        reply: String(parsed.reply),
-        source: "gemini",
-        model: usedModel,
-        assist: null,
-      } satisfies ChatApiResponse);
+      return chatJson(
+        {
+          reply: String(parsed.reply),
+          source: "gemini",
+          model: usedModel,
+          assist: null,
+        },
+        started,
+      );
     }
 
     if (!triageLive) {
-      return NextResponse.json({
-        reply: `${String(parsed.reply)}\n\n${TRIAGE_AFTER_ONLY}`,
-        source: "gemini",
-        model: usedModel,
-        assist: null,
-      } satisfies ChatApiResponse);
+      return chatJson(
+        {
+          reply: `${String(parsed.reply)}\n\n${TRIAGE_AFTER_ONLY}`,
+          source: "gemini",
+          model: usedModel,
+          assist: null,
+        },
+        started,
+      );
     }
 
     // Full affected roster from local rules (Gemini cannot list thousands of ids).
@@ -234,17 +251,23 @@ Officer: ${message}`;
       assist.mapHint,
     ]);
 
-    return NextResponse.json({
-      reply,
-      source: "gemini",
-      model: usedModel,
-      assist,
-    } satisfies ChatApiResponse);
+    return chatJson(
+      {
+        reply,
+        source: "gemini",
+        model: usedModel,
+        assist,
+      },
+      started,
+    );
   } catch {
     const local = runLocalChat(message, situation);
-    return NextResponse.json({
-      ...local,
-      reply: `${local.reply} (Gemini unavailable — local agent used.)`,
-    } satisfies ChatApiResponse);
+    return chatJson(
+      {
+        ...local,
+        reply: `${local.reply} (Gemini unavailable — local agent used.)`,
+      },
+      started,
+    );
   }
 }

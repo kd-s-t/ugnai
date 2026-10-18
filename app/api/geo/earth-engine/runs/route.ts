@@ -25,14 +25,25 @@ export async function GET() {
   if (!earthEngineConfigured()) {
     error = "EARTH_ENGINE_PROJECT_ID not set";
   } else {
-    const probe = await checkEarthEngineReady();
-    ready = probe.ready;
-    error = probe.error ?? null;
+    try {
+      const probe = await checkEarthEngineReady();
+      ready = probe.ready;
+      error = probe.error ?? null;
+    } catch (err) {
+      ready = false;
+      error = err instanceof Error ? err.message : String(err);
+    }
   }
 
   const [datasets, runs] = await Promise.all([
-    listActiveEeDatasets(),
-    listEeRuns(),
+    listActiveEeDatasets().catch((err) => {
+      console.warn("[ee] listActiveEeDatasets", err);
+      return [] as Awaited<ReturnType<typeof listActiveEeDatasets>>;
+    }),
+    listEeRuns().catch((err) => {
+      console.warn("[ee] listEeRuns", err);
+      return [] as Awaited<ReturnType<typeof listEeRuns>>;
+    }),
   ]);
 
   return NextResponse.json({

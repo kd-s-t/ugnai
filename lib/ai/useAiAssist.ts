@@ -532,6 +532,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
 
       try {
         if (isResponderCallIntent(trimmed)) {
+          const started = Date.now();
           const { reply, smsLog } = await dispatchResponderCallFromAssist(
             responderKindsFromIntent(trimmed),
             trimmed,
@@ -541,6 +542,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
             role: "assistant",
             content: reply,
             smsLog,
+            latencyMs: Date.now() - started,
             createdAt: new Date().toISOString(),
           };
           setThreads((prev) =>
@@ -584,6 +586,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
           }
 
           if (isCallDispatchIntent(trimmed)) {
+            const started = Date.now();
             const { reply, smsLog } = await dispatchCallFromAssist(
               callPriorityFromIntent(trimmed),
               payload.households,
@@ -593,6 +596,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
               role: "assistant",
               content: reply,
               smsLog,
+              latencyMs: Date.now() - started,
               createdAt: new Date().toISOString(),
             };
             setThreads((prev) =>
@@ -610,6 +614,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
             return;
           }
 
+          const started = Date.now();
           const { reply, smsLog } = await dispatchSmsFromAssist(
             smsPriorityFromIntent(trimmed),
             payload.households,
@@ -619,6 +624,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
             role: "assistant",
             content: reply,
             smsLog,
+            latencyMs: Date.now() - started,
             createdAt: new Date().toISOString(),
           };
           // After SMS: hide evacuate list only — map colors / floods stay.
@@ -642,6 +648,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
           .slice(-8)
           .map((m) => ({ role: m.role, content: m.content }));
 
+        const started = Date.now();
         const res = await fetch("/api/ai/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -662,6 +669,10 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
         }
 
         const data = (await res.json()) as ChatApiResponse;
+        const latencyMs =
+          typeof data.latencyMs === "number" && Number.isFinite(data.latencyMs)
+            ? Math.max(0, Math.round(data.latencyMs))
+            : Date.now() - started;
         let assistApplied = false;
         let nextResult: AssistResult | null | undefined;
 
@@ -694,6 +705,7 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
           role: "assistant",
           content: data.reply,
           assistApplied,
+          latencyMs,
           createdAt: new Date().toISOString(),
         };
 

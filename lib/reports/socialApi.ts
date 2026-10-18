@@ -135,12 +135,21 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
     aiReason: data.aiReason != null ? String(data.aiReason) : null,
     aiSource: (data.aiSource as HazardReport["aiSource"]) ?? null,
     aiModel: data.aiModel != null ? String(data.aiModel) : null,
+    aiLatencyMs:
+      typeof data.aiLatencyMs === "number" && Number.isFinite(data.aiLatencyMs)
+        ? Math.max(0, Math.round(data.aiLatencyMs))
+        : null,
     aiPriority: parseReportPriority(data.aiPriority),
     aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
     vertexClass: data.vertexClass != null ? String(data.vertexClass) : null,
     vertexConfidence:
       typeof data.vertexConfidence === "number"
         ? data.vertexConfidence
+        : null,
+    vertexLatencyMs:
+      typeof data.vertexLatencyMs === "number" &&
+      Number.isFinite(data.vertexLatencyMs)
+        ? Math.max(0, Math.round(data.vertexLatencyMs))
         : null,
     vertexLocationLabel:
       data.vertexLocationLabel != null

@@ -207,10 +207,12 @@ export async function POST(req: Request) {
     aiReason: ai.reason,
     aiSource: ai.source,
     aiModel: ai.model,
+    aiLatencyMs: ai.aiLatencyMs,
     aiPriority: ai.priority,
     aiPriorityFactors: ai.priorityFactors,
     vertexClass: ai.vertexClass,
     vertexConfidence: ai.vertexConfidence,
+    vertexLatencyMs: ai.vertexLatencyMs,
     vertexLocationLabel: ai.vertexLocationLabel,
     vertexLocationConfidence: ai.vertexLocationConfidence,
     vertexLocationPlaceId: ai.vertexLocationPlaceId,
@@ -256,5 +258,7 @@ export async function POST(req: Request) {
     vertexClass: ai.vertexClass,
     vertexConfidence: ai.vertexConfidence,
     vertexSource: ai.vertexSource,
+    vertexLatencyMs: ai.vertexLatencyMs,
+    aiLatencyMs: ai.aiLatencyMs,
   });
 }

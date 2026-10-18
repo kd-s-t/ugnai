@@ -20,6 +20,7 @@ const NAV: { href: string; label: string; exact?: boolean }[] = [
   { href: "/dev/roles", label: "Roles" },
   { href: "/dev/earth-engine", label: "Earth Engine" },
   { href: "/dev/flows", label: "Flows" },
+  { href: "/dev/benchmark", label: "Benchmark" },
   { href: "/dev/cost", label: "Cost" },
   { href: "/dev/references", label: "References" },
 ];

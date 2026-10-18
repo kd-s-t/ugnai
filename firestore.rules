@@ -262,9 +262,10 @@ service cloud.firestore {
       allow delete: if isOfficer();
     }
 
-    // Earth Engine DEM / hazards rows (server writes via Admin REST; clients read).
+    // Earth Engine DEM / hazards rows (server writes via Admin REST / SA IAM).
+    // Public read: elevation samples are not PII; admin panel + map load them.
     match /ee_datasets/{datasetId} {
-      allow read: if isOfficer() || isDeveloper();
+      allow read: if true;
       allow create, update, delete: if false;
     }
 
