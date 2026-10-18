@@ -1,6 +1,8 @@
 import type { AllocationOption } from "@/lib/workspace/allocationOptions";
+import type { ResourceShortage } from "@/lib/resourcesShortages/types";
 
 const CACHE_PREFIX = "ugnai.allocationOptions.v1:";
+const SHORTAGE_FLASH_PREFIX = "ugnai.shortage.flash.v1:";
 
 export type CachedAllocation = {
   options: AllocationOption[];
@@ -41,5 +43,38 @@ export function writeAllocationCache(
     sessionStorage.setItem(cacheKey(planKey), JSON.stringify(value));
   } catch {
     /* quota / private mode */
+  }
+}
+
+/** One-shot shortage snapshot so review remount does not blank to loading. */
+export function writeShortageFlash(
+  shortageId: string,
+  shortage: ResourceShortage,
+): void {
+  if (typeof window === "undefined" || !shortageId) return;
+  try {
+    sessionStorage.setItem(
+      `${SHORTAGE_FLASH_PREFIX}${shortageId}`,
+      JSON.stringify(shortage),
+    );
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function takeShortageFlash(
+  shortageId: string,
+): ResourceShortage | null {
+  if (typeof window === "undefined" || !shortageId) return null;
+  try {
+    const key = `${SHORTAGE_FLASH_PREFIX}${shortageId}`;
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+    sessionStorage.removeItem(key);
+    const parsed = JSON.parse(raw) as ResourceShortage;
+    if (!parsed?.id) return null;
+    return parsed;
+  } catch {
+    return null;
   }
 }

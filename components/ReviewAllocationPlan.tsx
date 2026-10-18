@@ -2,12 +2,15 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AllocationPlanStepper } from "@/components/AllocationPlanStepper";
 import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { isOfficer } from "@/lib/auth/types";
-import { readAllocationCache } from "@/lib/resourcesShortages/allocationCache";
+import {
+  readAllocationCache,
+  takeShortageFlash,
+} from "@/lib/resourcesShortages/allocationCache";
 import {
   getShortageById,
   patchShortageAllocationLines,
@@ -53,10 +56,23 @@ function followUpCopy(line: AllocationLine): string {
   if (line.constraint === "no_transport") {
     return "Find a vehicle, schedule a later delivery, or request partner transport.";
   }
-  if (line.constraintLabel === "Road block nearby") {
-    return "A verified road block is nearby. Clear it on Incidents, then verify again.";
+  if (
+    line.constraintLabel === "Verified road block" ||
+    line.constraintLabel === "Road block nearby"
+  ) {
+    return "A verified road block is on the route. Clear it on Incidents, then verify again.";
   }
   return "Checks the incident map for a verified road block, then saves the result.";
+}
+
+function verifyCheckedAtLabel(iso: string): string {
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
+  }).format(new Date(iso));
 }
 
 function constraintTone(constraint: AllocationLine["constraint"]) {
@@ -86,20 +102,34 @@ export function ReviewAllocationPlan() {
   const params = useParams();
   const rsCode = String(params.id ?? "RS-001").trim().toUpperCase() || "RS-001";
 
-  const [shortage, setShortage] = useState<ResourceShortage | null>(null);
+  const storageId = useMemo(
+    () => resourceEpicStorageId(rsCode, reportScope),
+    [rsCode, reportScope],
+  );
+
+  const flashRef = useRef<ResourceShortage | null | undefined>(undefined);
+  if (flashRef.current === undefined) {
+    flashRef.current = takeShortageFlash(storageId);
+  }
+
+  const [shortage, setShortage] = useState<ResourceShortage | null>(
+    () => flashRef.current ?? null,
+  );
   const [fallbackOptions, setFallbackOptions] = useState<AllocationOption[]>(
     [],
   );
   const [fallbackSelectedId, setFallbackSelectedId] = useState<string | null>(
     null,
   );
-  const [loadingShortage, setLoadingShortage] = useState(true);
+  const [loadingShortage, setLoadingShortage] = useState(
+    () => !flashRef.current,
+  );
   const [lines, setLines] = useState<AllocationLine[]>([]);
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
   const [verifyBusyId, setVerifyBusyId] = useState<string | null>(null);
   const [verifyResults, setVerifyResults] = useState<
-    Record<string, { ok: boolean; message: string }>
+    Record<string, { ok: boolean; message: string; checkedAt: string }>
   >({});
 
   const placeHint = useMemo(() => {
@@ -109,11 +139,6 @@ export function ReviewAllocationPlan() {
     }
     return scopeLabel(reportScope);
   }, [profile, reportScope]);
-
-  const storageId = useMemo(
-    () => resourceEpicStorageId(rsCode, reportScope),
-    [rsCode, reportScope],
-  );
 
   const plan = useMemo((): SupplyShortagePlan | null => {
     const apasDesk =
@@ -153,7 +178,7 @@ export function ReviewAllocationPlan() {
 
   useEffect(() => {
     let cancelled = false;
-    setLoadingShortage(true);
+    if (!shortage) setLoadingShortage(true);
     void (async () => {
       try {
         const existing = await getShortageById(storageId);
@@ -320,13 +345,14 @@ export function ReviewAllocationPlan() {
           row?.barangayLabel?.replace(/^Brgy\.\s*/i, "") ??
           null,
       });
+      const checkedAt = new Date().toISOString();
       const nextLines = lines.map((l) => {
         if (l.reportId !== line.reportId) return l;
         if (!result.ok) {
           return {
             ...l,
             constraint: "access_unverified" as const,
-            constraintLabel: "Road block nearby",
+            constraintLabel: "Verified road block",
           };
         }
         return {
@@ -337,12 +363,12 @@ export function ReviewAllocationPlan() {
         };
       });
       const message = result.ok
-        ? `${line.community}: Access OK. No verified road block nearby. Saved.`
-        : `${line.community}: Road block found (${result.block.title || result.block.id}). Saved. Clear it on Incidents, then verify again.`;
+        ? `Access to ${line.community} OK. No verified road block nearby.`
+        : `Verified road block near ${line.community} (${result.block.title || result.block.id}). Clear it on Incidents, then verify again.`;
       setLines(nextLines);
       setVerifyResults((prev) => ({
         ...prev,
-        [line.reportId]: { ok: result.ok, message },
+        [line.reportId]: { ok: result.ok, message, checkedAt },
       }));
       if (!selectedOption) {
         throw new Error("No allocation option selected to save.");
@@ -361,7 +387,7 @@ export function ReviewAllocationPlan() {
             options: prev.allocation.options.map((o) =>
               o.id === selectedOption.id ? { ...o, lines: nextLines } : o,
             ),
-            savedAt: new Date().toISOString(),
+            savedAt: checkedAt,
           },
         };
       });
@@ -372,6 +398,7 @@ export function ReviewAllocationPlan() {
           ok: false,
           message:
             err instanceof Error ? err.message : "Could not verify access",
+          checkedAt: new Date().toISOString(),
         },
       }));
     } finally {
@@ -404,7 +431,7 @@ export function ReviewAllocationPlan() {
     }
   }
 
-  if (loadingShortage) {
+  if (loadingShortage && !shortage && fallbackOptions.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
         <p className="text-sm text-[var(--muted)]">Loading plan review…</p>
@@ -708,23 +735,6 @@ export function ReviewAllocationPlan() {
             ) : null}
           </div>
           <div className="mt-3 space-y-3">
-            {Object.values(verifyResults).length > 0 ? (
-              <div className="space-y-2" role="status" aria-live="polite">
-                {Object.entries(verifyResults).map(([id, r]) => (
-                  <p
-                    key={id}
-                    className={cn(
-                      "rounded-lg px-3 py-2 text-[12px] leading-snug",
-                      r.ok
-                        ? "bg-[#ecfdf3] text-[#16794c] ring-1 ring-[#86efac]/60"
-                        : "bg-[#fffbeb] text-[#92400e] ring-1 ring-[#fde68a]",
-                    )}
-                  >
-                    {r.message}
-                  </p>
-                ))}
-              </div>
-            ) : null}
             {followUps.length === 0 ? (
               <p className="text-sm text-[var(--muted)]">
                 No delivery blockers on the selected option.
@@ -768,22 +778,27 @@ export function ReviewAllocationPlan() {
                         className="mt-3 inline-flex rounded-lg border border-[#93c5fd] bg-white px-3 py-2 text-[12px] font-medium text-[#2f5f9e] transition hover:border-[#3b6fb6] disabled:opacity-50"
                       >
                         {verifyBusyId === line.reportId
-                          ? "Checking…"
+                          ? `Checking ${line.community}…`
                           : result
-                            ? "Check again"
-                            : "Verify access"}
+                            ? `Verify access to ${line.community} again`
+                            : `Verify access to ${line.community}`}
                       </button>
                     )}
                     {result ? (
-                      <p
+                      <div
                         className={cn(
-                          "mt-2 text-[12px] leading-snug",
-                          result.ok ? "text-[#16794c]" : "text-[#92400e]",
+                          "mt-2 rounded-lg px-2.5 py-2 text-[12px] leading-snug",
+                          result.ok
+                            ? "bg-[#ecfdf3] text-[#16794c]"
+                            : "bg-[#fffbeb] text-[#92400e]",
                         )}
                         role="status"
                       >
-                        {result.message}
-                      </p>
+                        <p>{result.message}</p>
+                        <p className="mt-1 text-[11px] opacity-80">
+                          Checked {verifyCheckedAtLabel(result.checkedAt)}
+                        </p>
+                      </div>
                     ) : null}
                   </div>
                 );

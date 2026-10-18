@@ -87,7 +87,7 @@ export function TrackAssistance() {
   );
   const [verifyBusyId, setVerifyBusyId] = useState<string | null>(null);
   const [verifyResults, setVerifyResults] = useState<
-    Record<string, { ok: boolean; message: string }>
+    Record<string, { ok: boolean; message: string; checkedAt: string }>
   >({});
 
   useEffect(() => {
@@ -165,13 +165,14 @@ export function TrackAssistance() {
           row?.barangayLabel?.replace(/^Brgy\.\s*/i, "") ??
           null,
       });
+      const checkedAt = new Date().toISOString();
       const nextLines = lines.map((l) => {
         if (l.reportId !== line.reportId) return l;
         if (!result.ok) {
           return {
             ...l,
             constraint: "access_unverified" as const,
-            constraintLabel: "Road block nearby",
+            constraintLabel: "Verified road block",
           };
         }
         return {
@@ -182,12 +183,12 @@ export function TrackAssistance() {
         };
       });
       const message = result.ok
-        ? `${line.community}: Access OK. No verified road block nearby. Saved.`
-        : `${line.community}: Road block found (${result.block.title || result.block.id}). Saved. Clear it on Incidents, then verify again.`;
+        ? `Access to ${line.community} OK. No verified road block nearby.`
+        : `Verified road block near ${line.community} (${result.block.title || result.block.id}). Clear it on Incidents, then verify again.`;
       setLinesOverride(nextLines);
       setVerifyResults((prev) => ({
         ...prev,
-        [line.reportId]: { ok: result.ok, message },
+        [line.reportId]: { ok: result.ok, message, checkedAt },
       }));
       if (!selectedOptionId) {
         throw new Error("No allocation option selected to save.");
@@ -206,7 +207,7 @@ export function TrackAssistance() {
             options: prev.allocation.options.map((o) =>
               o.id === selectedOptionId ? { ...o, lines: nextLines } : o,
             ),
-            savedAt: new Date().toISOString(),
+            savedAt: checkedAt,
           },
         };
       });
@@ -217,6 +218,7 @@ export function TrackAssistance() {
           ok: false,
           message:
             err instanceof Error ? err.message : "Could not verify access",
+          checkedAt: new Date().toISOString(),
         },
       }));
     } finally {
@@ -597,17 +599,36 @@ export function TrackAssistance() {
                                   <p className="mt-0.5 text-[11px] leading-snug text-[var(--muted)]">
                                     {isTransport
                                       ? "No vehicle available for delivery."
-                                      : "Road conditions and security status unknown."}
+                                      : l.constraintLabel ===
+                                            "Verified road block" ||
+                                          l.constraintLabel ===
+                                            "Road block nearby"
+                                        ? "A verified road block is on the route."
+                                        : "Road conditions and security status unknown."}
                                   </p>
                                 </div>
                               </div>
                             </td>
                             <td className="max-w-[14rem] px-3 py-3.5 text-[12px] leading-snug text-[var(--muted)]">
-                              {result
-                                ? result.message
-                                : isTransport
-                                  ? "Find a vehicle, schedule a later delivery, or request partner transport."
-                                  : "Verify access with local authorities."}
+                              {result ? (
+                                <>
+                                  <span className="block">{result.message}</span>
+                                  <span className="mt-0.5 block text-[11px]">
+                                    Checked{" "}
+                                    {new Intl.DateTimeFormat("en-PH", {
+                                      month: "short",
+                                      day: "numeric",
+                                      hour: "numeric",
+                                      minute: "2-digit",
+                                      timeZone: "Asia/Manila",
+                                    }).format(new Date(result.checkedAt))}
+                                  </span>
+                                </>
+                              ) : isTransport ? (
+                                "Find a vehicle, schedule a later delivery, or request partner transport."
+                              ) : (
+                                `Verify access to ${l.community}.`
+                              )}
                             </td>
                             <td className="px-3 py-3.5 text-[12px] text-[var(--muted)]">
                               {targetDateLabel}
@@ -628,10 +649,10 @@ export function TrackAssistance() {
                                   className="inline-flex rounded-lg border border-[#93c5fd] px-3 py-1.5 text-[12px] font-semibold text-[#2f5f9e] hover:bg-[#eff6ff] disabled:opacity-50"
                                 >
                                   {verifyBusyId === l.reportId
-                                    ? "Checking…"
+                                    ? `Checking ${l.community}…`
                                     : result
-                                      ? "Check again"
-                                      : "Verify access"}
+                                      ? `Verify access to ${l.community} again`
+                                      : `Verify access to ${l.community}`}
                                 </button>
                               )}
                             </td>

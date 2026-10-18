@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
+import { writeShortageFlash } from "@/lib/resourcesShortages/allocationCache";
 import {
   getShortageById,
+  patchShortageAllocationLines,
   saveShortageWorkflowStep,
 } from "@/lib/resourcesShortages/api";
 import type { ResourceShortage } from "@/lib/resourcesShortages/types";
@@ -123,6 +125,8 @@ export function ResolveTransportConstraint() {
   const [qtyL, setQtyL] = useState(0);
   const [notes, setNotes] = useState("");
   const [added, setAdded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,12 +147,17 @@ export function ResolveTransportConstraint() {
     };
   }, [storageId]);
 
+  const selectedOptionId = useMemo(() => {
+    const options = shortage?.allocation?.options ?? [];
+    return shortage?.selectedOptionId || options[0]?.id || "";
+  }, [shortage]);
+
   const lines = useMemo((): AllocationLine[] => {
     const options = shortage?.allocation?.options ?? [];
-    const id = shortage?.selectedOptionId || options[0]?.id || "";
-    const opt = options.find((o) => o.id === id) ?? options[0];
+    const opt =
+      options.find((o) => o.id === selectedOptionId) ?? options[0];
     return opt?.lines ?? [];
-  }, [shortage]);
+  }, [shortage, selectedOptionId]);
 
   const focusLine = useMemo(() => {
     const transport = lines.filter((l) => l.constraint === "no_transport");
@@ -209,7 +218,11 @@ export function ResolveTransportConstraint() {
   const budgetForThis = unplannedPool + (focusLine?.allocateL ?? 0);
   const shortfallL = Math.max(0, qtyL - budgetForThis);
   const canAdd =
-    shortfallL === 0 && qtyL > 0 && selected.status === "available";
+    shortfallL === 0 &&
+    qtyL > 0 &&
+    selected.status === "available" &&
+    Boolean(selectedOptionId) &&
+    Boolean(focusLine);
 
   const reviewHref = `/admin/resources/review/${encodeURIComponent(rsCode)}`;
   const trackHref = `/admin/resources/track/${encodeURIComponent(rsCode)}`;
@@ -217,11 +230,57 @@ export function ResolveTransportConstraint() {
     shortage?.resourceLabel ?? planMeta?.resourceLabel ?? "Drinking water";
   const community = focusLine?.community ?? "Selected community";
   const optionTitle =
-    shortage?.allocation?.options.find(
-      (o) => o.id === (shortage.selectedOptionId || ""),
-    )?.title ??
+    shortage?.allocation?.options.find((o) => o.id === selectedOptionId)
+      ?.title ??
     shortage?.allocation?.options[0]?.title ??
     "Selected option";
+
+  async function onAddToPlan() {
+    if (!canAdd || !focusLine || !selectedOptionId || saving || added) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const nextLines = lines.map((l) => {
+        if (l.reportId !== focusLine.reportId) return l;
+        return {
+          ...l,
+          allocateL: qtyL,
+          readiness: "ready" as const,
+          constraint: "no_blockers" as const,
+          constraintLabel: "No blockers",
+        };
+      });
+      await patchShortageAllocationLines(
+        storageId,
+        selectedOptionId,
+        nextLines,
+      );
+      const now = new Date().toISOString();
+      if (shortage?.allocation) {
+        writeShortageFlash(storageId, {
+          ...shortage,
+          allocation: {
+            ...shortage.allocation,
+            options: shortage.allocation.options.map((o) =>
+              o.id === selectedOptionId ? { ...o, lines: nextLines } : o,
+            ),
+            savedAt: now,
+          },
+          updatedAt: now,
+        });
+      }
+      setAdded(true);
+      router.replace(reviewHref);
+    } catch (err) {
+      setSaveError(
+        err instanceof Error
+          ? err.message
+          : "Could not save transport to the plan.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  }
 
   if (!focusLine && shortage === null) {
     return (
@@ -569,14 +628,15 @@ export function ResolveTransportConstraint() {
 
             <button
               type="button"
-              disabled={!canAdd || added}
-              onClick={() => {
-                setAdded(true);
-                router.back();
-              }}
+              disabled={!canAdd || added || saving}
+              onClick={() => void onAddToPlan()}
               className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-[var(--foreground)] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[var(--foreground)]/90 disabled:cursor-not-allowed disabled:bg-[#94a3b8] disabled:opacity-100"
             >
-              {added ? "Added to plan" : "Add to plan"}
+              {saving
+                ? "Saving…"
+                : added
+                  ? "Added to plan"
+                  : "Add to plan"}
             </button>
             <button
               type="button"
@@ -585,6 +645,11 @@ export function ResolveTransportConstraint() {
             >
               Cancel
             </button>
+            {saveError ? (
+              <p className="mt-3 text-[12px] leading-snug text-[#b91c1c]" role="alert">
+                {saveError}
+              </p>
+            ) : null}
             {!canAdd && !added ? (
               <p className="mt-3 text-[11px] leading-snug text-[var(--muted)]">
                 Add to plan stays disabled until water budget and vehicle
