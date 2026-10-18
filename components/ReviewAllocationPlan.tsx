@@ -7,17 +7,21 @@ import { AllocationPlanStepper } from "@/components/AllocationPlanStepper";
 import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { isOfficer } from "@/lib/auth/types";
+import { readAllocationCache } from "@/lib/resourcesShortages/allocationCache";
 import {
   getShortageById,
   patchShortageAllocationLines,
+  saveShortageAllocationDraft,
   saveShortageWorkflowStep,
   setShortageReviewStatus,
+  upsertShortageFromPlan,
 } from "@/lib/resourcesShortages/api";
 import type { ResourceShortage } from "@/lib/resourcesShortages/types";
 import { scopeLabel } from "@/lib/reports/barangayScope";
-import type {
-  AllocationLine,
-  AllocationOption,
+import {
+  buildLocalAllocationOptions,
+  type AllocationLine,
+  type AllocationOption,
 } from "@/lib/workspace/allocationOptions";
 import {
   resourceEpicStorageId,
@@ -83,6 +87,13 @@ export function ReviewAllocationPlan() {
   const rsCode = String(params.id ?? "RS-001").trim().toUpperCase() || "RS-001";
 
   const [shortage, setShortage] = useState<ResourceShortage | null>(null);
+  const [fallbackOptions, setFallbackOptions] = useState<AllocationOption[]>(
+    [],
+  );
+  const [fallbackSelectedId, setFallbackSelectedId] = useState<string | null>(
+    null,
+  );
+  const [loadingShortage, setLoadingShortage] = useState(true);
   const [lines, setLines] = useState<AllocationLine[]>([]);
   const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
@@ -128,42 +139,141 @@ export function ReviewAllocationPlan() {
     );
   }, [reports, scopedReports, rsCode, reportScope]);
 
+  const planKey = useMemo(() => {
+    if (!plan) return "";
+    return [
+      plan.code,
+      plan.availableL,
+      plan.totalNeededL,
+      ...plan.rows.map(
+        (r) => `${r.reportId}:${r.gapL}:${r.readiness}:${r.needL}`,
+      ),
+    ].join("|");
+  }, [plan]);
+
   useEffect(() => {
     let cancelled = false;
+    setLoadingShortage(true);
     void (async () => {
-      const existing = await getShortageById(storageId);
-      if (cancelled) return;
-      setShortage(existing);
-      if (existing?.reviewStatus === "approved" || existing?.workflowStep === 3) {
-        return;
-      }
       try {
-        await saveShortageWorkflowStep(storageId, 2);
-        if (!cancelled) {
-          setShortage(await getShortageById(storageId));
+        const existing = await getShortageById(storageId);
+        if (cancelled) return;
+
+        if (
+          existing?.allocation &&
+          existing.allocation.options.length >= 3
+        ) {
+          setShortage(existing);
+          setFallbackOptions([]);
+          setFallbackSelectedId(null);
+          if (
+            existing.reviewStatus !== "approved" &&
+            existing.workflowStep !== 3
+          ) {
+            try {
+              await saveShortageWorkflowStep(storageId, 2);
+              if (!cancelled) {
+                setShortage(await getShortageById(storageId));
+              }
+            } catch {
+              /* offline */
+            }
+          }
+          return;
         }
-      } catch {
-        /* offline */
+
+        const cached = planKey ? readAllocationCache(planKey) : null;
+        const local =
+          plan && plan.rows.length > 0
+            ? buildLocalAllocationOptions(
+                plan.rows,
+                plan.availableL,
+                plan.totalNeededL,
+                plan.resourceLabel,
+              )
+            : null;
+        const recovered =
+          cached?.options && cached.options.length >= 3
+            ? cached.options
+            : local?.options && local.options.length >= 3
+              ? local.options
+              : [];
+        const recoveredId =
+          existing?.selectedOptionId ||
+          cached?.selectedOptionId ||
+          recovered.find((o) => o.suggested)?.id ||
+          recovered[0]?.id ||
+          null;
+
+        if (recovered.length >= 3 && plan) {
+          try {
+            await upsertShortageFromPlan(plan, storageId);
+            await saveShortageAllocationDraft(storageId, {
+              planKey: planKey || `${plan.code}:recovered`,
+              options: recovered,
+              source: cached?.source ?? "local",
+              prompt: cached?.debug?.prompt ?? null,
+              raw: cached?.debug?.raw ?? null,
+              model: cached?.debug?.model ?? null,
+              error: cached?.debug?.error ?? null,
+              savedAt: new Date().toISOString(),
+            });
+            if (recoveredId) {
+              await saveShortageWorkflowStep(storageId, 2, {
+                selectedOptionId: recoveredId,
+                reviewStatus: "review_draft",
+              });
+            }
+            if (!cancelled) {
+              setShortage(await getShortageById(storageId));
+              setFallbackOptions([]);
+              setFallbackSelectedId(null);
+              return;
+            }
+          } catch {
+            /* use in-memory fallback below */
+          }
+        }
+
+        if (!cancelled) {
+          setShortage(existing);
+          setFallbackOptions(recovered);
+          setFallbackSelectedId(recoveredId);
+        }
+      } finally {
+        if (!cancelled) setLoadingShortage(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [storageId]);
+  }, [storageId, planKey, plan]);
+
+  const allocationOptions = useMemo(() => {
+    const fromDb = shortage?.allocation?.options ?? [];
+    if (fromDb.length >= 3) return fromDb;
+    return fallbackOptions;
+  }, [shortage, fallbackOptions]);
 
   const selectedOption = useMemo(() => {
-    const options = shortage?.allocation?.options ?? [];
-    if (options.length === 0) return null;
-    const id = shortage?.selectedOptionId || options[0]?.id || "";
-    return options.find((o) => o.id === id) ?? options[0] ?? null;
-  }, [shortage]);
+    if (allocationOptions.length === 0) return null;
+    const id =
+      shortage?.selectedOptionId ||
+      fallbackSelectedId ||
+      allocationOptions[0]?.id ||
+      "";
+    return (
+      allocationOptions.find((o) => o.id === id) ??
+      allocationOptions[0] ??
+      null
+    );
+  }, [shortage, fallbackSelectedId, allocationOptions]);
 
   const selectedIndex = useMemo(() => {
-    const options = shortage?.allocation?.options ?? [];
     if (!selectedOption) return 0;
-    const i = options.findIndex((o) => o.id === selectedOption.id);
+    const i = allocationOptions.findIndex((o) => o.id === selectedOption.id);
     return i >= 0 ? i : 0;
-  }, [shortage, selectedOption]);
+  }, [allocationOptions, selectedOption]);
 
   useEffect(() => {
     if (selectedOption?.lines) {
@@ -292,6 +402,14 @@ export function ReviewAllocationPlan() {
     } finally {
       setApproving(false);
     }
+  }
+
+  if (loadingShortage) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 text-center">
+        <p className="text-sm text-[var(--muted)]">Loading plan review…</p>
+      </div>
+    );
   }
 
   if (!plan && !shortage) {
