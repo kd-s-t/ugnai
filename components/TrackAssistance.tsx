@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { AllocationPlanStepper } from "@/components/AllocationPlanStepper";
 import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
+import { ShortagePlanMap } from "@/components/ShortagePlanMap";
 import {
   getShortageById,
   patchShortageAllocationLines,
@@ -19,6 +20,7 @@ import {
   apasSitioWaterReports,
   buildSupplyShortagePlan,
   reportsForEpicCode,
+  type SupplyCommunityRow,
 } from "@/lib/workspace/supplyShortagePlan";
 import { verifyDeliveryAccess } from "@/lib/workspace/verifyDeliveryAccess";
 import { cn } from "@/lib/utils";
@@ -258,6 +260,45 @@ export function TrackAssistance() {
       },
     ];
   }, [readyLines]);
+
+  const mapRows = useMemo((): SupplyCommunityRow[] => {
+    if (planMeta?.rows?.length) {
+      if (lines.length === 0) return planMeta.rows;
+      const ids = new Set(lines.map((l) => l.reportId));
+      const matched = planMeta.rows.filter(
+        (r) =>
+          ids.has(r.reportId) || r.reportIds.some((id) => ids.has(id)),
+      );
+      return matched.length > 0 ? matched : planMeta.rows;
+    }
+    return lines.map((l) => {
+      const report =
+        scopedReports.find((r) => r.id === l.reportId) ||
+        reports.find((r) => r.id === l.reportId);
+      const readiness =
+        l.constraint === "no_blockers"
+          ? ("ready" as const)
+          : l.constraint === "no_transport"
+            ? ("no_transport" as const)
+            : ("access_unknown" as const);
+      return {
+        reportId: l.reportId,
+        reportIds: [l.reportId],
+        community: l.community,
+        barangayLabel: "",
+        mediaUrl: null,
+        peopleLabel: "",
+        requestCount: 1,
+        needL: l.needL,
+        localStockL: 0,
+        gapL: Math.max(l.allocateL, l.needL),
+        readiness,
+        readinessLabel: l.constraintLabel,
+        lat: report?.lat ?? null,
+        lng: report?.lng ?? null,
+      };
+    });
+  }, [planMeta, lines, scopedReports, reports]);
 
   const totalNeededL =
     shortage?.totalNeededL ??
@@ -729,7 +770,14 @@ export function TrackAssistance() {
                 View full map
               </Link>
             </div>
-            <TrackMapPanel lines={lines} deliveries={deliveries} />
+            <div className="p-3">
+              <ShortagePlanMap
+                key={mapRows.map((r) => r.reportId).join("|") || rsCode}
+                rows={mapRows}
+                reportScope={reportScope}
+                incidents={scopedReports}
+              />
+            </div>
           </section>
 
           <section className="rounded-xl border border-[#e2e8f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
@@ -964,126 +1012,6 @@ function ActivityGlyph({ index }: { index: number }) {
         <span className="text-[12px] font-bold">×</span>
       )}
     </span>
-  );
-}
-
-function TrackMapPanel({
-  lines,
-  deliveries,
-}: {
-  lines: AllocationLine[];
-  deliveries: DemoDelivery[];
-}) {
-  const deliveredIds = new Set(deliveries.map((d) => d.reportId));
-  const ranked = [...lines].sort((a, b) => {
-    const rank = (l: AllocationLine) =>
-      deliveredIds.has(l.reportId)
-        ? 0
-        : l.constraint === "access_unverified"
-          ? 1
-          : l.constraint === "no_transport"
-            ? 2
-            : 3;
-    return rank(a) - rank(b);
-  });
-  const slots = [
-    { x: 22, y: 58 },
-    { x: 52, y: 34 },
-    { x: 78, y: 62 },
-  ];
-  const pins = ranked.slice(0, 3).map((l, i) => {
-    const delivered = deliveredIds.has(l.reportId);
-    const color = delivered
-      ? "#2f5f9e"
-      : l.constraint === "access_unverified"
-        ? "#eab308"
-        : l.constraint === "no_transport"
-          ? "#b91c1c"
-          : "#64748b";
-    const status = delivered
-      ? "Dispatched"
-      : l.constraint === "access_unverified"
-        ? "Pending"
-        : l.constraint === "no_transport"
-          ? "Not scheduled"
-          : "Queued";
-    return {
-      letter: String.fromCharCode(65 + i),
-      label: l.community,
-      status,
-      color,
-      ...slots[i]!,
-    };
-  });
-
-  return (
-    <div className="relative h-52 overflow-hidden bg-[linear-gradient(165deg,#c5d8ee_0%,#e8eef6_42%,#d5dee9_100%)]">
-      <div
-        className="absolute inset-0 opacity-[0.35]"
-        style={{
-          backgroundImage:
-            "linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)",
-          backgroundSize: "28px 28px",
-        }}
-        aria-hidden
-      />
-      <svg
-        className="absolute inset-0 size-full"
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        aria-hidden
-      >
-        <path
-          d="M5 72 C 18 40, 35 80, 48 36 S 72 28, 95 60"
-          fill="none"
-          stroke="#64748b"
-          strokeWidth="1.4"
-          opacity="0.45"
-        />
-        {pins.length >= 2 ? (
-          <path
-            d={pins
-              .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
-              .join(" ")}
-            fill="none"
-            stroke="#2f5f9e"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ) : null}
-      </svg>
-      {pins.map((p) => (
-        <div
-          key={p.letter}
-          className="absolute flex -translate-x-1/2 -translate-y-[85%] flex-col items-center"
-          style={{ left: `${p.x}%`, top: `${p.y}%` }}
-        >
-          <span className="relative">
-            <span
-              className="flex size-8 items-center justify-center rounded-full text-[12px] font-bold text-white shadow-md ring-2 ring-white"
-              style={{ background: p.color }}
-            >
-              {p.letter}
-            </span>
-            <span
-              className="absolute left-1/2 top-[85%] h-2 w-2 -translate-x-1/2 rotate-45"
-              style={{ background: p.color }}
-              aria-hidden
-            />
-          </span>
-          <p className="mt-2 max-w-[5rem] truncate text-center text-[10px] font-semibold text-[var(--foreground)]">
-            {p.label}
-          </p>
-          <p className="text-[9px] text-[var(--muted)]">{p.status}</p>
-        </div>
-      ))}
-      {pins.length === 0 ? (
-        <p className="absolute inset-0 flex items-center justify-center text-sm text-[var(--muted)]">
-          No communities on this plan yet.
-        </p>
-      ) : null}
-    </div>
   );
 }
 
