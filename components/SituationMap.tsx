@@ -52,7 +52,10 @@ import {
 import type { Household } from "@/lib/households/types";
 import { subscribeAllReports } from "@/lib/reports/api";
 import { officerReportScope } from "@/lib/reports/barangayScope";
-import { isTinoScenarioDemoReport } from "@/lib/reports/scenarioDemo";
+import {
+  demoReportMatchesPhase,
+  isTinoScenarioDemoReport,
+} from "@/lib/reports/scenarioDemo";
 import { ensureAllMapReportsInDb } from "@/lib/reports/seedMapReport";
 import type { HazardReport } from "@/lib/reports/types";
 import { useScenario } from "@/lib/scenarios";
@@ -349,9 +352,10 @@ export function SituationMap({
     // Before: clean map until Agent triage; chat first.
     if (tinoActive && phase === "before") return [];
     // No storm = live ops: hide Tino/queue seeds that During/After write into Firestore.
+    // Tino on: keep only demos that match the active phase (During ≠ After).
     const reportsForMap = !tinoActive
       ? dbReports.filter((r) => !isTinoScenarioDemoReport(r))
-      : dbReports;
+      : dbReports.filter((r) => demoReportMatchesPhase(r, phase));
     const closedIds = new Set(
       reportsForMap
         .filter(

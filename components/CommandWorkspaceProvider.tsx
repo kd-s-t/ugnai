@@ -28,11 +28,13 @@ import {
   type ReportScope,
 } from "@/lib/reports/barangayScope";
 import {
+  demoReportMatchesPhase,
   hideScenarioDemoReportsInUi,
   isTinoScenarioDemoReport,
 } from "@/lib/reports/scenarioDemo";
 import { ensureAllMapReportsInDb } from "@/lib/reports/seedMapReport";
 import type { HazardReport } from "@/lib/reports/types";
+import { useScenario } from "@/lib/scenarios";
 import { fetchCebuWeather, isHazardousWeather } from "@/lib/weather/openMeteo";
 
 const QUEUE_STATUSES = new Set([
@@ -74,6 +76,7 @@ export function CommandWorkspaceProvider({
   children: ReactNode;
 }) {
   const { profile } = useAuth();
+  const { phase, tinoActive } = useScenario();
   const [reports, setReports] = useState<HazardReport[]>([]);
   const [pendingAccounts, setPendingAccounts] = useState<PendingAccount[]>(
     [],
@@ -231,9 +234,14 @@ export function CommandWorkspaceProvider({
 
   const scopedReports = useMemo(() => {
     const inScope = reports.filter((r) => reportInScope(r, reportScope));
-    if (!hideScenarioDemoReportsInUi()) return inScope;
-    return inScope.filter((r) => !isTinoScenarioDemoReport(r));
-  }, [reports, reportScope]);
+    if (hideScenarioDemoReportsInUi()) {
+      return inScope.filter((r) => !isTinoScenarioDemoReport(r));
+    }
+    if (tinoActive) {
+      return inScope.filter((r) => demoReportMatchesPhase(r, phase));
+    }
+    return inScope;
+  }, [reports, reportScope, tinoActive, phase]);
 
   const activeOfficers = useMemo(() => {
     const active = barangayUsers.filter(
