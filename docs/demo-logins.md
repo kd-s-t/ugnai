@@ -14,7 +14,7 @@ Seed local Auth: `npm run seed:local`
 
 ## Developer
 
-Route: `/login/developer`
+Route: `/nexora` (unlisted — not on the public login page)
 
 | Name | Email | Password |
 |------|--------|----------|

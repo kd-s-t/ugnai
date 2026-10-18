@@ -106,11 +106,38 @@ export function useAiAssist(opts: UseAiAssistOpts = {}) {
             if (!cancelled) setHydrated(true);
             return;
           }
-          // Prefer cloud when it has any threads (cross-device / refresh).
-          setThreads(cloud.threads);
-          setActiveId(cloud.activeId);
-          setModel(cloud.model);
-          saveHistory(cloud);
+          // Prefer whichever side has newer thread activity so a slow cloud
+          // hydrate cannot wipe an in-flight Gemini reply (or HMR remount).
+          const localNewest = Math.max(
+            0,
+            ...(local?.threads ?? []).map((t) => Date.parse(t.updatedAt) || 0),
+          );
+          const cloudNewest = Math.max(
+            0,
+            ...cloud.threads.map((t) => Date.parse(t.updatedAt) || 0),
+          );
+          const localMsgCount = (local?.threads ?? []).reduce(
+            (n, t) => n + t.messages.length,
+            0,
+          );
+          const cloudMsgCount = cloud.threads.reduce(
+            (n, t) => n + t.messages.length,
+            0,
+          );
+          const preferLocal =
+            Boolean(local) &&
+            (localNewest > cloudNewest ||
+              (localNewest === cloudNewest && localMsgCount > cloudMsgCount));
+          if (preferLocal && local) {
+            setThreads(local.threads);
+            setActiveId(local.activeId);
+            setModel(local.model);
+          } else {
+            setThreads(cloud.threads);
+            setActiveId(cloud.activeId);
+            setModel(cloud.model);
+            saveHistory(cloud);
+          }
         } catch (err) {
           console.warn("[useAiAssist] cloud hydrate failed", err);
         }

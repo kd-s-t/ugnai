@@ -45,17 +45,6 @@ export default function LoginChoosePage() {
               Report hazards and track your submissions
             </span>
           </Link>
-          <Link
-            href="/login/developer"
-            className="block rounded-xl border border-[var(--border)] px-4 py-4 transition hover:border-[var(--accent)] hover:bg-[var(--surface-raised)]"
-          >
-            <span className="block text-base font-semibold text-[var(--foreground)]">
-              Developer
-            </span>
-            <span className="mt-1 block text-sm text-[var(--muted)]">
-              Ken, Don, Jean, Pat · About us team console
-            </span>
-          </Link>
         </div>
       </AuthCard>
     </AuthGate>

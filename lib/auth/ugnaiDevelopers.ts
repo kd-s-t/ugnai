@@ -1,5 +1,8 @@
 /** The only UGNAI developer accounts (About us team). */
 
+/** Unlisted sign-in path — not linked from public login UI. */
+export const DEVELOPER_LOGIN_PATH = "/nexora";
+
 export type UgnaiDeveloper = {
   id: string;
   slug: string;

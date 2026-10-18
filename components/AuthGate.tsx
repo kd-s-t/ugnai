@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AuthPageSkeleton } from "@/components/AuthPageSkeleton";
 import { PageLoadSkeleton } from "@/components/PageLoadSkeleton";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import { DEVELOPER_LOGIN_PATH } from "@/lib/auth/ugnaiDevelopers";
 import {
   isAccountActive,
   isAccountFired,
@@ -31,7 +32,12 @@ function homeForRole(role: UserRole | undefined) {
 function portalRoleMismatch(pathname: string, role: UserRole): boolean {
   if (pathname.startsWith("/login/citizen")) return role !== "citizen";
   if (pathname.startsWith("/login/officer")) return role !== "officer";
-  if (pathname.startsWith("/login/developer")) return role !== "developer";
+  if (
+    pathname === DEVELOPER_LOGIN_PATH ||
+    pathname.startsWith(`${DEVELOPER_LOGIN_PATH}/`)
+  ) {
+    return role !== "developer";
+  }
   return false;
 }
 
@@ -58,7 +64,7 @@ export function AuthGate({
         role === "citizen"
           ? "/login/citizen"
           : role === "developer"
-            ? "/login/developer"
+            ? DEVELOPER_LOGIN_PATH
             : "/login/officer",
       );
       return;
