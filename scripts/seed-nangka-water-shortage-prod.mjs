@@ -128,7 +128,7 @@ function fieldsFor(sample) {
   const notes = `${sample.people} people affected in ${sample.purok}. ${stockLine} Need ${sample.waterL} L drinking water. ${sample.readiness}`;
 
   return {
-    citizenUid: sv("demo-map-seed"),
+    citizenUid: sv("demo-resource-seed"),
     citizenName: sv(sample.name),
     citizenPurok: sv(sample.purok),
     barangay: sv("Nangka"),
