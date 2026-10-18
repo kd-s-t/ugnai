@@ -17,6 +17,8 @@ export function isTinoScenarioDemoReport(
   ) {
     return false;
   }
+  // Nangka RS-001 drinking-water shortage desk (not a Tino map pin).
+  if (r.aiModel === "resource-seed") return false;
   if (r.citizenUid === "demo-map-seed") return true;
   if (r.id.startsWith("rpt-")) return true;
   if (r.aiModel === "sample-seed") return true;
