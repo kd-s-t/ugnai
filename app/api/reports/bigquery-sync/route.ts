@@ -56,11 +56,20 @@ export async function POST(req: Request) {
     aiReason: r.aiReason ?? null,
     aiSource: r.aiSource ?? null,
     aiModel: r.aiModel ?? null,
+    aiLatencyMs:
+      typeof r.aiLatencyMs === "number" && Number.isFinite(r.aiLatencyMs)
+        ? Math.max(0, Math.round(r.aiLatencyMs))
+        : null,
     aiPriority: r.aiPriority ?? null,
     aiPriorityFactors: r.aiPriorityFactors ?? null,
     vertexClass: r.vertexClass ?? null,
     vertexConfidence:
       typeof r.vertexConfidence === "number" ? r.vertexConfidence : null,
+    vertexLatencyMs:
+      typeof r.vertexLatencyMs === "number" &&
+      Number.isFinite(r.vertexLatencyMs)
+        ? Math.max(0, Math.round(r.vertexLatencyMs))
+        : null,
     vertexLocationLabel: r.vertexLocationLabel ?? null,
     vertexLocationConfidence:
       typeof r.vertexLocationConfidence === "number"

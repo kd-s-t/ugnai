@@ -226,6 +226,7 @@ export async function ensureMySampleReports(input: {
       aiReason: sample.aiReason,
       aiSource: sample.status === "queued" ? null : "local",
       aiModel: sample.status === "queued" ? null : "sample-seed",
+      aiLatencyMs: sample.status === "queued" ? null : 760,
       aiPriority:
         sample.status === "rejected"
           ? "low"
@@ -241,6 +242,7 @@ export async function ensureMySampleReports(input: {
       },
       vertexClass: null,
       vertexConfidence: null,
+      vertexLatencyMs: null,
       vertexLocationLabel: null,
       vertexLocationConfidence: null,
       vertexLocationPlaceId: null,

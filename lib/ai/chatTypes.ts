@@ -25,6 +25,8 @@ export type ChatMessage = {
   /** SMS blast log for clickable “N message(s)” in the reply. */
   smsLog?: SmsLogEntry[];
   createdAt?: string;
+  /** Model / handler wall time for this assistant turn (ms). */
+  latencyMs?: number | null;
   /** Cached ElevenLabs audio (Firebase Storage) — replay without regenerating. */
   audioUrl?: string;
   audioStoragePath?: string;
@@ -54,4 +56,6 @@ export type ChatApiResponse = {
   model?: string;
   /** Present when the agent ran triage / map updates. */
   assist: AssistResult | null;
+  /** Server wall time for this reply (ms). */
+  latencyMs?: number | null;
 };

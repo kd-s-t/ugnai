@@ -202,6 +202,8 @@ export type HazardReport = {
   aiReason: string | null;
   aiSource: "gemini" | "local" | null;
   aiModel: string | null;
+  /** Gemini (or local fallback) wall time in ms. */
+  aiLatencyMs: number | null;
   /** Gemini (or local fallback) response priority. */
   aiPriority: ReportPriority | null;
   /** Factor notes behind aiPriority. */
@@ -209,6 +211,8 @@ export type HazardReport = {
   /** Vertex AutoML / vision top class (e.g. flood, accident, unrelated). */
   vertexClass: string | null;
   vertexConfidence: number | null;
+  /** Vertex classify wall time in ms. */
+  vertexLatencyMs: number | null;
   /** Visual place from Vertex Gemini (free-text). */
   vertexLocationLabel: string | null;
   vertexLocationConfidence: number | null;

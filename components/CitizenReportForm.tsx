@@ -1029,14 +1029,45 @@ export function CitizenReportForm({
       ? await updateGuestHazardReport(payload)
       : await createGuestHazardReport({ ...payload, status: "queued" });
 
+    const place =
+      placeFromCoords(lat, lng) ?? {
+        barangay: DEFAULT_REPORT_BARANGAY,
+        lgu: DEFAULT_REPORT_LGU,
+      };
+
     // Await Vertex + Gemini so title / hazardHint are rewritten before leave.
     setStatus(t(language, "common.submitting"));
     try {
-      await fetch("/api/reports/guest-validate", {
+      const res = await fetch("/api/reports/guest-validate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reportId: id, title, notes, hazardHint }),
       });
+      if (res.ok) {
+        const data = (await res.json()) as {
+          status?: "legit" | "rejected" | "needs_review";
+          hazardHint?: ReportHazardHint | null;
+          title?: string | null;
+          reason?: string | null;
+        };
+        if (data.status === "legit") {
+          void triggerAutoResponderCall({
+            id,
+            hazardHint: data.hazardHint || hazardHint,
+            status: "legit",
+            barangay: place.barangay,
+            lgu: place.lgu,
+            lat,
+            lng,
+            title: data.title || title,
+            notes,
+            citizenPurok: null,
+            autoResponderCallAt: null,
+            voiceTranscript: transcript || null,
+            aiReason: data.reason ?? null,
+          });
+        }
+      }
     } catch {
       // Report already queued — officer queue can still pick it up.
     }
@@ -1202,10 +1233,12 @@ export function CitizenReportForm({
         };
         vertexClass?: string | null;
         vertexConfidence?: number | null;
+        vertexLatencyMs?: number | null;
         vertexLocationLabel?: string | null;
         vertexLocationConfidence?: number | null;
         vertexLocationPlaceId?: string | null;
         vertexLocationPlaceLabel?: string | null;
+        aiLatencyMs?: number | null;
       };
 
       const detectedHint =
@@ -1221,6 +1254,8 @@ export function CitizenReportForm({
         aiReason: data.reason,
         aiSource: data.source,
         aiModel: data.model ?? null,
+        aiLatencyMs:
+          typeof data.aiLatencyMs === "number" ? data.aiLatencyMs : null,
         ...(detectedHint !== hazardHint ? { hazardHint: detectedHint } : {}),
         ...(displayTitle !== title ? { title: displayTitle } : {}),
         aiPriority: data.priority ?? null,
@@ -1229,6 +1264,10 @@ export function CitizenReportForm({
         vertexConfidence:
           typeof data.vertexConfidence === "number"
             ? data.vertexConfidence
+            : null,
+        vertexLatencyMs:
+          typeof data.vertexLatencyMs === "number"
+            ? data.vertexLatencyMs
             : null,
         vertexLocationLabel: data.vertexLocationLabel ?? null,
         vertexLocationConfidence:

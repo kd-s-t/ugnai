@@ -145,10 +145,17 @@ export function PublicSituationMap() {
     return map;
   }, [nangkaOps, phase, triageLive, assist, pack.scenarioActions]);
 
-  // Before: quiet until command triage. During: elev-grid blue tiles.
+  // Before: quiet. During: peak elev wash. After: residual elev wash.
   const mapFloods = useMemo(() => {
     if (!nangkaOps) return [];
     if (phase === "before") return [];
+    if (phase === "after") {
+      return predictAiFloods({
+        typhoons: pack.typhoons,
+        source: "local",
+        residual: true,
+      });
+    }
     if (!triageLive) return pack.floods;
     return predictAiFloods({
       typhoons: pack.typhoons,

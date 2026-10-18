@@ -131,6 +131,14 @@ function looksLikeTriageProse(content: string): boolean {
   );
 }
 
+function formatChatLatencyMs(ms: number | null | undefined): string | null {
+  if (ms == null || !Number.isFinite(ms) || ms < 0) return null;
+  const rounded = Math.round(ms);
+  if (rounded < 1000) return `${rounded}ms`;
+  const seconds = rounded / 1000;
+  return `${seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+}
+
 function AssistRichBody({
   content,
   forcePanels,
@@ -740,27 +748,41 @@ export function MangugnaiChat({
                     ) : (
                       <p className="whitespace-pre-wrap">{m.content}</p>
                     )}
-                    {m.role === "assistant" && ttsReady ? (
+                    {m.role === "assistant" &&
+                    (ttsReady || formatChatLatencyMs(m.latencyMs)) ? (
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            speakMessage(m, { skipIfSpeaking: true })
-                          }
-                          disabled={ttsSpeaking}
-                          className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase transition hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
-                          title={
-                            ttsSpeaking
-                              ? "Already speaking — use Shut up to stop"
-                              : m.audioUrl
-                                ? "Replay saved audio"
-                                : "Read aloud"
-                          }
-                        >
-                          <Volume2 className="size-3" aria-hidden />
-                          Speak
-                        </button>
-                        {speakingMsgId === m.id ? (
+                        {(() => {
+                          const t = formatChatLatencyMs(m.latencyMs);
+                          return t ? (
+                            <span
+                              className="font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase"
+                              title="Response time"
+                            >
+                              {t}
+                            </span>
+                          ) : null;
+                        })()}
+                        {ttsReady ? (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              speakMessage(m, { skipIfSpeaking: true })
+                            }
+                            disabled={ttsSpeaking}
+                            className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase transition hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
+                            title={
+                              ttsSpeaking
+                                ? "Already speaking — use Shut up to stop"
+                                : m.audioUrl
+                                  ? "Replay saved audio"
+                                  : "Read aloud"
+                            }
+                          >
+                            <Volume2 className="size-3" aria-hidden />
+                            Speak
+                          </button>
+                        ) : null}
+                        {ttsReady && speakingMsgId === m.id ? (
                           <button
                             type="button"
                             onClick={() => stopAiSpeech()}

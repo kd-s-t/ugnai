@@ -148,6 +148,8 @@ export function ValidationQueue() {
         aiReason: `Officer override → ${verdict}. ${report.aiReason ?? ""}`.trim(),
         aiSource: report.aiSource,
         aiModel: report.aiModel,
+        aiLatencyMs: report.aiLatencyMs,
+        vertexLatencyMs: report.vertexLatencyMs,
         validatedAt,
         trustInput: {
           registered: Boolean(report.citizenUid),

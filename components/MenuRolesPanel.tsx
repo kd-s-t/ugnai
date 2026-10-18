@@ -19,7 +19,7 @@ const MENU_ROLE_LEVELS = [
     title: "Platform",
     who: "UGNAI developers (Nexora Labs)",
     summary:
-      "Developer console: users across barangays, onboard, Earth Engine, support triage, flows, cost, and role reference. Not day-to-day field command.",
+      "Developer console: users across barangays, onboard, Earth Engine, support triage, flows, benchmark, cost, and role reference. Not day-to-day field command.",
   },
 ] as const;
 
@@ -96,7 +96,7 @@ const MENU_ROLE_MATRIX: {
     developer: "Full",
   },
   {
-    menu: "Flows / cost / refs",
+    menu: "Flows / benchmark / cost / refs",
     citizen: "—",
     officer: "—",
     developer: "Full",

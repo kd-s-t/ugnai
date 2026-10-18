@@ -13,10 +13,15 @@ import { EarthEngineFlow } from "@/components/EarthEngineFlow";
 import { PartnerOnboardFlow } from "@/components/PartnerOnboardFlow";
 import { RegistrationFlow } from "@/components/RegistrationFlow";
 import { ResourcesFlow } from "@/components/ResourcesFlow";
+import { SystemArchitectureFlow } from "@/components/SystemArchitectureFlow";
 import { VertexAgentFlow } from "@/components/VertexAgentFlow";
 import { cn } from "@/lib/utils";
 
 const DIVISIONS = [
+  {
+    label: "System",
+    tabs: [{ id: "architecture", label: "Architecture" }],
+  },
   {
     label: "Onboard",
     tabs: [
@@ -54,7 +59,7 @@ type TabId = (typeof DIVISIONS)[number]["tabs"][number]["id"];
 const TAB_IDS = new Set<string>(
   DIVISIONS.flatMap((d) => d.tabs.map((t) => t.id)),
 );
-const DEFAULT_TAB: TabId = "onboard";
+const DEFAULT_TAB: TabId = "architecture";
 
 function parseFlowParam(raw: string | null): TabId {
   if (raw && TAB_IDS.has(raw)) return raw as TabId;
@@ -112,7 +117,9 @@ function FlowsTabs() {
         ))}
       </div>
       <div className="min-h-0 flex-1">
-        {tab === "onboard" ? (
+        {tab === "architecture" ? (
+          <SystemArchitectureFlow />
+        ) : tab === "onboard" ? (
           <BarangayOnboardFlow />
         ) : tab === "partners" ? (
           <PartnerOnboardFlow />

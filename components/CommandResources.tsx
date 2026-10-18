@@ -652,7 +652,7 @@ export function CommandResources() {
         </aside>
       </div>
 
-      <section className="mt-4 overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
+      <section className="mt-4 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-5">
           <div>
             <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-wide">
@@ -730,7 +730,7 @@ export function CommandResources() {
         </div>
       </section>
 
-      <section className="mt-4 mb-2 overflow-hidden rounded-2xl bg-white shadow-sm">
+      <section className="mt-4 mb-2 shrink-0 overflow-hidden rounded-2xl border border-[var(--border)] bg-white shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-5">
           <h2 className="font-[family-name:var(--font-display)] text-lg font-semibold tracking-wide">
             Recent resource activity

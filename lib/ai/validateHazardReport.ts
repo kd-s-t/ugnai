@@ -44,6 +44,10 @@ export type HazardValidateResult = {
   vertexLocationConfidence: number | null;
   vertexLocationPlaceId: string | null;
   vertexLocationPlaceLabel: string | null;
+  /** Vertex classify wall time in ms (null when skipped). */
+  vertexLatencyMs: number | null;
+  /** Gemini (or local fallback) wall time in ms. */
+  aiLatencyMs: number | null;
 };
 
 function parseVerdict(text: string): {
@@ -122,6 +126,7 @@ function withVertex(
     | "vertexLocationConfidence"
     | "vertexLocationPlaceId"
     | "vertexLocationPlaceLabel"
+    | "vertexLatencyMs"
   >,
   vertex: VertexClassifyResult,
 ): HazardValidateResult {
@@ -134,6 +139,7 @@ function withVertex(
     vertexLocationConfidence: vertex.locationConfidence,
     vertexLocationPlaceId: vertex.locationPlaceId,
     vertexLocationPlaceLabel: vertex.locationPlaceLabel,
+    vertexLatencyMs: vertex.latencyMs,
   };
 }
 
@@ -185,6 +191,7 @@ function localFallback(input: {
       priority: ranked.priority,
       priorityFactors: ranked.factors,
       reason,
+      aiLatencyMs: null,
     },
     input.vertex,
   );
@@ -236,12 +243,14 @@ export async function validateHazardReport(input: {
           locationPlaceId: null,
           locationPlaceLabel: null,
           source: "skipped" as const,
+          latencyMs: null,
           reason: "Image class needs photo bytes (inline base64).",
         } satisfies VertexClassifyResult);
 
   const key = process.env.GEMINI_API_KEY?.trim();
   if (!key) {
-    return localFallback({
+    const localStarted = Date.now();
+    const local = localFallback({
       title,
       notes,
       hazardHint,
@@ -255,6 +264,7 @@ export async function validateHazardReport(input: {
       vertex,
       voiceTranscript,
     });
+    return { ...local, aiLatencyMs: Date.now() - localStarted };
   }
 
   const model = resolveGeminiModel(input.model ?? DEFAULT_GEMINI_MODEL);
@@ -337,14 +347,16 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
       });
     }
 
+    const started = Date.now();
     const response = await ai.models.generateContent({
       model,
       contents: [{ role: "user", parts }],
     });
+    const aiLatencyMs = Date.now() - started;
 
     const parsed = parseVerdict(response.text ?? "");
     if (!parsed) {
-      return localFallback({
+      const fallback = localFallback({
         title,
         notes,
         hazardHint,
@@ -356,6 +368,7 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
         vertex,
         voiceTranscript,
       });
+      return { ...fallback, aiLatencyMs };
     }
 
     // Never keep AI-generated / stock / watermark as a reject reason.
@@ -409,11 +422,13 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
         priority,
         priorityFactors,
         reason,
+        aiLatencyMs,
       },
       vertex,
     );
   } catch {
-    return localFallback({
+    const localStarted = Date.now();
+    const fallback = localFallback({
       title,
       notes,
       hazardHint,
@@ -425,5 +440,6 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
       vertex,
       voiceTranscript,
     });
+    return { ...fallback, aiLatencyMs: Date.now() - localStarted };
   }
 }

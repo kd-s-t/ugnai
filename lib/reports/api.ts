@@ -206,6 +206,12 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
     aiReason: data.aiReason != null ? String(data.aiReason) : null,
     aiSource: (data.aiSource as HazardReport["aiSource"]) ?? null,
     aiModel: data.aiModel != null ? String(data.aiModel) : null,
+    aiLatencyMs:
+      typeof data.aiLatencyMs === "number" && Number.isFinite(data.aiLatencyMs)
+        ? Math.max(0, Math.round(data.aiLatencyMs))
+        : data.aiLatencyMs != null && Number.isFinite(Number(data.aiLatencyMs))
+          ? Math.max(0, Math.round(Number(data.aiLatencyMs)))
+          : null,
     aiPriority: parseReportPriority(data.aiPriority),
     aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
     vertexClass: data.vertexClass != null ? String(data.vertexClass) : null,
@@ -214,6 +220,14 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
         ? data.vertexConfidence
         : data.vertexConfidence != null
           ? Number(data.vertexConfidence)
+          : null,
+    vertexLatencyMs:
+      typeof data.vertexLatencyMs === "number" &&
+      Number.isFinite(data.vertexLatencyMs)
+        ? Math.max(0, Math.round(data.vertexLatencyMs))
+        : data.vertexLatencyMs != null &&
+            Number.isFinite(Number(data.vertexLatencyMs))
+          ? Math.max(0, Math.round(Number(data.vertexLatencyMs)))
           : null,
     vertexLocationLabel:
       data.vertexLocationLabel != null
@@ -383,10 +397,12 @@ export async function startIncidentDraft(input: {
     aiReason: null,
     aiSource: null,
     aiModel: null,
+    aiLatencyMs: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -574,10 +590,12 @@ export async function createGuestHazardReport(input: {
     // Pending until /api/reports/guest-validate writes the real source.
     aiSource: null,
     aiModel: null,
+    aiLatencyMs: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: input.vertexClass ?? null,
     vertexConfidence: input.vertexConfidence ?? null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -683,10 +701,12 @@ export async function updateGuestHazardReport(input: {
     aiReason: null,
     aiSource: null,
     aiModel: null,
+    aiLatencyMs: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -784,10 +804,12 @@ export async function createHazardReport(input: {
     aiReason: null,
     aiSource: null,
     aiModel: null,
+    aiLatencyMs: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
+    vertexLatencyMs: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -1036,6 +1058,7 @@ export async function updateReportValidation(
     aiReason: string | null;
     aiSource: HazardReport["aiSource"];
     aiModel: string | null;
+    aiLatencyMs?: number | null;
     hazardHint?: ReportHazardHint;
     /** When AI upgrades a generic intent title (e.g. "I need help" → "Fire"). */
     title?: string;
@@ -1043,6 +1066,7 @@ export async function updateReportValidation(
     aiPriorityFactors?: ReportPriorityFactors | null;
     vertexClass?: string | null;
     vertexConfidence?: number | null;
+    vertexLatencyMs?: number | null;
     vertexLocationLabel?: string | null;
     vertexLocationConfidence?: number | null;
     vertexLocationPlaceId?: string | null;
