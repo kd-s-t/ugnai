@@ -1,3 +1,5 @@
+import { clampToOpsCoverage, CEBU_AREA } from "@/lib/geo/cebu";
+
 export type ReportCaptureMeta = {
   lat: number | null;
   lng: number | null;
@@ -5,6 +7,8 @@ export type ReportCaptureMeta = {
   locationLabel: string;
   device: string;
   ipAddress: string | null;
+  /** True when device GPS was outside metro Cebu and snapped to Nangka hall. */
+  remappedToOps?: boolean;
 };
 
 function parseDevice(ua: string): string {
@@ -82,14 +86,22 @@ export async function captureReportMeta(): Promise<ReportCaptureMeta> {
   let locationAccuracyM: number | null = null;
   let locationLabel = "Location unavailable";
 
+  let remappedToOps = false;
   try {
     const gps = await readGps();
-    lat = gps.lat;
-    lng = gps.lng;
-    locationAccuracyM = gps.accuracy;
-    const acc =
-      gps.accuracy != null ? ` ±${Math.round(gps.accuracy)} m` : "";
-    locationLabel = `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}${acc}`;
+    const clamped = clampToOpsCoverage(gps.lat, gps.lng);
+    lat = clamped.lat;
+    lng = clamped.lng;
+    remappedToOps = clamped.remapped;
+    if (clamped.remapped) {
+      locationAccuracyM = null;
+      locationLabel = CEBU_AREA.name;
+    } else {
+      locationAccuracyM = gps.accuracy;
+      const acc =
+        gps.accuracy != null ? ` ±${Math.round(gps.accuracy)} m` : "";
+      locationLabel = `${gps.lat.toFixed(5)}, ${gps.lng.toFixed(5)}${acc}`;
+    }
   } catch {
     locationLabel = "Location denied or unavailable";
   }
@@ -103,5 +115,6 @@ export async function captureReportMeta(): Promise<ReportCaptureMeta> {
     locationLabel,
     device,
     ipAddress,
+    remappedToOps,
   };
 }

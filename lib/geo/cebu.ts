@@ -24,6 +24,28 @@ export function isNearOpsArea(
   return distKm(CEBU_AREA.center, { lat, lng }) <= maxKm;
 }
 
+/**
+ * Metro Cebu coverage for device GPS. Remote testers (e.g. Singapore judges)
+ * sit far outside this — clamp them to the barangay hall so demo pins stay
+ * on the ops map.
+ */
+export const SERVICE_COVERAGE_KM = 80;
+
+export function clampToOpsCoverage(
+  lat: number,
+  lng: number,
+  maxKm = SERVICE_COVERAGE_KM,
+): { lat: number; lng: number; remapped: boolean } {
+  if (distKm(CEBU_AREA.center, { lat, lng }) <= maxKm) {
+    return { lat, lng, remapped: false };
+  }
+  return {
+    lat: CEBU_AREA.center.lat,
+    lng: CEBU_AREA.center.lng,
+    remapped: true,
+  };
+}
+
 /** True when most mapped households sit inside the current ops barangay. */
 export function rosterMatchesOpsArea(
   households: { lat: number | null; lng: number | null }[],

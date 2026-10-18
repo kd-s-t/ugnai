@@ -18,6 +18,7 @@ import {
 import { runLocalAssist } from "@/lib/ai/localAssist";
 import { predictAiFloods } from "@/lib/ai/predictFloods";
 import { getBarangayMapPack } from "@/lib/geo/barangayMapPack";
+import { clampToOpsCoverage } from "@/lib/geo/cebu";
 import {
   DEFAULT_MAP_AREA,
   isNangkaOpsArea,
@@ -330,7 +331,11 @@ export function PublicSituationMap() {
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        void applyCoords(pos.coords.latitude, pos.coords.longitude);
+        const clamped = clampToOpsCoverage(
+          pos.coords.latitude,
+          pos.coords.longitude,
+        );
+        void applyCoords(clamped.lat, clamped.lng);
       },
       (err) => {
         if (err.code === err.PERMISSION_DENIED) {

@@ -848,7 +848,10 @@ export function CitizenReportForm({
         setMapZoom(16);
         setFromGps(true);
         userPinnedRef.current = false;
-        if (captured.locationLabel) {
+        if (captured.remappedToOps) {
+          // Remote GPS (e.g. Singapore judges) was snapped to Nangka hall.
+          setPlaceQuery(placeLabel(nearestPlace(NANGKA_HALL.lat, NANGKA_HALL.lng)));
+        } else if (captured.locationLabel) {
           setPlaceQuery(captured.locationLabel);
         } else {
           const nearest = nearestPlace(captured.lat, captured.lng);
