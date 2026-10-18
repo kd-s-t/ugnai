@@ -19,8 +19,8 @@ import { uploadIdentityMedia } from "@/lib/auth/idUpload";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { verifyIdWithApi } from "@/lib/auth/verifyIdClient";
 import {
-  formatPhMobileInput,
-  toE164PhMobile,
+  formatIntlMobileInput,
+  toE164Intl,
 } from "@/lib/alerts/phones";
 import { notifyAccountDecision } from "@/lib/auth/notifyAccountDecision";
 import { getClientAuth, getClientDb } from "@/lib/firebase/client";
@@ -30,7 +30,7 @@ export default function CitizenRegisterPage() {
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
   const [purok, setPurok] = useState("Purok 1");
-  const [phone, setPhone] = useState("+63");
+  const [phone, setPhone] = useState("+");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [location, setLocation] = useState<RegisterLocation | null>({
@@ -57,9 +57,9 @@ export default function CitizenRegisterPage() {
       setError("Choose your barangay / location.");
       return;
     }
-    const phoneE164 = toE164PhMobile(phone);
+    const phoneE164 = toE164Intl(phone);
     if (!phoneE164) {
-      setError("Enter a Philippine mobile number (+63 9XX XXX XXXX).");
+      setError("Enter a mobile number with country code (e.g. +65… or +63…).");
       return;
     }
     if (!idCapture.idFile || !idCapture.faceFile) {
@@ -228,22 +228,22 @@ export default function CitizenRegisterPage() {
           </label>
           <label className="block text-sm">
             <span className="mb-1.5 block text-[var(--muted)]">
-              Phone · PH mobile (+63)
+              Phone · with country code
             </span>
             <input
               type="tel"
               required
               inputMode="tel"
               autoComplete="tel"
+              maxLength={16}
               value={phone}
-              onChange={(e) => setPhone(formatPhMobileInput(e.target.value))}
+              onChange={(e) => setPhone(formatIntlMobileInput(e.target.value))}
               onBlur={() => {
-                const next = toE164PhMobile(phone);
+                const next = toE164Intl(phone);
                 if (next) setPhone(next);
               }}
-              placeholder="+639XXXXXXXXX"
-              pattern="^\+639\d{9}$"
-              title="Philippine mobile only, e.g. +639605075119"
+              placeholder="+65 9123 4567"
+              title="Include country code, e.g. +6591234567 or +639171234567"
               className="w-full border border-[var(--border)] bg-[var(--input)] px-3 py-2.5 outline-none focus:border-[var(--accent)]"
             />
           </label>

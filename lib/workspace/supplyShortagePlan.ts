@@ -120,7 +120,7 @@ function readinessLabelFor(
   detail?: "road_block" | "ok" | "unverified",
 ): string {
   if (r === "no_transport") return "No transport";
-  if (detail === "road_block") return "Road block nearby";
+  if (detail === "road_block") return "Verified road block";
   if (r === "access_unknown") return "Access unverified";
   if (detail === "ok") return "Access OK";
   return "Access OK";
@@ -169,7 +169,7 @@ function resourceBlurb(kind: SupplyNeedKind): string {
 
 /**
  * Set Access column from verified road-block incidents near each sitio.
- * Keeps "No transport"; otherwise Access OK or Road block nearby / unverified.
+ * Keeps "No transport"; otherwise Access OK or Verified road block / unverified.
  */
 export function applyIncidentAccessToRows(
   rows: SupplyCommunityRow[],

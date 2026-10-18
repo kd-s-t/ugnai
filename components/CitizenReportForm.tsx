@@ -40,6 +40,10 @@ import {
   useMotionSafe,
 } from "@/components/motion/primitives";
 import { useAuth } from "@/lib/auth/AuthProvider";
+import {
+  formatIntlMobileInput,
+  toE164Intl,
+} from "@/lib/alerts/phones";
 import { sanitizeGuestReporterPhone } from "@/lib/auth/demoAccount";
 import { isCitizen, isOfficer, type UserProfile } from "@/lib/auth/types";
 import { t } from "@/lib/citizen/i18n";
@@ -119,30 +123,6 @@ type FieldErrors = {
   mobile?: string;
 };
 
-/** PH mobile UI: static +63 + up to 10 local digits (start with 9). */
-const PH_MOBILE_PREFIX = "+63";
-const PH_MOBILE_LOCAL_LEN = 10;
-
-function digitsOnly(value: string): string {
-  return value.replace(/\D/g, "");
-}
-
-/** Local 10 digits after +63 (09… / +63… / 9…). */
-function phMobileLocalFromStored(phone: string | null | undefined): string {
-  const d = digitsOnly(phone ?? "");
-  if (!d) return "";
-  if (d.startsWith("63") && d.length >= 2) {
-    return d.slice(2, 2 + PH_MOBILE_LOCAL_LEN);
-  }
-  if (d.startsWith("0") && d.length >= 1) {
-    return d.slice(1, 1 + PH_MOBILE_LOCAL_LEN);
-  }
-  return d.slice(0, PH_MOBILE_LOCAL_LEN);
-}
-
-function formatPhMobile(localDigits: string): string {
-  return `${PH_MOBILE_PREFIX}${localDigits}`;
-}
 
 type Intent = "needHelp" | "reportHazard";
 type ReportFor = "myself" | "someoneElse";
@@ -312,15 +292,13 @@ export function CitizenReportForm({
   const [approximate, setApproximate] = useState(true);
   const [fromGps, setFromGps] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
-  const [mobileLocal, setMobileLocal] = useState(() => {
+  const [mobileInput, setMobileInput] = useState(() => {
     const raw = isCitizen(author)
       ? author.phone || ""
       : sanitizeGuestReporterPhone(draft?.reporterPhone) || "";
-    return phMobileLocalFromStored(raw);
+    return raw ? formatIntlMobileInput(raw) : "";
   });
-  const mobileNumber = mobileLocal
-    ? formatPhMobile(mobileLocal)
-    : "";
+  const mobileNumber = toE164Intl(mobileInput) ?? "";
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -899,7 +877,7 @@ export function CitizenReportForm({
   }
 
   function validateMobile(): boolean {
-    if (mobileLocal.length !== PH_MOBILE_LOCAL_LEN) {
+    if (!toE164Intl(mobileInput)) {
       setFieldErrors((prev) => ({
         ...prev,
         mobile: t(language, "errors.mobileRequired"),
@@ -2356,39 +2334,31 @@ export function CitizenReportForm({
             <span className="text-sm font-semibold text-[var(--foreground)]">
               {t(language, "review.mobileOptional")}
             </span>
-            <div
+            <input
+              type="tel"
+              inputMode="tel"
+              required
+              maxLength={16}
+              value={mobileInput}
+              onChange={(e) => {
+                setMobileInput(formatIntlMobileInput(e.target.value));
+                setFieldErrors((prev) => ({ ...prev, mobile: undefined }));
+              }}
+              onBlur={() => {
+                const next = toE164Intl(mobileInput);
+                if (next) setMobileInput(next);
+              }}
+              placeholder={t(language, "review.mobilePlaceholder")}
+              autoComplete="tel"
+              aria-label={t(language, "review.mobileOptional")}
+              aria-invalid={!!fieldErrors.mobile}
               className={cn(
-                "flex w-full items-center rounded-xl border bg-[var(--surface)] text-sm",
+                "w-full rounded-xl border bg-[var(--surface)] px-3 py-3 text-sm outline-none",
                 fieldErrors.mobile
                   ? "border-[var(--danger)]"
-                  : "border-[var(--border)] focus-within:border-[#2563eb]/40",
+                  : "border-[var(--border)] focus:border-[#2563eb]/40",
               )}
-            >
-              <span
-                className="shrink-0 select-none pl-3 font-medium text-[var(--muted)]"
-                aria-hidden
-              >
-                {PH_MOBILE_PREFIX}
-              </span>
-              <input
-                type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                required
-                maxLength={PH_MOBILE_LOCAL_LEN}
-                value={mobileLocal}
-                onChange={(e) => {
-                  setMobileLocal(
-                    digitsOnly(e.target.value).slice(0, PH_MOBILE_LOCAL_LEN),
-                  );
-                  setFieldErrors((prev) => ({ ...prev, mobile: undefined }));
-                }}
-                placeholder={t(language, "review.mobilePlaceholder")}
-                autoComplete="tel-national"
-                aria-label={t(language, "review.mobileOptional")}
-                className="min-w-0 flex-1 rounded-xl border-0 bg-transparent px-2 py-3 outline-none"
-              />
-            </div>
+            />
             {fieldErrors.mobile ? (
               <span className="block text-xs text-[var(--danger)]" role="alert">
                 {fieldErrors.mobile}

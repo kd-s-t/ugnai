@@ -7,7 +7,7 @@ import {
   buildReporterDispatchCallScript,
   buildResponderCallScript,
 } from "@/lib/alerts/callCopy";
-import { toE164Ph } from "@/lib/alerts/phones";
+import { toE164Intl } from "@/lib/alerts/phones";
 import {
   resolveResponderCalls,
   type ResponderCallKind,
@@ -249,7 +249,7 @@ async function postHouseholdCalls(body: Body) {
     const priority = r.priority ?? "evacuate";
     if (!allowed.has(priority)) continue;
 
-    const e164 = toE164Ph(r.phone);
+    const e164 = toE164Intl(r.phone);
     if (!e164) {
       skipped.push({
         ownerName: r.ownerName,

@@ -14,7 +14,7 @@ import { ensurePendingSampleAccounts } from "@/lib/auth/ensurePendingSampleAccou
 import { notifyAccountDecision } from "@/lib/auth/notifyAccountDecision";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { isAccountActive, isCitizen, isOfficer } from "@/lib/auth/types";
-import { toE164Ph } from "@/lib/alerts/phones";
+import { toE164Intl } from "@/lib/alerts/phones";
 import { phoneToTelHref } from "@/lib/geo/responderStations";
 import { Button } from "@/components/ui/button";
 
@@ -166,7 +166,7 @@ export function AccountValidationPanel({
         <ul className="divide-y divide-[var(--border)]">
           {visible.map((r) => {
             const phoneRaw = isCitizen(r) ? r.phone : "";
-            const phoneE164 = toE164Ph(phoneRaw);
+            const phoneE164 = toE164Intl(phoneRaw);
             const telHref = phoneE164
               ? phoneToTelHref(phoneE164)
               : phoneRaw.trim()

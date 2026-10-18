@@ -53,9 +53,8 @@ export function HomePage() {
 
           <FadeItem>
             <p className="mt-3 max-w-md text-[15px] leading-relaxed text-[var(--muted)] sm:mt-4 sm:text-lg">
-              Paid command-center software barangays and LGUs subscribe to —
-              turn a hazard into household needs, resource moves, and the right
-              alerts.
+              Command-center software barangays and LGUs subscribe to. Turn a
+              hazard into household needs, resource moves, and the right alerts.
             </p>
           </FadeItem>
 

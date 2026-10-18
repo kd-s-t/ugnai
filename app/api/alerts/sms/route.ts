@@ -5,7 +5,7 @@ import {
   isValidAlertEmail,
 } from "@/lib/alerts/emailCopy";
 import { emailProviderStatus, sendEmailBatch } from "@/lib/alerts/sendEmail";
-import { toE164Ph } from "@/lib/alerts/phones";
+import { toE164Intl } from "@/lib/alerts/phones";
 import {
   buildEvacSmsBody,
   buildInvestigatorAssignSmsBody,
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
     const priority = r.priority ?? "evacuate";
     if (!allowed.has(priority)) continue;
 
-    const e164 = toE164Ph(r.phone);
+    const e164 = toE164Intl(r.phone);
     const email = r.email?.trim() ?? "";
     const emailOk = isValidAlertEmail(email);
     const copy = {
