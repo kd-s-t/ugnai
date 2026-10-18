@@ -148,7 +148,7 @@ export default function LoginPage() {
     try {
       await ensureBootstrapOfficer(officer);
       await requireLoginRole("officer", logout);
-      router.replace("/admin/full");
+      router.replace("/admin/overview");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -169,7 +169,7 @@ export default function LoginPage() {
         await login(trimmedEmail, password);
       }
       await requireLoginRole("officer", logout);
-      router.replace("/admin/full");
+      router.replace("/admin/overview");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
       setError(
