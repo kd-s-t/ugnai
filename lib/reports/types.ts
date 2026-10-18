@@ -217,7 +217,7 @@ export type HazardReport = {
   vertexConfidence: number | null;
   /** Vertex classify wall time in ms. */
   vertexLatencyMs: number | null;
-  /** Vertex text prompt (image omitted). */
+  /** Vertex API request (image omitted). */
   vertexPrompt: string | null;
   /** Vertex raw model / API return. */
   vertexRaw: string | null;

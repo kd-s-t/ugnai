@@ -47,9 +47,9 @@ export type HazardValidateResult = {
   vertexLocationPlaceLabel: string | null;
   /** Vertex classify wall time in ms (null when skipped). */
   vertexLatencyMs: number | null;
-  /** Vertex text prompt (image omitted). */
+  /** Vertex API request (image omitted). */
   vertexPrompt: string | null;
-  /** Vertex raw model / API return. */
+  /** Vertex API response / model return. */
   vertexRaw: string | null;
   /** Gemini (or local fallback) wall time in ms. */
   aiLatencyMs: number | null;
