@@ -94,10 +94,12 @@ import {
 import { cn } from "@/lib/utils";
 
 const stepMotion = {
-  initial: { opacity: 0, y: 16 },
+  initial: { opacity: 0, y: 6 },
   animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -10 },
+  exit: { opacity: 0, y: -4 },
 };
+
+const stepTransition = { duration: 0.18, ease: easeOut };
 
 const HallPinMap = dynamic(() => import("@/components/HallPinMap"), {
   ssr: false,
@@ -223,8 +225,8 @@ function SolidAction({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      whileTap={motionSafe && !disabled ? { scale: 0.98 } : undefined}
-      transition={{ type: "spring", stiffness: 420, damping: 28 }}
+      whileTap={motionSafe && !disabled ? { scale: 0.99 } : undefined}
+      transition={{ duration: 0.12, ease: easeOut }}
       className={cn(
         "flex w-full items-center justify-center gap-2 rounded-[14px] px-4 py-[16px] text-[17px] font-semibold disabled:opacity-60",
         style === "danger" &&
@@ -1409,8 +1411,8 @@ export function CitizenReportForm({
           onLanguageChange={setLanguage}
           variant="brand"
         />
-      <Stagger className="space-y-5 pt-3 pb-4">
-        <FadeItem>
+      <Stagger light className="space-y-5 pt-3 pb-4">
+        <FadeItem light>
           <div className="space-y-3">
             <p className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-[0.08em] text-[#1d4ed8] uppercase">
               <Shield className="size-3.5 fill-[#1d4ed8] text-[#1d4ed8]" aria-hidden />
@@ -1451,7 +1453,7 @@ export function CitizenReportForm({
           </div>
         </FadeItem>
 
-        <FadeItem>
+        <FadeItem light>
           <div className="space-y-3">
             <p className="text-base font-semibold text-[var(--foreground)]">
               {t(language, "home.whatToDo")}
@@ -1533,15 +1535,15 @@ export function CitizenReportForm({
           </div>
         </FadeItem>
 
-        <FadeItem>
+        <FadeItem light>
           <HomeFloodTip language={language} />
         </FadeItem>
-        <FadeItem>
+        <FadeItem light>
           <Danger911Banner language={language} variant="soft" />
         </FadeItem>
 
         {isCitizen(author) ? (
-          <FadeItem>
+          <FadeItem light>
             <div id="my-reports" className="pt-2">
               <CitizenReportsList citizenUid={author.uid} />
             </div>
@@ -1566,7 +1568,7 @@ export function CitizenReportForm({
           initial={motionSafe ? "initial" : false}
           animate="animate"
           exit={motionSafe ? "exit" : undefined}
-          transition={{ duration: 0.32, ease: easeOut }}
+          transition={stepTransition}
         >
           <StepProgress
             step={1}
@@ -1754,14 +1756,14 @@ export function CitizenReportForm({
                 <motion.div
                   key={p.id}
                   layout={motionSafe}
-                  initial={motionSafe ? { opacity: 0, y: 8, scale: 0.98 } : false}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  initial={motionSafe ? { opacity: 0, y: 4 } : false}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={
                     motionSafe
                       ? { opacity: 0, height: 0, marginTop: 0 }
                       : undefined
                   }
-                  transition={{ duration: 0.25, ease: easeOut }}
+                  transition={{ duration: 0.15, ease: easeOut }}
                   className="flex items-center gap-2.5 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-3 text-sm"
                 >
                   {p.file.type.startsWith("image/") ? (
@@ -1908,7 +1910,7 @@ export function CitizenReportForm({
           initial={motionSafe ? "initial" : false}
           animate="animate"
           exit={motionSafe ? "exit" : undefined}
-          transition={{ duration: 0.32, ease: easeOut }}
+          transition={stepTransition}
         >
           <StepProgress
             step={2}
@@ -2169,7 +2171,7 @@ export function CitizenReportForm({
           initial={motionSafe ? "initial" : false}
           animate="animate"
           exit={motionSafe ? "exit" : undefined}
-          transition={{ duration: 0.32, ease: easeOut }}
+          transition={stepTransition}
         >
           <StepProgress
             step={3}

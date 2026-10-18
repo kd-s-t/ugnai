@@ -34,6 +34,16 @@ export const fadeUp: Variants = {
   },
 };
 
+/** Shorter travel / faster fade for citizen reporting flows. */
+export const fadeUpLight: Variants = {
+  hidden: { opacity: 0, y: 5 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.2, ease: easeOut },
+  },
+};
+
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
   show: {
@@ -49,10 +59,19 @@ export const stagger: Variants = {
   },
 };
 
+export const staggerLight: Variants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.035, delayChildren: 0.015 },
+  },
+};
+
 type FadeProps = HTMLMotionProps<"div"> & {
   children: ReactNode;
   delay?: number;
   y?: number;
+  /** Faster, shorter motion (reporting / forms). */
+  light?: boolean;
 };
 
 /** Single fade/slide-in block. Honors prefers-reduced-motion. */
@@ -60,10 +79,13 @@ export function FadeIn({
   children,
   className,
   delay = 0,
-  y = 12,
+  y,
+  light = false,
   ...rest
 }: FadeProps) {
   const safe = useMotionSafe();
+  const travel = y ?? (light ? 5 : 12);
+  const duration = light ? 0.2 : 0.45;
   if (!safe) {
     return (
       <div className={className} {...(rest as object)}>
@@ -74,9 +96,9 @@ export function FadeIn({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y }}
+      initial={{ opacity: 0, y: travel }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay, ease: easeOut }}
+      transition={{ duration, delay, ease: easeOut }}
       {...rest}
     >
       {children}
@@ -88,10 +110,16 @@ type StaggerProps = {
   children: ReactNode;
   className?: string;
   delay?: number;
+  light?: boolean;
 };
 
 /** Parent for staggered FadeItem children. */
-export function Stagger({ children, className, delay = 0 }: StaggerProps) {
+export function Stagger({
+  children,
+  className,
+  delay = 0,
+  light = false,
+}: StaggerProps) {
   const safe = useMotionSafe();
   if (!safe) {
     return <div className={className}>{children}</div>;
@@ -99,7 +127,7 @@ export function Stagger({ children, className, delay = 0 }: StaggerProps) {
   return (
     <motion.div
       className={className}
-      variants={stagger}
+      variants={light ? staggerLight : stagger}
       initial="hidden"
       animate="show"
       transition={{ delayChildren: delay }}
@@ -112,16 +140,21 @@ export function Stagger({ children, className, delay = 0 }: StaggerProps) {
 export function FadeItem({
   children,
   className,
+  light = false,
 }: {
   children: ReactNode;
   className?: string;
+  light?: boolean;
 }) {
   const safe = useMotionSafe();
   if (!safe) {
     return <div className={className}>{children}</div>;
   }
   return (
-    <motion.div className={className} variants={fadeUp}>
+    <motion.div
+      className={className}
+      variants={light ? fadeUpLight : fadeUp}
+    >
       {children}
     </motion.div>
   );
