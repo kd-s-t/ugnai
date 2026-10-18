@@ -36,6 +36,14 @@ import {
   NANGKA_HOUSEHOLD_TARGET,
 } from "@/lib/households/seed";
 import type { Household } from "@/lib/households/types";
+import {
+  ensureNangkaEvacCenters,
+  subscribeEvacCenters,
+} from "@/lib/evacCenters/api";
+import { applyEvacDirectoryToSafePoints } from "@/lib/evacCenters/mapSafePoints";
+import { NANGKA_BARANGAY_ID } from "@/lib/evacCenters/nangkaSeed";
+import type { EvacCenter } from "@/lib/evacCenters/types";
+import type { SafePoint } from "@/lib/geo/safePoints";
 import { useScenario } from "@/lib/scenarios";
 import {
   fetchCebuWeather,
@@ -102,6 +110,7 @@ export function PublicSituationMap() {
   const [locateError, setLocateError] = useState<string | null>(null);
   const [matched, setMatched] = useState(false);
   const [snapshot, setSnapshot] = useState<BarangayMapSnapshot | null>(null);
+  const [evacCenters, setEvacCenters] = useState<EvacCenter[]>([]);
 
   const pack = useMemo(
     () => getBarangayMapPack(area, bundle),
@@ -163,6 +172,39 @@ export function PublicSituationMap() {
     });
   }, [nangkaOps, phase, triageLive, pack.floods, pack.typhoons]);
   const beforeQuiet = tinoActive && phase === "before";
+
+  useEffect(() => {
+    if (!nangkaOps || !tinoActive) {
+      setEvacCenters([]);
+      return;
+    }
+    if (phase !== "during" && phase !== "after") {
+      setEvacCenters([]);
+      return;
+    }
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await ensureNangkaEvacCenters();
+      } catch {
+        /* directory may still subscribe */
+      }
+      if (cancelled) return;
+      unsub = subscribeEvacCenters(NANGKA_BARANGAY_ID, setEvacCenters);
+    })();
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [nangkaOps, phase, tinoActive]);
+
+  const mapSafePoints = useMemo((): SafePoint[] => {
+    if (!tinoActive || (phase !== "during" && phase !== "after")) {
+      return pack.safePoints;
+    }
+    return applyEvacDirectoryToSafePoints(pack.safePoints, evacCenters);
+  }, [pack.safePoints, evacCenters, tinoActive, phase]);
 
   // Escape polylines / chevrons off the public map.
   const escapeRoutes: AssistEscapeRoute[] = useMemo(() => [], []);
@@ -452,7 +494,7 @@ export function PublicSituationMap() {
               typhoons={pack.typhoons}
               fires={beforeQuiet ? [] : pack.fires}
               reportPins={beforeQuiet ? [] : pack.reportPins}
-              safePoints={pack.safePoints}
+              safePoints={mapSafePoints}
               responders={beforeQuiet ? [] : pack.responders}
               assistPriorities={assistPriorities}
               escapeRoutes={escapeRoutes}

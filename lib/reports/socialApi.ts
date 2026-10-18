@@ -139,6 +139,8 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
       typeof data.aiLatencyMs === "number" && Number.isFinite(data.aiLatencyMs)
         ? Math.max(0, Math.round(data.aiLatencyMs))
         : null,
+    aiPrompt: data.aiPrompt != null ? String(data.aiPrompt) : null,
+    aiRaw: data.aiRaw != null ? String(data.aiRaw) : null,
     aiPriority: parseReportPriority(data.aiPriority),
     aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
     vertexClass: data.vertexClass != null ? String(data.vertexClass) : null,
@@ -151,6 +153,9 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
       Number.isFinite(data.vertexLatencyMs)
         ? Math.max(0, Math.round(data.vertexLatencyMs))
         : null,
+    vertexPrompt:
+      data.vertexPrompt != null ? String(data.vertexPrompt) : null,
+    vertexRaw: data.vertexRaw != null ? String(data.vertexRaw) : null,
     vertexLocationLabel:
       data.vertexLocationLabel != null
         ? String(data.vertexLocationLabel)

@@ -154,6 +154,8 @@ function buildRow(
     aiSource: "local" as const,
     aiModel: "resource-seed",
     aiLatencyMs: 640,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: "high",
     aiPriorityFactors: {
       immediateSeverity: "Drinking water shortage · households need supply.",
@@ -165,6 +167,8 @@ function buildRow(
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,

@@ -224,12 +224,21 @@ async function ensureEvacCenterSeeds(
           : null;
       const other =
         stock && typeof stock.other === "string" ? stock.other.trim() : "";
+      const occupancy = Number(data.occupancy ?? 0) || 0;
+      const food = stock ? Number(stock.foodPacks ?? 0) || 0 : 0;
+      const water = stock ? Number(stock.waterLiters ?? 0) || 0 : 0;
       const patch: Record<string, unknown> = {};
       if (looksLikeCoordProvenance(label)) {
         patch.locationLabel = seed.locationLabel;
       }
       if (/^open\s*24/i.test(other)) {
         patch.stock = { ...stock, other: "" };
+      }
+      // Empty directory rows still get the curated during-storm demo counts.
+      if (occupancy === 0 && seed.occupancy > 0 && food === 0 && water === 0) {
+        patch.occupancy = seed.occupancy;
+        patch.maxCapacity = seed.maxCapacity;
+        patch.stock = seed.stock;
       }
       if (Object.keys(patch).length > 0) {
         patch.updatedAt = now;

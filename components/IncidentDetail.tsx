@@ -512,7 +512,11 @@ export function IncidentDetail({
         aiSource: selected.aiSource,
         aiModel: selected.aiModel,
         aiLatencyMs: selected.aiLatencyMs,
+        aiPrompt: selected.aiPrompt,
+        aiRaw: selected.aiRaw,
         vertexLatencyMs: selected.vertexLatencyMs,
+        vertexPrompt: selected.vertexPrompt,
+        vertexRaw: selected.vertexRaw,
         ...(hazardHint !== selected.hazardHint ? { hazardHint } : {}),
         validatedAt,
         trustInput: {
@@ -837,6 +841,12 @@ export function IncidentDetail({
                   : ""}
               </p>
             ) : null}
+            {globalView ? (
+              <AiTraceBlocks
+                prompt={selected.vertexPrompt}
+                rawReturn={selected.vertexRaw}
+              />
+            ) : null}
           </div>
 
           {(() => {
@@ -1031,6 +1041,12 @@ export function IncidentDetail({
                 </p>
               </div>
               <p className="mt-1 text-sm">{selected.aiReason}</p>
+              {globalView ? (
+                <AiTraceBlocks
+                  prompt={selected.aiPrompt}
+                  rawReturn={selected.aiRaw}
+                />
+              ) : null}
             </div>
           ) : null}
 
@@ -1739,6 +1755,40 @@ function formatAiLatencyMs(ms: number | null | undefined): string | null {
   if (rounded < 1000) return `${rounded}ms`;
   const seconds = rounded / 1000;
   return `${seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+}
+
+function AiTraceBlocks({
+  prompt,
+  rawReturn,
+}: {
+  prompt: string | null;
+  rawReturn: string | null;
+}) {
+  if (!prompt?.trim() && !rawReturn?.trim()) return null;
+  return (
+    <div className="mt-2 space-y-2">
+      {prompt?.trim() ? (
+        <div>
+          <p className="font-mono text-[9px] tracking-wider text-[var(--muted)] uppercase">
+            Raw prompt
+          </p>
+          <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded bg-[#0f1b2d] px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90">
+            {prompt}
+          </pre>
+        </div>
+      ) : null}
+      {rawReturn?.trim() ? (
+        <div>
+          <p className="font-mono text-[9px] tracking-wider text-[var(--muted)] uppercase">
+            Raw return
+          </p>
+          <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap break-words rounded bg-[#0f1b2d] px-2.5 py-2 font-mono text-[10px] leading-relaxed text-white/90">
+            {rawReturn}
+          </pre>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function PanelEyebrow({ children }: { children: ReactNode }) {
