@@ -119,17 +119,20 @@ export async function upsertShortageFromPlan(
     ...new Set(plan.rows.flatMap((r) => r.reportIds)),
   ];
 
+  const totalNeededL = Math.max(0, Number(plan.totalNeededL) || 0);
+  const availableL = Math.max(0, Number(plan.availableL) || 0);
+  const shortageL = Math.max(0, Number(plan.shortageL) || 0);
   await setDoc(
     ref,
     {
       kind: plan.kind,
-      resourceLabel: plan.resourceLabel,
-      resourceBlurb: plan.resourceBlurb,
-      totalNeededL: plan.totalNeededL,
-      availableL: plan.availableL,
-      shortageL: plan.shortageL,
-      communityCount: plan.communityCount,
-      advisory: plan.advisory,
+      resourceLabel: plan.resourceLabel || "Supplies",
+      resourceBlurb: plan.resourceBlurb || "",
+      totalNeededL,
+      availableL,
+      shortageL,
+      communityCount: Number(plan.communityCount) || 0,
+      advisory: plan.advisory || "",
       reportIds,
       primaryReportId: plan.primaryReportId,
       publicCode,
@@ -162,9 +165,16 @@ export async function saveShortageWorkflowStep(
 ): Promise<void> {
   const id = shortageId.trim().toUpperCase();
   if (!id) return;
+  const ref = doc(getClientDb(), COL, id);
+  const existing = await getDoc(ref);
+  if (!existing.exists()) {
+    throw new Error(
+      "Shortage record not found. Open Compare options first, then continue.",
+    );
+  }
   const now = new Date().toISOString();
   await setDoc(
-    doc(getClientDb(), COL, id),
+    ref,
     {
       workflowStep,
       ...(extra?.selectedOptionId
@@ -200,10 +210,16 @@ export async function saveShortageAllocationDraft(
   const id = shortageId.trim().toUpperCase();
   if (!id || draft.options.length < 3) return;
   const now = new Date().toISOString();
-  const existing = await getDoc(doc(getClientDb(), COL, id));
+  const ref = doc(getClientDb(), COL, id);
+  const existing = await getDoc(ref);
+  if (!existing.exists()) {
+    throw new Error(
+      "Shortage record not found. Open the shortage plan, then Compare again.",
+    );
+  }
   const prevStep = asWorkflowStep(existing.data()?.workflowStep);
   await setDoc(
-    doc(getClientDb(), COL, id),
+    ref,
     {
       allocation: {
         planKey: draft.planKey,
