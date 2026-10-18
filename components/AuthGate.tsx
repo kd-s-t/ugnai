@@ -25,7 +25,7 @@ type AuthGateProps = {
 function homeForRole(role: UserRole | undefined) {
   if (role === "citizen") return "/my-reports";
   if (role === "developer") return "/dev";
-  return "/admin/full";
+  return "/admin/overview";
 }
 
 /** Login portals that only accept one role — wrong role stays on the form. */

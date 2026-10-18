@@ -203,7 +203,7 @@ export function HomeNav({ overlay = false }: HomeNavProps) {
       <>
         {role === "officer" ? (
           <Link
-            href="/admin/full"
+            href="/admin/overview"
             className={navLinkClass(onOverview)}
             onClick={() => setMenuOpen(false)}
           >

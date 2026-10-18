@@ -119,25 +119,22 @@ type FieldErrors = {
   mobile?: string;
 };
 
-/** PH mobile UI: static +639 + up to 10 more digits. */
-const PH_MOBILE_PREFIX = "+639";
+/** PH mobile UI: static +63 + up to 10 local digits (start with 9). */
+const PH_MOBILE_PREFIX = "+63";
 const PH_MOBILE_LOCAL_LEN = 10;
 
 function digitsOnly(value: string): string {
   return value.replace(/\D/g, "");
 }
 
-/** Digits after the leading 9 of a PH mobile (09… / +639… / 9…). */
+/** Local 10 digits after +63 (09… / +63… / 9…). */
 function phMobileLocalFromStored(phone: string | null | undefined): string {
   const d = digitsOnly(phone ?? "");
   if (!d) return "";
-  if (d.startsWith("639") && d.length >= 3) {
-    return d.slice(3, 3 + PH_MOBILE_LOCAL_LEN);
-  }
-  if (d.startsWith("09") && d.length >= 2) {
+  if (d.startsWith("63") && d.length >= 2) {
     return d.slice(2, 2 + PH_MOBILE_LOCAL_LEN);
   }
-  if (d.startsWith("9") && d.length >= 1) {
+  if (d.startsWith("0") && d.length >= 1) {
     return d.slice(1, 1 + PH_MOBILE_LOCAL_LEN);
   }
   return d.slice(0, PH_MOBILE_LOCAL_LEN);
