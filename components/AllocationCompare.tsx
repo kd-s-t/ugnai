@@ -11,6 +11,11 @@ import { AllocationPlanStepper } from "@/components/AllocationPlanStepper";
 import { easeOut, useMotionSafe } from "@/components/motion/primitives";
 import { scopeLabel } from "@/lib/reports/barangayScope";
 import {
+  type CachedAllocation,
+  readAllocationCache,
+  writeAllocationCache,
+} from "@/lib/resourcesShortages/allocationCache";
+import {
   getShortageById,
   saveSelectedAllocationOption,
   saveShortageAllocationDraft,
@@ -37,47 +42,12 @@ const SHOW_GEMINI_DEBUG =
   process.env.NEXT_PUBLIC_USE_EMULATORS === "true" ||
   process.env.NODE_ENV !== "production";
 
-const CACHE_PREFIX = "ugnai.allocationOptions.v1:";
-
 type GeminiDebug = {
   prompt?: string | null;
   raw?: string | null;
   model?: string;
   error?: string;
 };
-
-type CachedAllocation = {
-  options: AllocationOption[];
-  source: "gemini" | "local";
-  debug?: GeminiDebug | null;
-  savedAt: string;
-};
-
-function cacheKey(planKey: string): string {
-  return `${CACHE_PREFIX}${planKey}`;
-}
-
-function readAllocationCache(planKey: string): CachedAllocation | null {
-  if (typeof window === "undefined" || !planKey) return null;
-  try {
-    const raw = sessionStorage.getItem(cacheKey(planKey));
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as CachedAllocation;
-    if (!Array.isArray(parsed.options) || parsed.options.length < 3) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeAllocationCache(planKey: string, value: CachedAllocation): void {
-  if (typeof window === "undefined" || !planKey) return;
-  try {
-    sessionStorage.setItem(cacheKey(planKey), JSON.stringify(value));
-  } catch {
-    /* quota / private mode */
-  }
-}
 
 function fmtL(n: number): string {
   return `${n.toLocaleString("en-PH")} L`;
@@ -107,6 +77,8 @@ export function AllocationCompare() {
   const [source, setSource] = useState<"gemini" | "local" | null>(null);
   const [geminiDebug, setGeminiDebug] = useState<GeminiDebug | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [continueBusy, setContinueBusy] = useState(false);
+  const [continueError, setContinueError] = useState<string | null>(null);
 
   const placeHint = useMemo(() => {
     if (isOfficer(profile)) {
@@ -625,28 +597,61 @@ export function AllocationCompare() {
       </section>
 
       <div className="mt-6 flex flex-col gap-3 border-t border-[var(--border)] pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-xl text-[11px] text-[var(--muted)]">
-          Fresh inventory and transport checks, plus human approval, are still
-          required before any commitment is made.
-        </p>
+        <div className="max-w-xl space-y-1">
+          <p className="text-[11px] text-[var(--muted)]">
+            Fresh inventory and transport checks, plus human approval, are still
+            required before any commitment is made.
+          </p>
+          {continueError ? (
+            <p className="text-[12px] text-[#b91c1c]" role="alert">
+              {continueError}
+            </p>
+          ) : null}
+        </div>
         <button
           type="button"
-          disabled={!selected || options.length === 0}
+          disabled={!selected || options.length === 0 || continueBusy}
           onClick={() => {
-            if (!selected) return;
-            void saveSelectedAllocationOption(storageId, selected.id)
-              .catch(() => {
-                /* still navigate; review loads option from DB */
-              })
-              .finally(() => {
+            if (!selected || !plan || !planKey || options.length < 3) return;
+            setContinueBusy(true);
+            setContinueError(null);
+            void (async () => {
+              try {
+                writeAllocationCache(planKey, {
+                  options,
+                  source: source ?? "local",
+                  debug: geminiDebug,
+                  savedAt: new Date().toISOString(),
+                  selectedOptionId: selected.id,
+                });
+                await upsertShortageFromPlan(plan, storageId);
+                await saveShortageAllocationDraft(storageId, {
+                  planKey,
+                  options,
+                  source: source ?? "local",
+                  prompt: geminiDebug?.prompt ?? null,
+                  raw: geminiDebug?.raw ?? null,
+                  model: geminiDebug?.model ?? null,
+                  error: geminiDebug?.error ?? null,
+                  savedAt: new Date().toISOString(),
+                });
+                await saveSelectedAllocationOption(storageId, selected.id);
                 router.push(
-                  `/admin/resources/review/${encodeURIComponent(plan.code)}`,
+                  `/admin/resources/review/${encodeURIComponent(rsCode)}`,
                 );
-              });
+              } catch (err) {
+                setContinueError(
+                  err instanceof Error
+                    ? err.message
+                    : "Could not save the selected option. Try again.",
+                );
+                setContinueBusy(false);
+              }
+            })();
           }}
           className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#2f5f9e] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#254d82] disabled:opacity-50"
         >
-          Continue to plan review
+          {continueBusy ? "Saving…" : "Continue to plan review"}
         </button>
       </div>
 

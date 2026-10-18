@@ -140,6 +140,32 @@ function formatChatLatencyMs(ms: number | null | undefined): string | null {
   return `${n}s response time`;
 }
 
+/** Split on map/stock markers without RegExp (brackets would break a character class). */
+function splitAssistMarkers(content: string): string[] {
+  const tokens = [MAP_LEGEND_MARKER, STOCK_LIST_MARKER];
+  const parts: string[] = [];
+  let rest = content;
+  while (rest.length > 0) {
+    let nextIdx = -1;
+    let nextToken = "";
+    for (const token of tokens) {
+      const i = rest.indexOf(token);
+      if (i >= 0 && (nextIdx < 0 || i < nextIdx)) {
+        nextIdx = i;
+        nextToken = token;
+      }
+    }
+    if (nextIdx < 0 || !nextToken) {
+      parts.push(rest);
+      break;
+    }
+    if (nextIdx > 0) parts.push(rest.slice(0, nextIdx));
+    parts.push(nextToken);
+    rest = rest.slice(nextIdx + nextToken.length);
+  }
+  return parts;
+}
+
 function AssistRichBody({
   content,
   forcePanels,
@@ -169,9 +195,7 @@ function AssistRichBody({
     );
   }
 
-  const parts = content.split(
-    new RegExp(`(${MAP_LEGEND_MARKER}|${STOCK_LIST_MARKER})`, "g"),
-  );
+  const parts = splitAssistMarkers(content);
   let legendShown = false;
   let stockShown = false;
   return (
@@ -210,12 +234,34 @@ function SmsReplyBody({
   onOpenLog: (log: SmsLogEntry[]) => void;
   assistApplied?: boolean;
 }) {
-  if ((assistApplied || looksLikeTriageProse(content)) && !smsLog?.length) {
+  const hasRichMarkers =
+    content.includes(MAP_LEGEND_MARKER) ||
+    content.includes(STOCK_LIST_MARKER) ||
+    assistApplied ||
+    looksLikeTriageProse(content);
+
+  if (hasRichMarkers && !smsLog?.length) {
     return <AssistRichBody content={content} forcePanels />;
   }
 
   if (!smsLog?.length) {
     return <p className="whitespace-pre-wrap">{content}</p>;
+  }
+
+  // SMS reply that also carries map markers — expand panels, keep SMS link.
+  if (hasRichMarkers) {
+    return (
+      <div className="flex flex-col gap-0.5">
+        <AssistRichBody content={content} forcePanels />
+        <button
+          type="button"
+          onClick={() => onOpenLog(smsLog)}
+          className="mt-1 self-start font-medium text-[var(--accent)] underline underline-offset-2"
+        >
+          View sent
+        </button>
+      </div>
+    );
   }
   const match = content.match(/(\d+)\s+message\(s\)/);
   if (!match || match.index === undefined) {
@@ -527,10 +573,10 @@ export function MangugnaiChat({
                 className="h-8 gap-1 px-2 font-mono text-[10px] tracking-wider uppercase"
                 onClick={() => stopAiSpeech()}
                 aria-label="Stop speaking"
-                title="Shut up"
+                title="Mute"
               >
                 <VolumeX className="size-3.5" aria-hidden />
-                Shut up
+                Mute
               </Button>
             ) : null}
             {ttsReady ? (
@@ -773,7 +819,7 @@ export function MangugnaiChat({
                             className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase transition hover:text-[var(--accent)] disabled:cursor-not-allowed disabled:opacity-40"
                             title={
                               ttsSpeaking
-                                ? "Already speaking — use Shut up to stop"
+                                ? "Already speaking — use Mute to stop"
                                 : m.audioUrl
                                   ? "Replay saved audio"
                                   : "Read aloud"
@@ -788,10 +834,10 @@ export function MangugnaiChat({
                             type="button"
                             onClick={() => stopAiSpeech()}
                             className="inline-flex items-center gap-1 font-mono text-[10px] tracking-wider text-[var(--accent)] uppercase transition hover:opacity-80"
-                            title="Stop speaking"
+                            title="Mute"
                           >
                             <VolumeX className="size-3" aria-hidden />
-                            Shut up
+                            Mute
                           </button>
                         ) : null}
                       </div>
