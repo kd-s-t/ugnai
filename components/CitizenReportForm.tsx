@@ -1061,7 +1061,7 @@ export function CitizenReportForm({
             lng,
             title: data.title || title,
             notes,
-            citizenPurok: null,
+            citizenPurok: "no login",
             autoResponderCallAt: null,
             voiceTranscript: transcript || null,
             aiReason: data.reason ?? null,
