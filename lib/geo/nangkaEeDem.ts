@@ -12,18 +12,18 @@ export type NangkaEeDemFile = {
   samples: ElevSample[];
 };
 
-const cached = eeDem as NangkaEeDemFile;
+const seed = eeDem as NangkaEeDemFile;
 
 /** True when `npm run ee:dem` has written real Earth Engine samples. */
 export function hasNangkaEeDem(): boolean {
-  return Array.isArray(cached.samples) && cached.samples.length > 0;
+  return Array.isArray(seed.samples) && seed.samples.length > 0;
 }
 
 export function getNangkaEeDemMeta(): Omit<NangkaEeDemFile, "samples"> {
   return {
-    provider: cached.provider ?? null,
-    fetchedAt: cached.fetchedAt ?? null,
-    projectId: cached.projectId ?? null,
+    provider: seed.provider ?? null,
+    fetchedAt: seed.fetchedAt ?? null,
+    projectId: seed.projectId ?? null,
   };
 }
 
@@ -32,7 +32,7 @@ export function getNangkaEeDemMeta(): Omit<NangkaEeDemFile, "samples"> {
  * Google Elevation samples. Live rows live in Firestore ee_datasets/nangka-dem.
  */
 export function getNangkaElevGrid(): ElevSample[] {
-  if (hasNangkaEeDem()) return cached.samples as ElevSample[];
+  if (hasNangkaEeDem()) return seed.samples as ElevSample[];
   return NANGKA_ELEVATION_GRID;
 }
 

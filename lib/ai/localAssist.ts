@@ -10,7 +10,7 @@ import type { LandslideSample } from "@/lib/hazards/landslideSamples";
 import type { TyphoonSample } from "@/lib/hazards/typhoonSamples";
 import type { Household } from "@/lib/households/types";
 
-/** Align with escapeRoutes / elev flood grid (Google Elevation cache). */
+/** Align with escapeRoutes / elev flood grid (Google Elevation seed). */
 const ELEV_CORE_M = 9;
 const ELEV_FRINGE_M = 13;
 /** Above this: shelter in place — do not evacuate for flood alone. */

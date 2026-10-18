@@ -1,7 +1,7 @@
 import type { LatLng } from "@/lib/geo/cebu";
 import { getNangkaElevGrid } from "@/lib/geo/nangkaEeDem";
 
-/** Half-step of the cached Nangka elevation grid (slight overlap, not a solid slab). */
+/** Half-step of the Nangka elevation grid (slight overlap, not a solid slab). */
 const D_LAT = 0.0005;
 const D_LNG = 0.0006;
 

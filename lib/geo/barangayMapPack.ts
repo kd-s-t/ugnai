@@ -48,7 +48,7 @@ export type BarangayMapPack = {
 /**
  * Empty hazard pack — still shows command hall + LGU ECs/schools
  * so every barangay has facility pins (no Nangka hazard leak).
- * Fills nearby EE Cebu hazards when `npm run ee:hazards` cache exists.
+ * Fills nearby EE Cebu hazards when `npm run ee:hazards` dataset exists.
  */
 export function emptyPack(area: MapArea): BarangayMapPack {
   const ee = cebuEeHazardsNear(area, 8);

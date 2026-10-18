@@ -109,9 +109,9 @@ export function PublicSituationMap() {
   );
   const nangkaOps = isNangkaOpsArea(area);
 
-  // Before/During: live local triage so homepage matches command (floods + red/yellow).
+  // During only on public map. Before: chat Agent on command first.
   const assist = useMemo(() => {
-    if (!nangkaOps || !triageLive) return null;
+    if (!nangkaOps || !triageLive || phase === "before") return null;
     try {
       return runLocalAssist({
         households: nangkaHouseholds,
@@ -126,6 +126,7 @@ export function PublicSituationMap() {
   }, [
     nangkaOps,
     triageLive,
+    phase,
     nangkaHouseholds,
     pack.floods,
     pack.landslides,
@@ -135,24 +136,26 @@ export function PublicSituationMap() {
   const assistPriorities = useMemo(() => {
     const map: Record<string, AssistPriority> = {};
     if (!nangkaOps) return map;
-    // Public roster uses public-seed-* ids — triage in Before + During.
+    if (phase === "before") return map;
     if (triageLive && assist?.actions?.length) {
       for (const a of assist.actions) map[a.householdId] = a.priority;
       return map;
     }
     for (const a of pack.scenarioActions) map[a.householdId] = a.priority;
     return map;
-  }, [nangkaOps, triageLive, assist, pack.scenarioActions]);
+  }, [nangkaOps, phase, triageLive, assist, pack.scenarioActions]);
 
-  // Before/During: paint elev-grid blue tiles (client rebuild).
+  // Before: quiet until command triage. During: elev-grid blue tiles.
   const mapFloods = useMemo(() => {
     if (!nangkaOps) return [];
+    if (phase === "before") return [];
     if (!triageLive) return pack.floods;
     return predictAiFloods({
       typhoons: pack.typhoons,
       source: "local",
     });
-  }, [nangkaOps, triageLive, pack.floods, pack.typhoons]);
+  }, [nangkaOps, phase, triageLive, pack.floods, pack.typhoons]);
+  const beforeQuiet = tinoActive && phase === "before";
 
   // Escape polylines / chevrons off the public map.
   const escapeRoutes: AssistEscapeRoute[] = useMemo(() => [], []);
@@ -436,14 +439,14 @@ export function PublicSituationMap() {
                 void applyCoords(loc.lat, loc.lng);
               }}
               households={mapHouseholds}
-              quakes={quakes}
-              landslides={pack.landslides}
+              quakes={beforeQuiet ? [] : quakes}
+              landslides={beforeQuiet ? [] : pack.landslides}
               floods={mapFloods}
               typhoons={pack.typhoons}
-              fires={pack.fires}
-              reportPins={pack.reportPins}
+              fires={beforeQuiet ? [] : pack.fires}
+              reportPins={beforeQuiet ? [] : pack.reportPins}
               safePoints={pack.safePoints}
-              responders={pack.responders}
+              responders={beforeQuiet ? [] : pack.responders}
               assistPriorities={assistPriorities}
               escapeRoutes={escapeRoutes}
               scenarioPhase={bundle.phase}

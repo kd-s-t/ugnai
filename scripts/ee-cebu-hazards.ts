@@ -1,5 +1,5 @@
 /**
- * Build Cebu-wide hazard cache from DEM + one FIRMS EE pull.
+ * Build Cebu-wide hazard dataset from DEM + one FIRMS EE pull.
  * Also archives under data/ee-runs/ (same as admin UI).
  *
  * Usage: npm run ee:hazards

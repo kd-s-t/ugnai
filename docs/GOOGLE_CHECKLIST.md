@@ -17,7 +17,7 @@ Non-Google (Twilio, ElevenLabs, Open-Meteo, OSRM) is out of scope here.
 | **Vertex AI** | Photo class before Gemini (optional) | `VERTEX_PROJECT_ID`, `VERTEX_LOCATION`, `VERTEX_ENDPOINT_ID`, ADC/SA |
 | **Maps JavaScript** | Situation / command map tiles | `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` |
 | **Maps Platform** | Weather (+ Elevation API as elev fallback) | `GOOGLE_WEATHER_API_KEY` |
-| **Earth Engine** | SRTM DEM + Cebu hazard cache (admin pull → Firebase Storage `ee-cache/`) | `EARTH_ENGINE_PROJECT_ID`, ADC, `FIREBASE_STORAGE_BUCKET` |
+| **Earth Engine** | SRTM DEM + Cebu hazards (admin pull → Firestore `ee_datasets`) | `EARTH_ENGINE_PROJECT_ID`, ADC |
 
 ## Earth Engine (offline)
 
@@ -28,8 +28,8 @@ Non-Google (Twilio, ElevenLabs, Open-Meteo, OSRM) is out of scope here.
 - [ ] `.env.local`: `EARTH_ENGINE_PROJECT_ID=nice-pen-181017` + `GOOGLE_APPLICATION_CREDENTIALS=…`
 - [ ] `npm run ee:dem` → `data/cebu-ee-dem.json` + `data/nangka-ee-dem.json`
 - [ ] `npm run ee:hazards` → `data/cebu-ee-hazards.json` (floods / landslides / FIRMS fires)
-- [ ] `GET /api/geo/earth-engine` shows ready + cache counts
-- [ ] Map refresh: flood elev uses Nangka EE cache; other brgys show nearby EE hazard pins
+- [ ] `GET /api/geo/earth-engine` shows ready + dataset counts
+- [ ] Map refresh: flood elev uses Nangka EE dataset; other brgys show nearby EE hazard pins
 - [ ] Know billing: app does **not** call EE per page load; only manual `ee:dem` / `ee:hazards` spend compute (watch commercial platform fees)
 
 ## Firebase
@@ -68,7 +68,7 @@ Non-Google (Twilio, ElevenLabs, Open-Meteo, OSRM) is out of scope here.
 3. [ ] Firestore rules deployed
 4. [ ] Gemini secret on App Hosting / runtime
 5. [ ] BigQuery env + ADC on App Hosting / runtime
-6. [ ] EE caches committed or regenerated before demo (`ee:dem`, `ee:hazards`)
+6. [ ] EE datasets regenerated before demo (`ee:dem`, `ee:hazards`)
 7. [ ] App Hosting live URL verified
 8. [ ] No Gemini / SA JSON / Maps keys in client bundles or git
 
@@ -78,7 +78,7 @@ Non-Google (Twilio, ElevenLabs, Open-Meteo, OSRM) is out of scope here.
 - **BigQuery** = post-verdict warehouse (analytics / Cup data story)  
 - **Gemini** (+ optional **Vertex**) = triage / validation  
 - **Earth Engine** = offline SRTM DEM + FIRMS fire hotspots for flood / hazard layers  
-- **Maps JavaScript** = basemap; EE is the elevation / hazard cache, not a live map SDK  
+- **Maps JavaScript** = basemap; EE is elevation / hazard datasets, not a live map SDK  
 
 ### What Mangugnai (Gemini) is fed
 
@@ -87,7 +87,7 @@ Non-Google (Twilio, ElevenLabs, Open-Meteo, OSRM) is out of scope here.
 | Weather line | Google Weather (or Open-Meteo fallback) via `/api/weather` |
 | Households / roster | Firestore |
 | Flood / landslide / typhoon context | Scenario + elev-derived floods |
-| Elev for flood paint / who to evac | **Earth Engine SRTM cache** (primary); Google Elevation grid only if EE cache empty |
+| Elev for flood paint / who to evac | **Earth Engine SRTM** (primary); Google Elevation grid only if EE dataset empty |
 | Map display | Google Maps JS (UI only; Gemini does not call Maps) |
 
 See also: [README.md](./README.md), [PRODUCTION.md](./PRODUCTION.md), [report-validation-flow.md](./report-validation-flow.md), root [README.md](../README.md).

@@ -21,7 +21,6 @@ type RunsResponse = {
   projectId: string | null;
   error: string | null;
   storageBucket?: string | null;
-  activeFiles: DatasetRow[];
   datasets?: DatasetRow[];
   runs: EeRunMeta[];
 };
@@ -126,7 +125,7 @@ export function EarthEngineAdminPanel() {
   }
 
   const busy = Boolean(running || data?.busy);
-  const files = data?.datasets ?? data?.activeFiles ?? [];
+  const files = data?.datasets ?? [];
   const runs = data?.runs ?? [];
   const freshest = files.reduce<string | null>((best, f) => {
     if (!f.mtime) return best;

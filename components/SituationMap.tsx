@@ -52,6 +52,7 @@ import {
 import type { Household } from "@/lib/households/types";
 import { subscribeAllReports } from "@/lib/reports/api";
 import { officerReportScope } from "@/lib/reports/barangayScope";
+import { isTinoScenarioDemoReport } from "@/lib/reports/scenarioDemo";
 import { ensureAllMapReportsInDb } from "@/lib/reports/seedMapReport";
 import type { HazardReport } from "@/lib/reports/types";
 import { useScenario } from "@/lib/scenarios";
@@ -65,7 +66,8 @@ import {
 
 function reportToMapPin(r: HazardReport): ScenarioReportPin | null {
   if (r.lat == null || r.lng == null) return null;
-  if (r.status === "rejected") return null;
+  if (r.status === "rejected" || r.status === "done" || r.status === "failed")
+    return null;
   const kind: ScenarioReportPin["kind"] =
     r.hazardHint === "flood"
       ? "flood"
@@ -309,10 +311,10 @@ export function SituationMap({
     [pack.scenarioActions, mapHouseholds],
   );
 
-  // Before/During: auto local triage on the live DB roster (same as homepage).
-  // Chat "run triage" still wins when hasAiOverlay.
+  // During: auto local triage. Before: wait for Agent chat (hasAiOverlay).
   const phaseAssist = useMemo(() => {
     if (!nangkaOps || hasAiOverlay || !triageLive) return null;
+    if (phase === "before") return null;
     if (mapHouseholds.length === 0) return null;
     try {
       return runLocalAssist({
@@ -329,6 +331,7 @@ export function SituationMap({
     nangkaOps,
     hasAiOverlay,
     triageLive,
+    phase,
     mapHouseholds,
     pack.floods,
     pack.landslides,
@@ -343,15 +346,33 @@ export function SituationMap({
   }, [phaseAssist]);
 
   const mapReportPins = useMemo(() => {
-    const fromDb = dbReports
+    // Before: clean map until Agent triage; chat first.
+    if (tinoActive && phase === "before") return [];
+    // No storm = live ops: hide Tino/queue seeds that During/After write into Firestore.
+    const reportsForMap = !tinoActive
+      ? dbReports.filter((r) => !isTinoScenarioDemoReport(r))
+      : dbReports;
+    const closedIds = new Set(
+      reportsForMap
+        .filter(
+          (r) =>
+            r.status === "done" ||
+            r.status === "rejected" ||
+            r.status === "failed",
+        )
+        .map((r) => r.id),
+    );
+    const fromDb = reportsForMap
       .map(reportToMapPin)
       .filter((p): p is ScenarioReportPin => p != null);
     const merged =
       fromDb.length === 0
-        ? pack.reportPins
+        ? pack.reportPins.filter((p) => !closedIds.has(p.id))
         : (() => {
             const seen = new Set(fromDb.map((p) => p.id));
-            const extras = pack.reportPins.filter((p) => !seen.has(p.id));
+            const extras = pack.reportPins.filter(
+              (p) => !seen.has(p.id) && !closedIds.has(p.id),
+            );
             return [...fromDb, ...extras];
           })();
     // During/After: drop EC occupancy + landslide pins (flood drill focus).
@@ -366,7 +387,7 @@ export function SituationMap({
       );
     }
     return merged;
-  }, [dbReports, pack.reportPins, phase]);
+  }, [dbReports, pack.reportPins, phase, tinoActive]);
 
   useEffect(() => {
     let cancelled = false;
@@ -421,25 +442,37 @@ export function SituationMap({
   const hazard =
     weather &&
     isHazardousWeather(weather.weatherCode, weather.precipitationMm);
+  // Before: no priority paint until Agent chat. During: auto or chat.
   const mapPriorities = nangkaOps
     ? hasAiOverlay
       ? assistPriorities
-      : Object.keys(phasePriorities).length > 0
-        ? phasePriorities
-        : scenarioPriorities
+      : phase === "before"
+        ? {}
+        : Object.keys(phasePriorities).length > 0
+          ? phasePriorities
+          : scenarioPriorities
     : {};
   // Escape polylines / chevrons off the map (keep data for triage logic only).
   const mapEscapes = EMPTY_ESCAPES;
-  // Before/During: rebuild elev-grid blue tiles client-side (never trust
-  // slimmed chat/history payloads that drop footprints).
+  // Before: flood tiles only after Agent triage. During: rebuild elev-grid.
   const mapFloods = useMemo((): FloodSample[] => {
     if (!nangkaOps) return [];
+    if (phase === "before" && !hasAiOverlay) return [];
     if (!triageLive) return pack.floods;
     return predictAiFloods({
       typhoons: pack.typhoons,
       source: result?.source === "gemini" ? "gemini" : "local",
     });
-  }, [nangkaOps, triageLive, pack.floods, pack.typhoons, result?.source]);
+  }, [
+    nangkaOps,
+    phase,
+    hasAiOverlay,
+    triageLive,
+    pack.floods,
+    pack.typhoons,
+    result?.source,
+  ]);
+  const beforeQuiet = tinoActive && phase === "before" && !hasAiOverlay;
 
   const fillStage = fullViewport || fillRemaining;
   const stageH = fillStage
@@ -495,14 +528,14 @@ export function SituationMap({
             area={mapArea}
             lockCameraToArea
             households={mapHouseholds}
-            quakes={quakes}
-            landslides={pack.landslides}
+            quakes={beforeQuiet ? [] : quakes}
+            landslides={beforeQuiet ? [] : pack.landslides}
             floods={mapFloods}
             typhoons={pack.typhoons}
-            fires={pack.fires}
+            fires={beforeQuiet ? [] : pack.fires}
             reportPins={mapReportPins}
             safePoints={pack.safePoints}
-            responders={pack.responders}
+            responders={beforeQuiet ? [] : pack.responders}
             assistPriorities={mapPriorities}
             escapeRoutes={mapEscapes}
             scenarioPhase={phase}

@@ -1,6 +1,6 @@
 import { GoogleAuth } from "google-auth-library";
 
-/** Runtime bucket for server media / EE cache (not build-time NEXT_PUBLIC). */
+/** Runtime bucket for server media / EE run history (not build-time NEXT_PUBLIC). */
 export function mediaStorageBucket(): string {
   return (
     process.env.FIREBASE_STORAGE_BUCKET?.trim() ||

@@ -6,7 +6,7 @@
     {
       "id": "ee-fl-cebu-0",
       "name": "Flood-prone · -3 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.367727,
@@ -19,7 +19,7 @@
     {
       "id": "ee-fl-cebu-1",
       "name": "Flood-prone · -3 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.51,
@@ -32,7 +32,7 @@
     {
       "id": "ee-fl-cebu-2",
       "name": "Flood-prone · -3 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 11.05,
@@ -45,7 +45,7 @@
     {
       "id": "ee-fl-cebu-3",
       "name": "Flood-prone · -2 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -58,7 +58,7 @@
     {
       "id": "ee-fl-cebu-4",
       "name": "Flood-prone · -1 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -71,7 +71,7 @@
     {
       "id": "ee-fl-cebu-5",
       "name": "Flood-prone · -1 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.51,
@@ -84,7 +84,7 @@
     {
       "id": "ee-fl-cebu-6",
       "name": "Flood-prone · -1 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.83,
@@ -97,7 +97,7 @@
     {
       "id": "ee-fl-cebu-7",
       "name": "Flood-prone · -1 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.93,
@@ -110,7 +110,7 @@
     {
       "id": "ee-fl-cebu-8",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -123,7 +123,7 @@
     {
       "id": "ee-fl-cebu-9",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -136,7 +136,7 @@
     {
       "id": "ee-fl-cebu-10",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -149,7 +149,7 @@
     {
       "id": "ee-fl-cebu-11",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -162,7 +162,7 @@
     {
       "id": "ee-fl-cebu-12",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -175,7 +175,7 @@
     {
       "id": "ee-fl-cebu-13",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -188,7 +188,7 @@
     {
       "id": "ee-fl-cebu-14",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -201,7 +201,7 @@
     {
       "id": "ee-fl-cebu-15",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -214,7 +214,7 @@
     {
       "id": "ee-fl-cebu-16",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -227,7 +227,7 @@
     {
       "id": "ee-fl-cebu-17",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -240,7 +240,7 @@
     {
       "id": "ee-fl-cebu-18",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -253,7 +253,7 @@
     {
       "id": "ee-fl-cebu-19",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -266,7 +266,7 @@
     {
       "id": "ee-fl-cebu-20",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -279,7 +279,7 @@
     {
       "id": "ee-fl-cebu-21",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.81,
@@ -292,7 +292,7 @@
     {
       "id": "ee-fl-cebu-22",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.81,
@@ -305,7 +305,7 @@
     {
       "id": "ee-fl-cebu-23",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -318,7 +318,7 @@
     {
       "id": "ee-fl-cebu-24",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -331,7 +331,7 @@
     {
       "id": "ee-fl-cebu-25",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -344,7 +344,7 @@
     {
       "id": "ee-fl-cebu-26",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -357,7 +357,7 @@
     {
       "id": "ee-fl-cebu-27",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -370,7 +370,7 @@
     {
       "id": "ee-fl-cebu-28",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -383,7 +383,7 @@
     {
       "id": "ee-fl-cebu-29",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -396,7 +396,7 @@
     {
       "id": "ee-fl-cebu-30",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -409,7 +409,7 @@
     {
       "id": "ee-fl-cebu-31",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -422,7 +422,7 @@
     {
       "id": "ee-fl-cebu-32",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -435,7 +435,7 @@
     {
       "id": "ee-fl-cebu-33",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -448,7 +448,7 @@
     {
       "id": "ee-fl-cebu-34",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -461,7 +461,7 @@
     {
       "id": "ee-fl-cebu-35",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -474,7 +474,7 @@
     {
       "id": "ee-fl-cebu-36",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -487,7 +487,7 @@
     {
       "id": "ee-fl-cebu-37",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -500,7 +500,7 @@
     {
       "id": "ee-fl-cebu-38",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -513,7 +513,7 @@
     {
       "id": "ee-fl-cebu-39",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -526,7 +526,7 @@
     {
       "id": "ee-fl-cebu-40",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -539,7 +539,7 @@
     {
       "id": "ee-fl-cebu-41",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -552,7 +552,7 @@
     {
       "id": "ee-fl-cebu-42",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -565,7 +565,7 @@
     {
       "id": "ee-fl-cebu-43",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -578,7 +578,7 @@
     {
       "id": "ee-fl-cebu-44",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -591,7 +591,7 @@
     {
       "id": "ee-fl-cebu-45",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -604,7 +604,7 @@
     {
       "id": "ee-fl-cebu-46",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -617,7 +617,7 @@
     {
       "id": "ee-fl-cebu-47",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -630,7 +630,7 @@
     {
       "id": "ee-fl-cebu-48",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -643,7 +643,7 @@
     {
       "id": "ee-fl-cebu-49",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -656,7 +656,7 @@
     {
       "id": "ee-fl-cebu-50",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -669,7 +669,7 @@
     {
       "id": "ee-fl-cebu-51",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -682,7 +682,7 @@
     {
       "id": "ee-fl-cebu-52",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -695,7 +695,7 @@
     {
       "id": "ee-fl-cebu-53",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -708,7 +708,7 @@
     {
       "id": "ee-fl-cebu-54",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -721,7 +721,7 @@
     {
       "id": "ee-fl-cebu-55",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -734,7 +734,7 @@
     {
       "id": "ee-fl-cebu-56",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -747,7 +747,7 @@
     {
       "id": "ee-fl-cebu-57",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -760,7 +760,7 @@
     {
       "id": "ee-fl-cebu-58",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -773,7 +773,7 @@
     {
       "id": "ee-fl-cebu-59",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -786,7 +786,7 @@
     {
       "id": "ee-fl-cebu-60",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -799,7 +799,7 @@
     {
       "id": "ee-fl-cebu-61",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -812,7 +812,7 @@
     {
       "id": "ee-fl-cebu-62",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -825,7 +825,7 @@
     {
       "id": "ee-fl-cebu-63",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -838,7 +838,7 @@
     {
       "id": "ee-fl-cebu-64",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -851,7 +851,7 @@
     {
       "id": "ee-fl-cebu-65",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -864,7 +864,7 @@
     {
       "id": "ee-fl-cebu-66",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.99,
@@ -877,7 +877,7 @@
     {
       "id": "ee-fl-cebu-67",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -890,7 +890,7 @@
     {
       "id": "ee-fl-cebu-68",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -903,7 +903,7 @@
     {
       "id": "ee-fl-cebu-69",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -916,7 +916,7 @@
     {
       "id": "ee-fl-cebu-70",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -929,7 +929,7 @@
     {
       "id": "ee-fl-cebu-71",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -942,7 +942,7 @@
     {
       "id": "ee-fl-cebu-72",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -955,7 +955,7 @@
     {
       "id": "ee-fl-cebu-73",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -968,7 +968,7 @@
     {
       "id": "ee-fl-cebu-74",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -981,7 +981,7 @@
     {
       "id": "ee-fl-cebu-75",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -994,7 +994,7 @@
     {
       "id": "ee-fl-cebu-76",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -1007,7 +1007,7 @@
     {
       "id": "ee-fl-cebu-77",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -1020,7 +1020,7 @@
     {
       "id": "ee-fl-cebu-78",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -1033,7 +1033,7 @@
     {
       "id": "ee-fl-cebu-79",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.03,
@@ -1046,7 +1046,7 @@
     {
       "id": "ee-fl-cebu-80",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1059,7 +1059,7 @@
     {
       "id": "ee-fl-cebu-81",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1072,7 +1072,7 @@
     {
       "id": "ee-fl-cebu-82",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1085,7 +1085,7 @@
     {
       "id": "ee-fl-cebu-83",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1098,7 +1098,7 @@
     {
       "id": "ee-fl-cebu-84",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1111,7 +1111,7 @@
     {
       "id": "ee-fl-cebu-85",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -1124,7 +1124,7 @@
     {
       "id": "ee-fl-cebu-86",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1137,7 +1137,7 @@
     {
       "id": "ee-fl-cebu-87",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1150,7 +1150,7 @@
     {
       "id": "ee-fl-cebu-88",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1163,7 +1163,7 @@
     {
       "id": "ee-fl-cebu-89",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1176,7 +1176,7 @@
     {
       "id": "ee-fl-cebu-90",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1189,7 +1189,7 @@
     {
       "id": "ee-fl-cebu-91",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1202,7 +1202,7 @@
     {
       "id": "ee-fl-cebu-92",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -1215,7 +1215,7 @@
     {
       "id": "ee-fl-cebu-93",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1228,7 +1228,7 @@
     {
       "id": "ee-fl-cebu-94",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1241,7 +1241,7 @@
     {
       "id": "ee-fl-cebu-95",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1254,7 +1254,7 @@
     {
       "id": "ee-fl-cebu-96",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1267,7 +1267,7 @@
     {
       "id": "ee-fl-cebu-97",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1280,7 +1280,7 @@
     {
       "id": "ee-fl-cebu-98",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -1293,7 +1293,7 @@
     {
       "id": "ee-fl-cebu-99",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1306,7 +1306,7 @@
     {
       "id": "ee-fl-cebu-100",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1319,7 +1319,7 @@
     {
       "id": "ee-fl-cebu-101",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1332,7 +1332,7 @@
     {
       "id": "ee-fl-cebu-102",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1345,7 +1345,7 @@
     {
       "id": "ee-fl-cebu-103",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1358,7 +1358,7 @@
     {
       "id": "ee-fl-cebu-104",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1371,7 +1371,7 @@
     {
       "id": "ee-fl-cebu-105",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -1384,7 +1384,7 @@
     {
       "id": "ee-fl-cebu-106",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1397,7 +1397,7 @@
     {
       "id": "ee-fl-cebu-107",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1410,7 +1410,7 @@
     {
       "id": "ee-fl-cebu-108",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1423,7 +1423,7 @@
     {
       "id": "ee-fl-cebu-109",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1436,7 +1436,7 @@
     {
       "id": "ee-fl-cebu-110",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1449,7 +1449,7 @@
     {
       "id": "ee-fl-cebu-111",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1462,7 +1462,7 @@
     {
       "id": "ee-fl-cebu-112",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -1475,7 +1475,7 @@
     {
       "id": "ee-fl-cebu-113",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1488,7 +1488,7 @@
     {
       "id": "ee-fl-cebu-114",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1501,7 +1501,7 @@
     {
       "id": "ee-fl-cebu-115",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1514,7 +1514,7 @@
     {
       "id": "ee-fl-cebu-116",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1527,7 +1527,7 @@
     {
       "id": "ee-fl-cebu-117",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1540,7 +1540,7 @@
     {
       "id": "ee-fl-cebu-118",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1553,7 +1553,7 @@
     {
       "id": "ee-fl-cebu-119",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -1566,7 +1566,7 @@
     {
       "id": "ee-fl-cebu-120",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1579,7 +1579,7 @@
     {
       "id": "ee-fl-cebu-121",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1592,7 +1592,7 @@
     {
       "id": "ee-fl-cebu-122",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1605,7 +1605,7 @@
     {
       "id": "ee-fl-cebu-123",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1618,7 +1618,7 @@
     {
       "id": "ee-fl-cebu-124",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1631,7 +1631,7 @@
     {
       "id": "ee-fl-cebu-125",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1644,7 +1644,7 @@
     {
       "id": "ee-fl-cebu-126",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.17,
@@ -1657,7 +1657,7 @@
     {
       "id": "ee-fl-cebu-127",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1670,7 +1670,7 @@
     {
       "id": "ee-fl-cebu-128",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1683,7 +1683,7 @@
     {
       "id": "ee-fl-cebu-129",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1696,7 +1696,7 @@
     {
       "id": "ee-fl-cebu-130",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1709,7 +1709,7 @@
     {
       "id": "ee-fl-cebu-131",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1722,7 +1722,7 @@
     {
       "id": "ee-fl-cebu-132",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -1735,7 +1735,7 @@
     {
       "id": "ee-fl-cebu-133",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1748,7 +1748,7 @@
     {
       "id": "ee-fl-cebu-134",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1761,7 +1761,7 @@
     {
       "id": "ee-fl-cebu-135",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1774,7 +1774,7 @@
     {
       "id": "ee-fl-cebu-136",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1787,7 +1787,7 @@
     {
       "id": "ee-fl-cebu-137",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1800,7 +1800,7 @@
     {
       "id": "ee-fl-cebu-138",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1813,7 +1813,7 @@
     {
       "id": "ee-fl-cebu-139",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -1826,7 +1826,7 @@
     {
       "id": "ee-fl-cebu-140",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1839,7 +1839,7 @@
     {
       "id": "ee-fl-cebu-141",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1852,7 +1852,7 @@
     {
       "id": "ee-fl-cebu-142",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1865,7 +1865,7 @@
     {
       "id": "ee-fl-cebu-143",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1878,7 +1878,7 @@
     {
       "id": "ee-fl-cebu-144",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1891,7 +1891,7 @@
     {
       "id": "ee-fl-cebu-145",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -1904,7 +1904,7 @@
     {
       "id": "ee-fl-cebu-146",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -1917,7 +1917,7 @@
     {
       "id": "ee-fl-cebu-147",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -1930,7 +1930,7 @@
     {
       "id": "ee-fl-cebu-148",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -1943,7 +1943,7 @@
     {
       "id": "ee-fl-cebu-149",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -1956,7 +1956,7 @@
     {
       "id": "ee-fl-cebu-150",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -1969,7 +1969,7 @@
     {
       "id": "ee-fl-cebu-151",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -1982,7 +1982,7 @@
     {
       "id": "ee-fl-cebu-152",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -1995,7 +1995,7 @@
     {
       "id": "ee-fl-cebu-153",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -2008,7 +2008,7 @@
     {
       "id": "ee-fl-cebu-154",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -2021,7 +2021,7 @@
     {
       "id": "ee-fl-cebu-155",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -2034,7 +2034,7 @@
     {
       "id": "ee-fl-cebu-156",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.29,
@@ -2047,7 +2047,7 @@
     {
       "id": "ee-fl-cebu-157",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.29,
@@ -2060,7 +2060,7 @@
     {
       "id": "ee-fl-cebu-158",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.29,
@@ -2073,7 +2073,7 @@
     {
       "id": "ee-fl-cebu-159",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2086,7 +2086,7 @@
     {
       "id": "ee-fl-cebu-160",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2099,7 +2099,7 @@
     {
       "id": "ee-fl-cebu-161",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2112,7 +2112,7 @@
     {
       "id": "ee-fl-cebu-162",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2125,7 +2125,7 @@
     {
       "id": "ee-fl-cebu-163",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2138,7 +2138,7 @@
     {
       "id": "ee-fl-cebu-164",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -2151,7 +2151,7 @@
     {
       "id": "ee-fl-cebu-165",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2164,7 +2164,7 @@
     {
       "id": "ee-fl-cebu-166",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2177,7 +2177,7 @@
     {
       "id": "ee-fl-cebu-167",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2190,7 +2190,7 @@
     {
       "id": "ee-fl-cebu-168",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2203,7 +2203,7 @@
     {
       "id": "ee-fl-cebu-169",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2216,7 +2216,7 @@
     {
       "id": "ee-fl-cebu-170",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2229,7 +2229,7 @@
     {
       "id": "ee-fl-cebu-171",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2242,7 +2242,7 @@
     {
       "id": "ee-fl-cebu-172",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2255,7 +2255,7 @@
     {
       "id": "ee-fl-cebu-173",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2268,7 +2268,7 @@
     {
       "id": "ee-fl-cebu-174",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2281,7 +2281,7 @@
     {
       "id": "ee-fl-cebu-175",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -2294,7 +2294,7 @@
     {
       "id": "ee-fl-cebu-176",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -2307,7 +2307,7 @@
     {
       "id": "ee-fl-cebu-177",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -2320,7 +2320,7 @@
     {
       "id": "ee-fl-cebu-178",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.39,
@@ -2333,7 +2333,7 @@
     {
       "id": "ee-fl-cebu-179",
       "name": "Flood-prone · 0 m elev",
-      "place": "SRTM low ground (Earth Engine cache)",
+      "place": "SRTM low ground (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.39,
@@ -2348,7 +2348,7 @@
     {
       "id": "ee-ls-cebu-0",
       "name": "Slope risk · Δ619 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -2359,7 +2359,7 @@
     {
       "id": "ee-ls-cebu-1",
       "name": "Slope risk · Δ598 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.47,
@@ -2370,7 +2370,7 @@
     {
       "id": "ee-ls-cebu-2",
       "name": "Slope risk · Δ576 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.57,
@@ -2381,7 +2381,7 @@
     {
       "id": "ee-ls-cebu-3",
       "name": "Slope risk · Δ540 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -2392,7 +2392,7 @@
     {
       "id": "ee-ls-cebu-4",
       "name": "Slope risk · Δ536 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.47,
@@ -2403,7 +2403,7 @@
     {
       "id": "ee-ls-cebu-5",
       "name": "Slope risk · Δ520 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.39,
@@ -2414,7 +2414,7 @@
     {
       "id": "ee-ls-cebu-6",
       "name": "Slope risk · Δ490 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -2425,7 +2425,7 @@
     {
       "id": "ee-ls-cebu-7",
       "name": "Slope risk · Δ490 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -2436,7 +2436,7 @@
     {
       "id": "ee-ls-cebu-8",
       "name": "Slope risk · Δ487 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.39,
@@ -2447,7 +2447,7 @@
     {
       "id": "ee-ls-cebu-9",
       "name": "Slope risk · Δ480 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -2458,7 +2458,7 @@
     {
       "id": "ee-ls-cebu-10",
       "name": "Slope risk · Δ473 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2469,7 +2469,7 @@
     {
       "id": "ee-ls-cebu-11",
       "name": "Slope risk · Δ470 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -2480,7 +2480,7 @@
     {
       "id": "ee-ls-cebu-12",
       "name": "Slope risk · Δ469 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.61,
@@ -2491,7 +2491,7 @@
     {
       "id": "ee-ls-cebu-13",
       "name": "Slope risk · Δ448 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -2502,7 +2502,7 @@
     {
       "id": "ee-ls-cebu-14",
       "name": "Slope risk · Δ436 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.05,
@@ -2513,7 +2513,7 @@
     {
       "id": "ee-ls-cebu-15",
       "name": "Slope risk · Δ433 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2524,7 +2524,7 @@
     {
       "id": "ee-ls-cebu-16",
       "name": "Slope risk · Δ431 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.61,
@@ -2535,7 +2535,7 @@
     {
       "id": "ee-ls-cebu-17",
       "name": "Slope risk · Δ429 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -2546,7 +2546,7 @@
     {
       "id": "ee-ls-cebu-18",
       "name": "Slope risk · Δ429 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.29,
@@ -2557,7 +2557,7 @@
     {
       "id": "ee-ls-cebu-19",
       "name": "Slope risk · Δ420 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.53,
@@ -2568,7 +2568,7 @@
     {
       "id": "ee-ls-cebu-20",
       "name": "Slope risk · Δ415 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -2579,7 +2579,7 @@
     {
       "id": "ee-ls-cebu-21",
       "name": "Slope risk · Δ410 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.43,
@@ -2590,7 +2590,7 @@
     {
       "id": "ee-ls-cebu-22",
       "name": "Slope risk · Δ406 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -2601,7 +2601,7 @@
     {
       "id": "ee-ls-cebu-23",
       "name": "Slope risk · Δ405 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.37,
@@ -2612,7 +2612,7 @@
     {
       "id": "ee-ls-cebu-24",
       "name": "Slope risk · Δ395 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.45,
@@ -2623,7 +2623,7 @@
     {
       "id": "ee-ls-cebu-25",
       "name": "Slope risk · Δ393 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.57,
@@ -2634,7 +2634,7 @@
     {
       "id": "ee-ls-cebu-26",
       "name": "Slope risk · Δ392 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.53,
@@ -2645,7 +2645,7 @@
     {
       "id": "ee-ls-cebu-27",
       "name": "Slope risk · Δ391 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.91,
@@ -2656,7 +2656,7 @@
     {
       "id": "ee-ls-cebu-28",
       "name": "Slope risk · Δ387 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.49,
@@ -2667,7 +2667,7 @@
     {
       "id": "ee-ls-cebu-29",
       "name": "Slope risk · Δ380 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -2678,7 +2678,7 @@
     {
       "id": "ee-ls-cebu-30",
       "name": "Slope risk · Δ367 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.51,
@@ -2689,7 +2689,7 @@
     {
       "id": "ee-ls-cebu-31",
       "name": "Slope risk · Δ363 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.55,
@@ -2700,7 +2700,7 @@
     {
       "id": "ee-ls-cebu-32",
       "name": "Slope risk · Δ360 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.33,
@@ -2711,7 +2711,7 @@
     {
       "id": "ee-ls-cebu-33",
       "name": "Slope risk · Δ347 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -2722,7 +2722,7 @@
     {
       "id": "ee-ls-cebu-34",
       "name": "Slope risk · Δ347 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -2733,7 +2733,7 @@
     {
       "id": "ee-ls-cebu-35",
       "name": "Slope risk · Δ343 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.95,
@@ -2744,7 +2744,7 @@
     {
       "id": "ee-ls-cebu-36",
       "name": "Slope risk · Δ340 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -2755,7 +2755,7 @@
     {
       "id": "ee-ls-cebu-37",
       "name": "Slope risk · Δ340 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -2766,7 +2766,7 @@
     {
       "id": "ee-ls-cebu-38",
       "name": "Slope risk · Δ337 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.79,
@@ -2777,7 +2777,7 @@
     {
       "id": "ee-ls-cebu-39",
       "name": "Slope risk · Δ337 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.65,
@@ -2788,7 +2788,7 @@
     {
       "id": "ee-ls-cebu-40",
       "name": "Slope risk · Δ336 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.53,
@@ -2799,7 +2799,7 @@
     {
       "id": "ee-ls-cebu-41",
       "name": "Slope risk · Δ335 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -2810,7 +2810,7 @@
     {
       "id": "ee-ls-cebu-42",
       "name": "Slope risk · Δ334 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -2821,7 +2821,7 @@
     {
       "id": "ee-ls-cebu-43",
       "name": "Slope risk · Δ328 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -2832,7 +2832,7 @@
     {
       "id": "ee-ls-cebu-44",
       "name": "Slope risk · Δ324 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.77,
@@ -2843,7 +2843,7 @@
     {
       "id": "ee-ls-cebu-45",
       "name": "Slope risk · Δ323 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.11,
@@ -2854,7 +2854,7 @@
     {
       "id": "ee-ls-cebu-46",
       "name": "Slope risk · Δ318 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.59,
@@ -2865,7 +2865,7 @@
     {
       "id": "ee-ls-cebu-47",
       "name": "Slope risk · Δ311 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.65,
@@ -2876,7 +2876,7 @@
     {
       "id": "ee-ls-cebu-48",
       "name": "Slope risk · Δ306 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.67,
@@ -2887,7 +2887,7 @@
     {
       "id": "ee-ls-cebu-49",
       "name": "Slope risk · Δ304 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.09,
@@ -2898,7 +2898,7 @@
     {
       "id": "ee-ls-cebu-50",
       "name": "Slope risk · Δ302 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.41,
@@ -2909,7 +2909,7 @@
     {
       "id": "ee-ls-cebu-51",
       "name": "Slope risk · Δ300 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -2920,7 +2920,7 @@
     {
       "id": "ee-ls-cebu-52",
       "name": "Slope risk · Δ299 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.65,
@@ -2931,7 +2931,7 @@
     {
       "id": "ee-ls-cebu-53",
       "name": "Slope risk · Δ298 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.45,
@@ -2942,7 +2942,7 @@
     {
       "id": "ee-ls-cebu-54",
       "name": "Slope risk · Δ295 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.67,
@@ -2953,7 +2953,7 @@
     {
       "id": "ee-ls-cebu-55",
       "name": "Slope risk · Δ293 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -2964,7 +2964,7 @@
     {
       "id": "ee-ls-cebu-56",
       "name": "Slope risk · Δ293 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.53,
@@ -2975,7 +2975,7 @@
     {
       "id": "ee-ls-cebu-57",
       "name": "Slope risk · Δ290 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.57,
@@ -2986,7 +2986,7 @@
     {
       "id": "ee-ls-cebu-58",
       "name": "Slope risk · Δ286 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -2997,7 +2997,7 @@
     {
       "id": "ee-ls-cebu-59",
       "name": "Slope risk · Δ283 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.69,
@@ -3008,7 +3008,7 @@
     {
       "id": "ee-ls-cebu-60",
       "name": "Slope risk · Δ281 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.39,
@@ -3019,7 +3019,7 @@
     {
       "id": "ee-ls-cebu-61",
       "name": "Slope risk · Δ279 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.41,
@@ -3030,7 +3030,7 @@
     {
       "id": "ee-ls-cebu-62",
       "name": "Slope risk · Δ278 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.61,
@@ -3041,7 +3041,7 @@
     {
       "id": "ee-ls-cebu-63",
       "name": "Slope risk · Δ277 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.01,
@@ -3052,7 +3052,7 @@
     {
       "id": "ee-ls-cebu-64",
       "name": "Slope risk · Δ277 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.27,
@@ -3063,7 +3063,7 @@
     {
       "id": "ee-ls-cebu-65",
       "name": "Slope risk · Δ274 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -3074,7 +3074,7 @@
     {
       "id": "ee-ls-cebu-66",
       "name": "Slope risk · Δ274 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.81,
@@ -3085,7 +3085,7 @@
     {
       "id": "ee-ls-cebu-67",
       "name": "Slope risk · Δ272 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.55,
@@ -3096,7 +3096,7 @@
     {
       "id": "ee-ls-cebu-68",
       "name": "Slope risk · Δ270 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.85,
@@ -3107,7 +3107,7 @@
     {
       "id": "ee-ls-cebu-69",
       "name": "Slope risk · Δ269 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.41,
@@ -3118,7 +3118,7 @@
     {
       "id": "ee-ls-cebu-70",
       "name": "Slope risk · Δ269 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.69,
@@ -3129,7 +3129,7 @@
     {
       "id": "ee-ls-cebu-71",
       "name": "Slope risk · Δ266 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -3140,7 +3140,7 @@
     {
       "id": "ee-ls-cebu-72",
       "name": "Slope risk · Δ266 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.63,
@@ -3151,7 +3151,7 @@
     {
       "id": "ee-ls-cebu-73",
       "name": "Slope risk · Δ264 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -3162,7 +3162,7 @@
     {
       "id": "ee-ls-cebu-74",
       "name": "Slope risk · Δ264 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.43,
@@ -3173,7 +3173,7 @@
     {
       "id": "ee-ls-cebu-75",
       "name": "Slope risk · Δ261 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -3184,7 +3184,7 @@
     {
       "id": "ee-ls-cebu-76",
       "name": "Slope risk · Δ259 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -3195,7 +3195,7 @@
     {
       "id": "ee-ls-cebu-77",
       "name": "Slope risk · Δ259 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -3206,7 +3206,7 @@
     {
       "id": "ee-ls-cebu-78",
       "name": "Slope risk · Δ258 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -3217,7 +3217,7 @@
     {
       "id": "ee-ls-cebu-79",
       "name": "Slope risk · Δ256 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.21,
@@ -3228,7 +3228,7 @@
     {
       "id": "ee-ls-cebu-80",
       "name": "Slope risk · Δ256 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.51,
@@ -3239,7 +3239,7 @@
     {
       "id": "ee-ls-cebu-81",
       "name": "Slope risk · Δ255 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.75,
@@ -3250,7 +3250,7 @@
     {
       "id": "ee-ls-cebu-82",
       "name": "Slope risk · Δ255 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.89,
@@ -3261,7 +3261,7 @@
     {
       "id": "ee-ls-cebu-83",
       "name": "Slope risk · Δ254 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -3272,7 +3272,7 @@
     {
       "id": "ee-ls-cebu-84",
       "name": "Slope risk · Δ252 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.87,
@@ -3283,7 +3283,7 @@
     {
       "id": "ee-ls-cebu-85",
       "name": "Slope risk · Δ252 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.49,
@@ -3294,7 +3294,7 @@
     {
       "id": "ee-ls-cebu-86",
       "name": "Slope risk · Δ251 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.59,
@@ -3305,7 +3305,7 @@
     {
       "id": "ee-ls-cebu-87",
       "name": "Slope risk · Δ248 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.13,
@@ -3316,7 +3316,7 @@
     {
       "id": "ee-ls-cebu-88",
       "name": "Slope risk · Δ241 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.59,
@@ -3327,7 +3327,7 @@
     {
       "id": "ee-ls-cebu-89",
       "name": "Slope risk · Δ239 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.07,
@@ -3338,7 +3338,7 @@
     {
       "id": "ee-ls-cebu-90",
       "name": "Slope risk · Δ239 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.71,
@@ -3349,7 +3349,7 @@
     {
       "id": "ee-ls-cebu-91",
       "name": "Slope risk · Δ236 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -3360,7 +3360,7 @@
     {
       "id": "ee-ls-cebu-92",
       "name": "Slope risk · Δ234 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.77,
@@ -3371,7 +3371,7 @@
     {
       "id": "ee-ls-cebu-93",
       "name": "Slope risk · Δ234 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -3382,7 +3382,7 @@
     {
       "id": "ee-ls-cebu-94",
       "name": "Slope risk · Δ234 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.61,
@@ -3393,7 +3393,7 @@
     {
       "id": "ee-ls-cebu-95",
       "name": "Slope risk · Δ228 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.83,
@@ -3404,7 +3404,7 @@
     {
       "id": "ee-ls-cebu-96",
       "name": "Slope risk · Δ227 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -3415,7 +3415,7 @@
     {
       "id": "ee-ls-cebu-97",
       "name": "Slope risk · Δ227 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.97,
@@ -3426,7 +3426,7 @@
     {
       "id": "ee-ls-cebu-98",
       "name": "Slope risk · Δ227 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.23,
@@ -3437,7 +3437,7 @@
     {
       "id": "ee-ls-cebu-99",
       "name": "Slope risk · Δ227 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.43,
@@ -3448,7 +3448,7 @@
     {
       "id": "ee-ls-cebu-100",
       "name": "Slope risk · Δ226 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.57,
@@ -3459,7 +3459,7 @@
     {
       "id": "ee-ls-cebu-101",
       "name": "Slope risk · Δ223 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.35,
@@ -3470,7 +3470,7 @@
     {
       "id": "ee-ls-cebu-102",
       "name": "Slope risk · Δ220 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -3481,7 +3481,7 @@
     {
       "id": "ee-ls-cebu-103",
       "name": "Slope risk · Δ220 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.45,
@@ -3492,7 +3492,7 @@
     {
       "id": "ee-ls-cebu-104",
       "name": "Slope risk · Δ220 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.65,
@@ -3503,7 +3503,7 @@
     {
       "id": "ee-ls-cebu-105",
       "name": "Slope risk · Δ216 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.55,
@@ -3514,7 +3514,7 @@
     {
       "id": "ee-ls-cebu-106",
       "name": "Slope risk · Δ215 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.15,
@@ -3525,7 +3525,7 @@
     {
       "id": "ee-ls-cebu-107",
       "name": "Slope risk · Δ215 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.73,
@@ -3536,7 +3536,7 @@
     {
       "id": "ee-ls-cebu-108",
       "name": "Slope risk · Δ214 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.19,
@@ -3547,7 +3547,7 @@
     {
       "id": "ee-ls-cebu-109",
       "name": "Slope risk · Δ213 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.81,
@@ -3558,7 +3558,7 @@
     {
       "id": "ee-ls-cebu-110",
       "name": "Slope risk · Δ213 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.49,
@@ -3569,7 +3569,7 @@
     {
       "id": "ee-ls-cebu-111",
       "name": "Slope risk · Δ211 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.61,
@@ -3580,7 +3580,7 @@
     {
       "id": "ee-ls-cebu-112",
       "name": "Slope risk · Δ207 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.77,
@@ -3591,7 +3591,7 @@
     {
       "id": "ee-ls-cebu-113",
       "name": "Slope risk · Δ205 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.47,
@@ -3602,7 +3602,7 @@
     {
       "id": "ee-ls-cebu-114",
       "name": "Slope risk · Δ203 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.25,
@@ -3613,7 +3613,7 @@
     {
       "id": "ee-ls-cebu-115",
       "name": "Slope risk · Δ201 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.31,
@@ -3624,7 +3624,7 @@
     {
       "id": "ee-ls-cebu-116",
       "name": "Slope risk · Δ200 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 9.93,
@@ -3635,7 +3635,7 @@
     {
       "id": "ee-ls-cebu-117",
       "name": "Slope risk · Δ196 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.57,
@@ -3646,7 +3646,7 @@
     {
       "id": "ee-ls-cebu-118",
       "name": "Slope risk · Δ194 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.69,
@@ -3657,7 +3657,7 @@
     {
       "id": "ee-ls-cebu-119",
       "name": "Slope risk · Δ194 m",
-      "place": "SRTM neighbor relief (Earth Engine cache)",
+      "place": "SRTM neighbor relief (Earth Engine)",
       "purokHint": "Cebu",
       "severity": "critical",
       "lat": 10.71,

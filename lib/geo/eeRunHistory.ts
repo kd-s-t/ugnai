@@ -33,7 +33,10 @@ const ALLOWED_FILES = new Set([
   "meta.json",
 ]);
 
-const EE_PREFIX = "ee-cache";
+/** GCS prefix for run history (active datasets live in Firestore `ee_datasets`). */
+const EE_RUNS_PREFIX = "ee-runs";
+/** Older Storage prefix; read-only fallback. */
+const EE_RUNS_LEGACY_PREFIX = "ee-cache";
 
 export function eeDataRoot(): string {
   return join(process.cwd(), "data");
@@ -51,16 +54,20 @@ export function isAllowedEeFileName(name: string): boolean {
   return ALLOWED_FILES.has(name) && !name.includes("..") && !name.includes("/");
 }
 
-export function eeActiveObjectPath(fileName: string): string {
-  return `${EE_PREFIX}/active/${fileName}`;
+export function eeRunObjectPath(runId: string, fileName: string): string {
+  return `${EE_RUNS_PREFIX}/${runId}/${fileName}`;
 }
 
-export function eeRunObjectPath(runId: string, fileName: string): string {
-  return `${EE_PREFIX}/runs/${runId}/${fileName}`;
+function eeLegacyRunObjectPath(runId: string, fileName: string): string {
+  return `${EE_RUNS_LEGACY_PREFIX}/runs/${runId}/${fileName}`;
 }
 
 function eeIndexObjectPath(): string {
-  return `${EE_PREFIX}/runs/index.json`;
+  return `${EE_RUNS_PREFIX}/index.json`;
+}
+
+function eeLegacyIndexObjectPath(): string {
+  return `${EE_RUNS_LEGACY_PREFIX}/runs/index.json`;
 }
 
 function preferLocalDiskOnly(): boolean {
@@ -111,7 +118,10 @@ function writeLocalFile(absPath: string, body: string) {
 export async function listEeRuns(): Promise<EeRunMeta[]> {
   if (!preferLocalDiskOnly()) {
     try {
-      const remote = await gcsGetJson<EeRunMeta[]>(eeIndexObjectPath());
+      let remote = await gcsGetJson<EeRunMeta[]>(eeIndexObjectPath());
+      if (!Array.isArray(remote) || remote.length === 0) {
+        remote = await gcsGetJson<EeRunMeta[]>(eeLegacyIndexObjectPath());
+      }
       if (Array.isArray(remote) && remote.length > 0) {
         return [...remote].sort((a, b) =>
           (b.startedAt || "").localeCompare(a.startedAt || ""),
@@ -158,9 +168,11 @@ export async function getEeRun(runId: string): Promise<EeRunMeta | null> {
 
   if (!preferLocalDiskOnly()) {
     try {
-      const remote = await gcsGetJson<EeRunMeta>(
-        eeRunObjectPath(runId, "meta.json"),
-      );
+      const remote =
+        (await gcsGetJson<EeRunMeta>(eeRunObjectPath(runId, "meta.json"))) ??
+        (await gcsGetJson<EeRunMeta>(
+          eeLegacyRunObjectPath(runId, "meta.json"),
+        ));
       if (remote?.id) return remote;
     } catch (err) {
       console.warn("[ee] getEeRun storage", err);
@@ -293,7 +305,9 @@ export async function readEeRunFile(
 
   if (!preferLocalDiskOnly()) {
     try {
-      const remote = await gcsGetObject(eeRunObjectPath(runId, fileName));
+      const remote =
+        (await gcsGetObject(eeRunObjectPath(runId, fileName))) ??
+        (await gcsGetObject(eeLegacyRunObjectPath(runId, fileName)));
       if (remote) {
         return {
           body: remote.bytes,
@@ -313,8 +327,8 @@ export async function readEeRunFile(
   };
 }
 
-/** Active EE datasets from Firestore `ee_datasets` (not file cache). */
-export async function listActiveEeCacheFiles(): Promise<
+/** Active EE datasets from Firestore `ee_datasets`. */
+export async function listActiveEeDatasets(): Promise<
   {
     name: string;
     bytes: number;
@@ -332,7 +346,7 @@ export async function listActiveEeCacheFiles(): Promise<
   }));
 }
 
-export async function readActiveEeCacheFile(
+export async function readActiveEeDataset(
   fileName: string,
 ): Promise<{ body: Buffer; contentType: string } | null> {
   if (!isAllowedEeFileName(fileName) || fileName === "meta.json") return null;
@@ -346,7 +360,7 @@ export async function readActiveEeCacheFile(
 }
 
 /** Persist active dataset to Firestore `ee_datasets`. */
-export async function writeActiveEeCacheFile(
+export async function writeActiveEeDataset(
   fileName: string,
   json: unknown,
 ): Promise<void> {

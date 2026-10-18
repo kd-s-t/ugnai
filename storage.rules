@@ -38,7 +38,12 @@ service firebase.storage {
         && request.resource.contentType.matches('audio/.*');
     }
 
-    // Earth Engine DEM / hazard JSON cache (server ADC writes; officers may read).
+    // Earth Engine run history (server ADC writes; officers may read).
+    match /ee-runs/{allPaths=**} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+    // Legacy run-history prefix (read-only).
     match /ee-cache/{allPaths=**} {
       allow read: if request.auth != null;
       allow write: if false;

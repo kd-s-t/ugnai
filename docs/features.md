@@ -42,7 +42,7 @@ Home area: Brgy. Nangka, Consolacion, Cebu. Other barangays can be added (e.g. B
 ## Map and weather
 
 - Live map for officers and public view
-- Flood / slope layers from Earth Engine caches
+- Flood / slope layers from Earth Engine datasets
 - Weather from Google or Open-Meteo
 - Evacuation / hall points on the map
 

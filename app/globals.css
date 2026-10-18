@@ -590,10 +590,16 @@ select:not([multiple]) {
   line-height: 1.4;
 }
 
-/* Compact close — sits on the first content line (no tall Google header). */
-.dro-gmap-popup-close {
+/* Top-right actions (report link + close) on the first content line. */
+.dro-gmap-popup-actions {
   float: right;
+  display: flex;
+  align-items: center;
+  gap: 2px;
   margin: -2px 0 0 8px;
+}
+
+.dro-gmap-popup-close {
   border: 0;
   background: transparent;
   color: #5c6570;
@@ -605,6 +611,20 @@ select:not([multiple]) {
 }
 
 .dro-gmap-popup-close:hover {
+  color: #1f2126;
+}
+
+.dro-gmap-popup-report {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #5c6570;
+  text-decoration: none;
+}
+
+.dro-gmap-popup-report:hover {
   color: #1f2126;
 }
 
