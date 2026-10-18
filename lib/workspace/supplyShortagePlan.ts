@@ -295,6 +295,21 @@ export function buildSupplyShortagePlan(
   };
 }
 
+/** Apas Sitio drinking-water demos (only use when the desk scope is Apas). */
+export function apasSitioWaterReports(reports: HazardReport[]): HazardReport[] {
+  return reports.filter(
+    (r) =>
+      r.status !== "rejected" &&
+      r.status !== "done" &&
+      /apas/i.test(r.barangay ?? "") &&
+      /^Sitio\b/i.test(r.citizenPurok ?? "") &&
+      /drinking\s+water|Need\s+\d+\s*L/i.test(
+        `${r.title ?? ""}\n${r.notes ?? ""}`,
+      ) &&
+      !/food\s+packs/i.test(`${r.title ?? ""}\n${r.notes ?? ""}`),
+  );
+}
+
 /** Resolve shared shortage reports for an epic code (e.g. RS-001). */
 export function reportsForEpicCode(
   code: string,

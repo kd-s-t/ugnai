@@ -187,6 +187,11 @@ export function IncidentBoard() {
     let cancelled = false;
     void (async () => {
       try {
+        // Nangka desk only — do not seed Consolacion queue samples onto Apas.
+        const onNangka =
+          reportScope.mode === "barangay" &&
+          /nangka/i.test(reportScope.barangay);
+        if (!onNangka) return;
         const { isSimulationOn } = await import("@/lib/config/simulation");
         if (!isSimulationOn()) return;
         const { ensureQueueSampleReports } = await import(
@@ -201,7 +206,7 @@ export function IncidentBoard() {
     return () => {
       cancelled = true;
     };
-  }, [seedReady]);
+  }, [seedReady, reportScope]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dragId, setDragId] = useState<string | null>(null);

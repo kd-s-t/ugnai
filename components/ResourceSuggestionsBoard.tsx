@@ -1,18 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useCommandWorkspace } from "@/components/CommandWorkspaceProvider";
 import { listenAllSuggestions } from "@/lib/resourcesSuggestions/api";
 import type { ResourceSuggestion } from "@/lib/resourcesSuggestions/types";
+import { filterSuggestionsForScope } from "@/lib/workspace/resourceEpicScope";
+import { scopeLabel } from "@/lib/reports/barangayScope";
 
 function fmtL(n: number): string {
   return `${n.toLocaleString("en-PH")} L`;
 }
 
 export function ResourceSuggestionsBoard() {
+  const { scopedReports, reportScope } = useCommandWorkspace();
   const [rows, setRows] = useState<ResourceSuggestion[]>([]);
 
   useEffect(() => listenAllSuggestions(setRows), []);
+
+  const scopedIds = useMemo(
+    () => new Set(scopedReports.map((r) => r.id)),
+    [scopedReports],
+  );
+
+  const scopedRows = useMemo(
+    () => filterSuggestionsForScope(rows, reportScope, scopedIds),
+    [rows, reportScope, scopedIds],
+  );
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
@@ -32,11 +46,12 @@ export function ResourceSuggestionsBoard() {
             Resources suggested
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-[var(--muted)]">
-            One saved plan per shortage. Sitio requests are nested in that plan.
+            Saved plans for {scopeLabel(reportScope)}. Sitio requests are nested
+            in each plan.
           </p>
         </div>
         <p className="text-[12px] text-[var(--muted)]">
-          {rows.length} {rows.length === 1 ? "plan" : "plans"}
+          {scopedRows.length} {scopedRows.length === 1 ? "plan" : "plans"}
         </p>
       </div>
 
@@ -54,20 +69,20 @@ export function ResourceSuggestionsBoard() {
               </tr>
             </thead>
             <tbody>
-              {rows.length === 0 ? (
+              {scopedRows.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
                     className="px-4 py-8 text-center text-sm text-[var(--muted)] sm:px-5"
                   >
-                    No suggestions yet. Open a shortage with Review shortage to
-                    save a plan.
+                    No suggestions yet for this barangay. Open a shortage with
+                    Review shortage to save a plan.
                   </td>
                 </tr>
               ) : (
-                rows.map((row) => (
+                scopedRows.map((row) => (
                   <tr
-                    key={row.id}
+                    key={`${row.id}-${row.requestCount}`}
                     className="border-b border-[var(--border)] last:border-b-0"
                   >
                     <td className="px-4 py-3 sm:px-5">
@@ -78,7 +93,7 @@ export function ResourceSuggestionsBoard() {
                         {row.id}
                       </Link>
                     </td>
-                    <td className="px-3 py-3 text-[var(--foreground)]">
+                    <td className="px-3 py-3 text-[var(--muted)]">
                       {row.resourceLabel}
                     </td>
                     <td className="px-3 py-3 tabular-nums">
@@ -90,7 +105,7 @@ export function ResourceSuggestionsBoard() {
                     <td className="px-3 py-3 tabular-nums font-semibold text-[#c72929]">
                       {fmtL(row.shortageL)}
                     </td>
-                    <td className="px-4 py-3 text-right sm:px-5">
+                    <td className="px-4 py-3 sm:px-5">
                       <Link
                         href={`/admin/resources/${encodeURIComponent(row.id)}`}
                         className="inline-flex rounded-lg border border-[var(--border)] bg-white px-2.5 py-1.5 text-[12px] font-medium text-[var(--foreground)] transition hover:border-[var(--foreground)]/25"

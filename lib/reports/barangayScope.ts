@@ -142,6 +142,23 @@ export function scopeForProfile(profile: UserProfile | null): ReportScope {
 }
 
 export function reportInScope(report: HazardReport, scope: ReportScope): boolean {
+  // Desk boards trust the report's barangay/lgu tags first. GPS nearest-hall
+  // remapping must not pull Apas tickets onto a Nangka officer board (or vice versa).
+  const taggedBarangay = report.barangay?.trim();
+  const taggedLgu = report.lgu?.trim();
+  if (taggedBarangay) {
+    if (scope.mode === "barangay") {
+      if (taggedBarangay.toLowerCase() !== scope.barangay.toLowerCase()) {
+        return false;
+      }
+      if (!taggedLgu) return true;
+      return taggedLgu.toLowerCase() === scope.lgu.toLowerCase();
+    }
+    if (taggedLgu) {
+      return taggedLgu.toLowerCase() === scope.lgu.toLowerCase();
+    }
+  }
+
   const place = resolveReportPlace(report);
   if (scope.mode === "barangay") {
     return (

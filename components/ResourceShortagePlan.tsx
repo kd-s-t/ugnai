@@ -14,6 +14,7 @@ import type {
   ResourceSuggestion,
   ResourceSuggestionRequest,
 } from "@/lib/resourcesSuggestions/types";
+import type { ReportScope } from "@/lib/reports/barangayScope";
 import type { SupplyShortagePlan } from "@/lib/workspace/supplyShortagePlan";
 import { cn } from "@/lib/utils";
 
@@ -35,23 +36,29 @@ export function ResourceShortagePlan({
   plan,
   placeLine,
   updatedLabel,
+  storageId,
+  reportScope,
 }: {
   plan: SupplyShortagePlan;
   placeLine: string;
   updatedLabel: string;
+  /** Barangay-scoped Firestore id; defaults to public epic code. */
+  storageId?: string;
+  reportScope?: ReportScope | null;
 }) {
   const [suggestionDoc, setSuggestionDoc] =
     useState<ResourceSuggestion | null>(null);
   const [shortageDoc, setShortageDoc] = useState<ResourceShortage | null>(null);
   const [syncing, setSyncing] = useState(true);
   const shortageId = plan.code.trim().toUpperCase();
+  const docId = (storageId?.trim() || shortageId).toUpperCase();
 
   useEffect(() => {
     let cancelled = false;
     setSyncing(true);
     void (async () => {
       try {
-        const saved = await upsertShortageFromPlan(plan);
+        const saved = await upsertShortageFromPlan(plan, docId);
         if (!cancelled) setShortageDoc(saved);
       } catch {
         /* rules / offline — table still falls back to plan rows */
@@ -62,14 +69,21 @@ export function ResourceShortagePlan({
     return () => {
       cancelled = true;
     };
-  }, [plan]);
+  }, [plan, docId]);
 
   useEffect(() => {
-    return listenSuggestionsByEpic(shortageId, setSuggestionDoc);
-  }, [shortageId]);
+    return listenSuggestionsByEpic(docId, setSuggestionDoc);
+  }, [docId]);
 
   const tableRows = useMemo((): ResourceSuggestionRequest[] => {
-    if (suggestionDoc?.requests.length) return suggestionDoc.requests;
+    const planIds = new Set(plan.rows.flatMap((r) => r.reportIds));
+    const scopedRequests =
+      suggestionDoc?.requests.filter((r) =>
+        (r.reportIds.length ? r.reportIds : [r.reportId]).some((id) =>
+          planIds.has(id),
+        ),
+      ) ?? [];
+    if (scopedRequests.length > 0) return scopedRequests;
     const totalGap = plan.rows.reduce((s, r) => s + Math.max(0, r.gapL), 0);
     return plan.rows.map((row) => {
       const people = Number(row.peopleLabel.replace(/[^\d]/g, "")) || 0;
@@ -363,7 +377,7 @@ export function ResourceShortagePlan({
           Illustrative areas · Field confirmation required.
         </p>
         <div className="mt-3">
-          <ShortagePlanMap rows={plan.rows} />
+          <ShortagePlanMap rows={plan.rows} reportScope={reportScope} />
         </div>
       </section>
     </div>
