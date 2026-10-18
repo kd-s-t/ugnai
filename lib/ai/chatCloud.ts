@@ -9,7 +9,7 @@ import {
 import type { ChatThread } from "@/lib/ai/chatTypes";
 import type { GeminiAssistModelId } from "@/lib/ai/geminiModels";
 import { DEFAULT_GEMINI_MODEL, isGeminiAssistModel } from "@/lib/ai/geminiModels";
-import { titleFromMessages } from "@/lib/ai/chatHistory";
+import { refreshWelcome, titleFromMessages } from "@/lib/ai/chatHistory";
 
 const META_ID = "meta";
 
@@ -77,6 +77,7 @@ export async function loadCloudHistory(
       threads.push({
         ...t,
         id: t.id || d.id,
+        messages: refreshWelcome(t.messages),
         title: t.title || titleFromMessages(t.messages),
         result: t.result ?? null,
         callListVisible: t.callListVisible ?? Boolean(t.result?.actions?.length),

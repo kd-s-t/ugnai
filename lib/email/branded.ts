@@ -20,12 +20,58 @@ export function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-export function appOrigin(): string {
+const CANONICAL_APP_ORIGIN = "https://ugnaiph.com";
+/** Keep in sync with middleware RETIRED_HOSTS — old brand domain is gone. */
+const RETIRED_APP_HOSTS = new Set(["luwasph.com", "www.luwasph.com"]);
+
+function stripTrailingSlash(origin: string): string {
+  return origin.replace(/\/$/, "");
+}
+
+function originHost(origin: string): string | null {
+  try {
+    return new URL(origin).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function isUnusableAppOrigin(origin: string): boolean {
+  const host = originHost(origin);
+  if (!host) return true;
+  if (host === "localhost" || host === "127.0.0.1" || host === "[::1]") {
+    return true;
+  }
+  return RETIRED_APP_HOSTS.has(host);
+}
+
+function resolveAppOrigin(opts: { allowLoopback: boolean }): string {
   const explicit = process.env.NEXT_PUBLIC_APP_URL?.trim();
-  if (explicit) return explicit.replace(/\/$/, "");
+  if (explicit) {
+    const o = stripTrailingSlash(explicit);
+    if (!isUnusableAppOrigin(o)) return o;
+  }
   const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) return `https://${vercel.replace(/\/$/, "")}`;
-  return "http://localhost:3000";
+  if (vercel) {
+    const o = `https://${stripTrailingSlash(vercel)}`;
+    if (!isUnusableAppOrigin(o)) return o;
+  }
+  if (opts.allowLoopback) return "http://127.0.0.1:3000";
+  return CANONICAL_APP_ORIGIN;
+}
+
+export function appOrigin(): string {
+  return resolveAppOrigin({
+    allowLoopback: process.env.NODE_ENV !== "production",
+  });
+}
+
+/**
+ * Public origin for email &lt;img&gt; assets (static maps).
+ * Never loopback / retired hosts — mail clients cannot load those URLs.
+ */
+export function emailAssetOrigin(): string {
+  return resolveAppOrigin({ allowLoopback: false });
 }
 
 export function mailFromDisplay(): string {

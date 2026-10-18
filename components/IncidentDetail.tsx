@@ -816,7 +816,12 @@ export function IncidentDetail({
                 Vertex AI · image class + location
                 {(() => {
                   const t = formatAiLatencyMs(selected.vertexLatencyMs);
-                  return t ? ` · ${t}` : "";
+                  return t ? (
+                    <>
+                      {" · "}
+                      <span className="normal-case tracking-normal">{t}</span>
+                    </>
+                  ) : null;
                 })()}
               </p>
             </div>
@@ -889,37 +894,6 @@ export function IncidentDetail({
           ) : null}
 
           <dl className="mt-3 grid gap-2 text-xs sm:grid-cols-2">
-            <div className="border border-[var(--border)] bg-[var(--surface-raised)] px-2.5 py-2">
-              <dt className="font-mono text-[9px] tracking-wider text-[var(--muted)] uppercase">
-                AI check
-              </dt>
-              <dd className="mt-0.5 flex items-center gap-1.5 text-[var(--foreground)]">
-                {selected.aiSource === "gemini" ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src="/brands/gemini.png"
-                    alt=""
-                    title="Gemini"
-                    className="h-3.5 w-auto shrink-0 opacity-80"
-                  />
-                ) : null}
-                <span>
-                  {selected.aiReason
-                    ? `${
-                        selected.aiSource === "gemini"
-                          ? "Gemini"
-                          : selected.aiSource === "local"
-                            ? "local rules"
-                            : (selected.aiSource ?? "AI")
-                      }${
-                        selected.aiConfidence != null
-                          ? ` · ${Math.round(selected.aiConfidence * 100)}%`
-                          : ""
-                      }`
-                    : "Pending"}
-                </span>
-              </dd>
-            </div>
             <Meta
               label="Priority"
               value={
@@ -1033,10 +1007,15 @@ export function IncidentDetail({
                   className="h-3.5 w-auto shrink-0"
                 />
                 <p className="font-mono text-[9px] tracking-wider text-[var(--warn)] uppercase">
-                  AI interpretation · proposal only
+                  AI interpretation
                   {(() => {
                     const t = formatAiLatencyMs(selected.aiLatencyMs);
-                    return t ? ` · ${t}` : "";
+                    return t ? (
+                      <>
+                        {" · "}
+                        <span className="normal-case tracking-normal">{t}</span>
+                      </>
+                    ) : null;
                   })()}
                 </p>
               </div>
@@ -1752,9 +1731,10 @@ export function IncidentDetail({
 function formatAiLatencyMs(ms: number | null | undefined): string | null {
   if (ms == null || !Number.isFinite(ms) || ms < 0) return null;
   const rounded = Math.round(ms);
-  if (rounded < 1000) return `${rounded}ms`;
+  if (rounded < 1000) return `${rounded}ms response time`;
   const seconds = rounded / 1000;
-  return `${seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+  const n = seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1);
+  return `${n}s response time`;
 }
 
 function AiTraceBlocks({

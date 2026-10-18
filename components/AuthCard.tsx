@@ -9,7 +9,7 @@ type AuthCardProps = {
   title: string;
   subtitle: string;
   children: React.ReactNode;
-  footer: React.ReactNode;
+  footer?: React.ReactNode;
 };
 
 export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
@@ -33,9 +33,11 @@ export function AuthCard({ title, subtitle, children, footer }: AuthCardProps) {
           </h1>
           <p className="mt-1 text-sm text-[var(--muted)]">{subtitle}</p>
           <div className="mt-6">{children}</div>
-          <div className="mt-6 border-t border-[var(--border)] pt-4 text-sm text-[var(--muted)]">
-            {footer}
-          </div>
+          {footer ? (
+            <div className="mt-6 border-t border-[var(--border)] pt-4 text-sm text-[var(--muted)]">
+              {footer}
+            </div>
+          ) : null}
         </motion.div>
       </main>
       <HomeFooter />

@@ -193,13 +193,6 @@ export default function LoginPage() {
               Change role
             </Link>
             {" · "}
-            <Link
-              href="/login/developer"
-              className="text-[var(--accent)] hover:underline"
-            >
-              Developer login
-            </Link>
-            {" · "}
             No officer account?{" "}
             <Link
               href="/register"

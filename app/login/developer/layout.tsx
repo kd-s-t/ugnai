@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Developer sign in · UGNAI",
+  title: "Sign in · UGNAI",
+  robots: { index: false, follow: false },
 };
 
 export default function Layout({

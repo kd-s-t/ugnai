@@ -169,7 +169,7 @@ async function main() {
     JSON.stringify(
       {
         password: DEMO_PASSWORD,
-        login: "/login/developer",
+        login: "/nexora",
         home: "/dev",
         developers: results,
       },

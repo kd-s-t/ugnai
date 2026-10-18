@@ -260,7 +260,13 @@ export function CommandWorkspaceProvider({
     const pendingOfficerCount = pendingAccounts.filter(
       (r) => r.role === "officer",
     ).length;
-    const reportQueueCount = scopedReports.filter((r) =>
+    // Same visibility as IncidentBoard: hide Tino/queue seeds when not in a
+    // Before/During/After drill, so the nav badge matches "0 in queue".
+    const hideDemo = !tinoActive || hideScenarioDemoReportsInUi();
+    const boardVisible = hideDemo
+      ? scopedReports.filter((r) => !isTinoScenarioDemoReport(r))
+      : scopedReports;
+    const reportQueueCount = boardVisible.filter((r) =>
       QUEUE_STATUSES.has(r.status),
     ).length;
 
@@ -288,6 +294,7 @@ export function CommandWorkspaceProvider({
     weatherOk,
     weatherHazard,
     seedReady,
+    tinoActive,
   ]);
 
   return (

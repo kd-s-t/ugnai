@@ -134,9 +134,10 @@ function looksLikeTriageProse(content: string): boolean {
 function formatChatLatencyMs(ms: number | null | undefined): string | null {
   if (ms == null || !Number.isFinite(ms) || ms < 0) return null;
   const rounded = Math.round(ms);
-  if (rounded < 1000) return `${rounded}ms`;
+  if (rounded < 1000) return `${rounded}ms response time`;
   const seconds = rounded / 1000;
-  return `${seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1)}s`;
+  const n = seconds >= 10 ? seconds.toFixed(0) : seconds.toFixed(1);
+  return `${n}s response time`;
 }
 
 function AssistRichBody({
@@ -153,11 +154,11 @@ function AssistRichBody({
   const showPanels = Boolean(forcePanels || hasMarkers || looksLikeTriageProse(content));
 
   if (!hasMarkers) {
+    // Never blank the bubble if strip removed triage boilerplate only.
+    const body = cleaned || content.trim();
     return (
       <div className="flex flex-col gap-0.5">
-        {cleaned ? (
-          <p className="whitespace-pre-wrap">{cleaned}</p>
-        ) : null}
+        {body ? <p className="whitespace-pre-wrap">{body}</p> : null}
         {showPanels ? (
           <>
             <MapColorLegend />
@@ -249,7 +250,7 @@ function SmsReplyBody({
 }
 
 const SUGGESTIONS = [
-  "A typhoon cat 5 is coming in 3 days — what do we do?",
+  "A typhoon cat 5 is coming in 3 days. What do we do?",
   "Run triage",
   "What do the red yellow and blue mean?",
   "Alert them to evacuate",
@@ -755,7 +756,7 @@ export function MangugnaiChat({
                           const t = formatChatLatencyMs(m.latencyMs);
                           return t ? (
                             <span
-                              className="font-mono text-[10px] tracking-wider text-[var(--muted)] uppercase"
+                              className="font-mono text-[10px] tracking-normal text-[var(--muted)]"
                               title="Response time"
                             >
                               {t}

@@ -8,6 +8,7 @@ import { DeveloperNotifications } from "@/components/DeveloperNotifications";
 import { ProfileAvatar } from "@/components/ProfileAvatar";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import { isAccountActive, isDeveloper } from "@/lib/auth/types";
+import { DEVELOPER_LOGIN_PATH } from "@/lib/auth/ugnaiDevelopers";
 import { subscribeSupportTickets } from "@/lib/support/api";
 import { cn } from "@/lib/utils";
 
@@ -67,7 +68,7 @@ export function DeveloperShell({
 
   async function onLogout() {
     await logout();
-    router.replace("/login/developer");
+    router.replace(DEVELOPER_LOGIN_PATH);
   }
 
   const displayName = profile?.displayName ?? user?.email ?? "Developer";

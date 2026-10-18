@@ -2,15 +2,24 @@ import type { ChatMessage, ChatThread } from "@/lib/ai/chatTypes";
 import type { GeminiAssistModelId } from "@/lib/ai/geminiModels";
 import { DEFAULT_GEMINI_MODEL, isGeminiAssistModel } from "@/lib/ai/geminiModels";
 
-export const CHAT_STORAGE_KEY = "ugnai.agent-nangka.history.v2";
+export const CHAT_STORAGE_KEY = "ugnai.agent-nangka.history.v3";
 
 export const WELCOME_MESSAGE: ChatMessage = {
   id: "welcome",
   role: "assistant",
   content:
-    "Kumusta. I’m Agent Nangka, your UGNAI DRRM colleague for the Tino simulation. Ask what to do for a storm, or say “run triage” and I’ll paint the map (green = house owners, red = evacuate, yellow = prepare / shelter in place, blue = flood footprints). When you’re ready, say “alert them to evacuate”, or “call the fire station” / “call the police” and I’ll dial Consolacion BFP or PNP.",
+    "Kumusta. I’m Agent Nangka, your UGNAI DRRM colleague for the Tino simulation. Ask what to do for a storm, or say “run triage” and I’ll paint the map (green = house owners, red = evacuate, yellow = prepare or shelter in place, blue = flood footprints). When you’re ready, say “alert them to evacuate”, or “call the fire station” or “call the police” and I’ll dial Consolacion BFP or PNP.",
   createdAt: new Date(0).toISOString(),
 };
+
+/** Replace stale Mangugnai / em-dash welcome copy still sitting in storage. */
+export function refreshWelcome(messages: ChatMessage[]): ChatMessage[] {
+  return messages.map((m) => {
+    if (m.role !== "assistant") return m;
+    if (!m.id.startsWith("welcome")) return m;
+    return { ...m, content: WELCOME_MESSAGE.content };
+  });
+}
 
 type StoredHistory = {
   activeId: string;
@@ -58,14 +67,19 @@ export function loadHistory(): {
     }
     const threads = parsed.threads
       .filter((t) => t && typeof t.id === "string" && Array.isArray(t.messages))
-      .map((t) => ({
-        ...t,
-        title: t.title || titleFromMessages(t.messages),
-        result: t.result ?? null,
-        callListVisible: t.callListVisible ?? Boolean(t.result?.actions?.length),
-        createdAt: t.createdAt ?? new Date().toISOString(),
-        updatedAt: t.updatedAt ?? t.createdAt ?? new Date().toISOString(),
-      }));
+      .map((t) => {
+        const messages = refreshWelcome(t.messages);
+        return {
+          ...t,
+          messages,
+          title: t.title || titleFromMessages(messages),
+          result: t.result ?? null,
+          callListVisible:
+            t.callListVisible ?? Boolean(t.result?.actions?.length),
+          createdAt: t.createdAt ?? new Date().toISOString(),
+          updatedAt: t.updatedAt ?? t.createdAt ?? new Date().toISOString(),
+        };
+      });
     if (!threads.length) return null;
     const activeId = threads.some((t) => t.id === parsed.activeId)
       ? parsed.activeId

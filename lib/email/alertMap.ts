@@ -1,4 +1,4 @@
-import { appOrigin, escapeHtml } from "@/lib/email/branded";
+import { appOrigin, emailAssetOrigin, escapeHtml } from "@/lib/email/branded";
 
 export type MapPoint = {
   lat: number;
@@ -43,7 +43,7 @@ export function alertStaticMapSrc(input: {
     hazLabel: input.hazard.label,
     kind: input.kind,
   });
-  return `${appOrigin()}/api/email/static-map?${q.toString()}`;
+  return `${emailAssetOrigin()}/api/email/static-map?${q.toString()}`;
 }
 
 /** Google Static Maps URL (server-only). */
@@ -144,7 +144,7 @@ export function shelterStaticMapSrc(input: {
     q.set(`d${i}Label`, d.label);
   });
   q.set("n", String(Math.min(5, input.destinations.length)));
-  return `${appOrigin()}/api/email/static-map?${q.toString()}`;
+  return `${emailAssetOrigin()}/api/email/static-map?${q.toString()}`;
 }
 
 /** Google Static Maps — home + numbered shelter pins (server-only). */
