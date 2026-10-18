@@ -1,385 +1,181 @@
-/** Fixed prototype eval set for Cup / developer benchmarking. */
+import {
+  hazardHintLabel,
+  type HazardReport,
+  type ReportStatus,
+} from "@/lib/reports/types";
 
-export type BenchmarkSurface = "report" | "allocation" | "chat";
+export type VerdictKey = "validated" | "rejected" | "needs_review";
 
-export type BenchmarkCase = {
+/** Display label for AI / ops verdict (never show raw "legit"). */
+export function verdictLabel(
+  v: "legit" | "rejected" | "needs_review" | null | undefined,
+): VerdictKey | null {
+  if (v === "legit") return "validated";
+  if (v === "rejected") return "rejected";
+  if (v === "needs_review") return "needs_review";
+  return null;
+}
+
+/** Officer / ops outcome that can be compared to aiVerdict. */
+export function officerOutcome(
+  status: ReportStatus,
+): "legit" | "rejected" | "needs_review" | null {
+  switch (status) {
+    case "legit":
+    case "assigned":
+    case "dispatched":
+    case "done":
+      return "legit";
+    case "rejected":
+      return "rejected";
+    case "needs_review":
+      return "needs_review";
+    default:
+      return null;
+  }
+}
+
+export type LiveBenchmarkRow = {
   id: string;
-  label: string;
-  /** Short description of the input. */
-  input: string;
-  expected: string;
-  actual: string;
-  /** Model confidence 0–1 when applicable. */
+  hazard: string;
+  place: string;
+  officer: VerdictKey | null;
+  ai: VerdictKey | null;
   confidence: number | null;
-  /** End-to-end latency in ms. */
-  latencyMs: number;
-  match: boolean;
+  latencyMs: number | null;
+  vertexLatencyMs: number | null;
+  aiPrompt: string | null;
+  aiRaw: string | null;
+  vertexPrompt: string | null;
+  vertexRaw: string | null;
+  match: boolean | null;
+  createdAt: string;
 };
 
-export type BenchmarkSuite = {
-  id: BenchmarkSurface;
-  label: string;
-  model: string;
-  note: string;
-  cases: BenchmarkCase[];
-};
+function hasText(value: string | null | undefined): boolean {
+  return Boolean(value?.trim());
+}
 
-export const BENCHMARK_SUITES: BenchmarkSuite[] = [
-  {
-    id: "report",
-    label: "Report validation",
-    model: "Vertex vision → Gemini verdict",
-    note: "10 fixed cases · photo + claim + GPS context",
-    cases: [
-      {
-        id: "r01",
-        label: "Flood clear",
-        input: "Street flood photo, claim flood, GPS in Nangka",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.93,
-        latencyMs: 1420,
-        match: true,
-      },
-      {
-        id: "r02",
-        label: "Fire clear",
-        input: "Structure fire plume, claim fire",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.91,
-        latencyMs: 1380,
-        match: true,
-      },
-      {
-        id: "r03",
-        label: "Accident",
-        input: "Two-vehicle collision, claim accident",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.88,
-        latencyMs: 1510,
-        match: true,
-      },
-      {
-        id: "r04",
-        label: "Off-topic",
-        input: "Food plate photo, claim flood",
-        expected: "rejected",
-        actual: "rejected",
-        confidence: 0.96,
-        latencyMs: 1210,
-        match: true,
-      },
-      {
-        id: "r05",
-        label: "Ambiguous water",
-        input: "Small puddle, claim deep flood",
-        expected: "needs_review",
-        actual: "needs_review",
-        confidence: 0.54,
-        latencyMs: 1680,
-        match: true,
-      },
-      {
-        id: "r06",
-        label: "Landslide",
-        input: "Slope debris on road, claim landslide",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.9,
-        latencyMs: 1450,
-        match: true,
-      },
-      {
-        id: "r07",
-        label: "Road blockage",
-        input: "Fallen tree blocking lane",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.87,
-        latencyMs: 1330,
-        match: true,
-      },
-      {
-        id: "r08",
-        label: "Claim mismatch",
-        input: "Dry street photo, claim waist-deep flood",
-        expected: "rejected",
-        actual: "needs_review",
-        confidence: 0.61,
-        latencyMs: 1720,
-        match: false,
-      },
-      {
-        id: "r09",
-        label: "Low light",
-        input: "Night flood, grainy phone photo",
-        expected: "needs_review",
-        actual: "needs_review",
-        confidence: 0.49,
-        latencyMs: 1890,
-        match: true,
-      },
-      {
-        id: "r10",
-        label: "Evac crowding",
-        input: "Packed center hall, claim evac overcrowding",
-        expected: "validated",
-        actual: "validated",
-        confidence: 0.85,
-        latencyMs: 1400,
-        match: true,
-      },
-    ],
-  },
-  {
-    id: "allocation",
-    label: "Resource allocation",
-    model: "Gemini allocation options",
-    note: "10 fixed shortage scenarios · usable plan options",
-    cases: [
-      {
-        id: "a01",
-        label: "Water short",
-        input: "Water requested 200 · available 80",
-        expected: "3 options · feasible",
-        actual: "3 options · feasible",
-        confidence: null,
-        latencyMs: 2100,
-        match: true,
-      },
-      {
-        id: "a02",
-        label: "Food short",
-        input: "Food packs 500 · available 120",
-        expected: "3 options · feasible",
-        actual: "3 options · feasible",
-        confidence: null,
-        latencyMs: 1980,
-        match: true,
-      },
-      {
-        id: "a03",
-        label: "Transport",
-        input: "Rescue boats 4 · available 1",
-        expected: "3 options · prioritize",
-        actual: "3 options · prioritize",
-        confidence: null,
-        latencyMs: 2240,
-        match: true,
-      },
-      {
-        id: "a04",
-        label: "Balanced stock",
-        input: "Request ≈ available across SKUs",
-        expected: "1–2 options · commit",
-        actual: "2 options · commit",
-        confidence: null,
-        latencyMs: 1750,
-        match: true,
-      },
-      {
-        id: "a05",
-        label: "Zero stock",
-        input: "Critical item · available 0",
-        expected: "escalate / partner",
-        actual: "escalate / partner",
-        confidence: null,
-        latencyMs: 1900,
-        match: true,
-      },
-      {
-        id: "a06",
-        label: "Multi-purok",
-        input: "Same SKU shortage in 3 puroks",
-        expected: "split plan",
-        actual: "split plan",
-        confidence: null,
-        latencyMs: 2450,
-        match: true,
-      },
-      {
-        id: "a07",
-        label: "Meds",
-        input: "OTC meds short · clinic stock",
-        expected: "clinic-first options",
-        actual: "clinic-first options",
-        confidence: null,
-        latencyMs: 2050,
-        match: true,
-      },
-      {
-        id: "a08",
-        label: "Over-request",
-        input: "Request 10× available",
-        expected: "cap + phase",
-        actual: "cap only",
-        confidence: null,
-        latencyMs: 2180,
-        match: false,
-      },
-      {
-        id: "a09",
-        label: "Mixed SKUs",
-        input: "Water + food + blankets together",
-        expected: "bundled options",
-        actual: "bundled options",
-        confidence: null,
-        latencyMs: 2600,
-        match: true,
-      },
-      {
-        id: "a10",
-        label: "After peak",
-        input: "Recovery welfare packs",
-        expected: "phased delivery",
-        actual: "phased delivery",
-        confidence: null,
-        latencyMs: 1920,
-        match: true,
-      },
-    ],
-  },
-  {
-    id: "chat",
-    label: "Officer chat",
-    model: "Gemini assist (Mangugnai)",
-    note: "10 fixed desk questions · on-topic + grounded",
-    cases: [
-      {
-        id: "c01",
-        label: "Cat 5 prep",
-        input: "Cat 5 in 3 days — what do we do?",
-        expected: "before-phase guidance",
-        actual: "before-phase guidance",
-        confidence: null,
-        latencyMs: 980,
-        match: true,
-      },
-      {
-        id: "c02",
-        label: "Map colors",
-        input: "What do red / yellow mean?",
-        expected: "triage legend",
-        actual: "triage legend",
-        confidence: null,
-        latencyMs: 720,
-        match: true,
-      },
-      {
-        id: "c03",
-        label: "Flood footprint",
-        input: "Why blue squares on the map?",
-        expected: "flood footprint explain",
-        actual: "flood footprint explain",
-        confidence: null,
-        latencyMs: 810,
-        match: true,
-      },
-      {
-        id: "c04",
-        label: "Assign report",
-        input: "Who should take CEB-CON-NANG flood ticket?",
-        expected: "officer / role hint",
-        actual: "officer / role hint",
-        confidence: null,
-        latencyMs: 1100,
-        match: true,
-      },
-      {
-        id: "c05",
-        label: "Resources link",
-        input: "Shortage on water — where do I allocate?",
-        expected: "point to Resources",
-        actual: "point to Resources",
-        confidence: null,
-        latencyMs: 890,
-        match: true,
-      },
-      {
-        id: "c06",
-        label: "Off-topic",
-        input: "Write a poem about Cebu",
-        expected: "refuse / redirect",
-        actual: "refuse / redirect",
-        confidence: null,
-        latencyMs: 640,
-        match: true,
-      },
-      {
-        id: "c07",
-        label: "During peak",
-        input: "Reports flooding in — priority order?",
-        expected: "during triage order",
-        actual: "during triage order",
-        confidence: null,
-        latencyMs: 1050,
-        match: true,
-      },
-      {
-        id: "c08",
-        label: "After recovery",
-        input: "Storm passed — what checks remain?",
-        expected: "after / welfare checks",
-        actual: "after / welfare checks",
-        confidence: null,
-        latencyMs: 940,
-        match: true,
-      },
-      {
-        id: "c09",
-        label: "Hallucinated place",
-        input: "Status in Brgy. Fakeville?",
-        expected: "unknown / no invent",
-        actual: "unknown / no invent",
-        confidence: null,
-        latencyMs: 780,
-        match: true,
-      },
-      {
-        id: "c10",
-        label: "SMS send",
-        input: "Draft SMS for purok 3 evacuate now",
-        expected: "short alert draft",
-        actual: "long essay",
-        confidence: null,
-        latencyMs: 1200,
-        match: false,
-      },
-    ],
-  },
-];
-
-export function summarizeSuite(suite: BenchmarkSuite) {
-  const n = suite.cases.length;
-  const matches = suite.cases.filter((c) => c.match).length;
-  const latencies = [...suite.cases.map((c) => c.latencyMs)].sort(
-    (a, b) => a - b,
+/** Gemini call has latency + stored response (prompt or raw return). */
+export function hasGeminiTrace(r: HazardReport): boolean {
+  return (
+    typeof r.aiLatencyMs === "number" &&
+    Number.isFinite(r.aiLatencyMs) &&
+    (hasText(r.aiRaw) || hasText(r.aiPrompt))
   );
-  const p50 = percentile(latencies, 0.5);
-  const p95 = percentile(latencies, 0.95);
-  const maxLatency = latencies[latencies.length - 1] ?? 1;
+}
+
+/** Vertex call has latency + stored response (prompt or raw return). */
+export function hasVertexTrace(r: HazardReport): boolean {
+  return (
+    typeof r.vertexLatencyMs === "number" &&
+    Number.isFinite(r.vertexLatencyMs) &&
+    (hasText(r.vertexRaw) || hasText(r.vertexPrompt))
+  );
+}
+
+/**
+ * Only reports with real AI telemetry (latency + prompt/return).
+ * Seeds / old docs without traces are excluded.
+ */
+export function reportsToBenchmarkRows(
+  reports: HazardReport[],
+): LiveBenchmarkRow[] {
+  const scored = reports.filter(
+    (r) => hasGeminiTrace(r) || hasVertexTrace(r),
+  );
+
+  return scored.map((r) => {
+    const outcome = officerOutcome(r.status);
+    const match =
+      outcome != null && r.aiVerdict != null ? outcome === r.aiVerdict : null;
+    return {
+      id: r.id,
+      hazard: hazardHintLabel(r.hazardHint),
+      place: [r.barangay, r.lgu].filter(Boolean).join(", ") || "—",
+      officer: outcome ? verdictLabel(outcome) : null,
+      ai: verdictLabel(r.aiVerdict),
+      confidence:
+        typeof r.aiConfidence === "number" && Number.isFinite(r.aiConfidence)
+          ? r.aiConfidence
+          : null,
+      latencyMs:
+        typeof r.aiLatencyMs === "number" && Number.isFinite(r.aiLatencyMs)
+          ? Math.max(0, Math.round(r.aiLatencyMs))
+          : null,
+      vertexLatencyMs:
+        typeof r.vertexLatencyMs === "number" &&
+        Number.isFinite(r.vertexLatencyMs)
+          ? Math.max(0, Math.round(r.vertexLatencyMs))
+          : null,
+      aiPrompt: r.aiPrompt,
+      aiRaw: r.aiRaw,
+      vertexPrompt: r.vertexPrompt,
+      vertexRaw: r.vertexRaw,
+      match,
+      createdAt: r.createdAt,
+    };
+  });
+}
+
+export function summarizeLiveRows(rows: LiveBenchmarkRow[]) {
+  const withLatency = rows
+    .map((r) => r.latencyMs)
+    .filter((ms): ms is number => ms != null)
+    .sort((a, b) => a - b);
+  const withVertex = rows
+    .map((r) => r.vertexLatencyMs)
+    .filter((ms): ms is number => ms != null)
+    .sort((a, b) => a - b);
+  const comparable = rows.filter((r) => r.match != null);
+  const matches = comparable.filter((r) => r.match === true).length;
+  const n = comparable.length;
+  const confidences = rows
+    .map((r) => r.confidence)
+    .filter((c): c is number => c != null);
+  const avgConfidence =
+    confidences.length === 0
+      ? null
+      : confidences.reduce((a, b) => a + b, 0) / confidences.length;
+
+  const mix: Record<VerdictKey, number> = {
+    validated: 0,
+    rejected: 0,
+    needs_review: 0,
+  };
+  for (const r of rows) {
+    if (r.ai) mix[r.ai] += 1;
+  }
+
   return {
-    n,
+    scored: rows.length,
+    comparable: n,
     matches,
-    accuracyPct: n === 0 ? 0 : Math.round((matches / n) * 100),
-    p50,
-    p95,
-    maxLatency,
+    agreementPct: n === 0 ? null : Math.round((matches / n) * 100),
+    misses: Math.max(0, n - matches),
+    p50: percentile(withLatency, 0.5),
+    p95: percentile(withLatency, 0.95),
+    maxLatency: withLatency[withLatency.length - 1] ?? 0,
+    withLatency: withLatency.length,
+    vertexP50: percentile(withVertex, 0.5),
+    vertexP95: percentile(withVertex, 0.95),
+    withVertex: withVertex.length,
+    avgConfidence,
+    mix,
   };
 }
 
-function percentile(sorted: number[], p: number): number {
-  if (sorted.length === 0) return 0;
+function percentile(sorted: number[], p: number): number | null {
+  if (sorted.length === 0) return null;
   const idx = Math.min(
     sorted.length - 1,
     Math.max(0, Math.ceil(p * sorted.length) - 1),
   );
-  return sorted[idx] ?? 0;
+  return sorted[idx] ?? null;
 }
 
-export function formatLatencyMs(ms: number): string {
+export function formatLatencyMs(ms: number | null | undefined): string {
+  if (ms == null || !Number.isFinite(ms)) return "—";
   if (ms < 1000) return `${Math.round(ms)} ms`;
   return `${(ms / 1000).toFixed(1)} s`;
 }

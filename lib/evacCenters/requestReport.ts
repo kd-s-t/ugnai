@@ -163,6 +163,8 @@ export async function createEvacStockRequestReport(input: {
     aiSource: null,
     aiModel: null,
     aiLatencyMs: null,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: priority,
     aiPriorityFactors: {
       immediateSeverity: `Evac center request · ${urgencyLabel(input.urgency)}.`,
@@ -174,6 +176,8 @@ export async function createEvacStockRequestReport(input: {
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,

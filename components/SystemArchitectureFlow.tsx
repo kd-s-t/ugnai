@@ -25,7 +25,7 @@ import { FlowCopyJsonButton } from "@/components/flow/FlowCopyJsonButton";
 import { useFlowLayout } from "@/components/flow/useFlowLayout";
 
 const DOT = "!size-2 !bg-[#0f1b2d] !border-0";
-const FLOW_ID = "system-architecture-v3";
+const FLOW_ID = "system-architecture-v37";
 
 function StepNode({ data }: NodeProps) {
   const d = data as {
@@ -34,7 +34,9 @@ function StepNode({ data }: NodeProps) {
     lines?: string[];
     costs?: string[];
     logo?: string;
+    logos?: string[];
     textOnly?: boolean;
+    large?: boolean;
     in?: boolean;
     out?: boolean;
     outTop?: boolean;
@@ -42,13 +44,24 @@ function StepNode({ data }: NodeProps) {
     outMid?: boolean;
     outLeft?: boolean;
     outBottom?: boolean;
+    outUp?: boolean;
     inTop?: boolean;
     inBot?: boolean;
     inMid?: boolean;
     inFromTop?: boolean;
+    inFromBottom?: boolean;
   };
+  const width = d.large
+    ? 220
+    : d.logos && d.logos.length > 2
+      ? 220
+      : 148;
+  const logoSize = d.large ? 52 : 36;
   return (
-    <div className={`relative ${flowNodeClass}`} style={{ width: 148 }}>
+    <div
+      className={`relative ${flowNodeClass} ${d.large ? "gap-1.5 px-4 py-3.5" : ""}`}
+      style={{ width }}
+    >
       {d.note ? (
         <p className="absolute -top-6 left-1/2 w-max -translate-x-1/2 font-mono text-[10px] text-[var(--muted)]">
           {d.note}
@@ -92,16 +105,44 @@ function StepNode({ data }: NodeProps) {
           className={DOT}
         />
       ) : null}
-      {d.logo && !d.textOnly ? (
+      {d.inFromBottom ? (
+        <Handle
+          type="target"
+          position={Position.Bottom}
+          id="in-from-bottom"
+          className={DOT}
+        />
+      ) : null}
+      {d.logos?.length && !d.textOnly ? (
+        <div className={`flex items-center justify-center ${d.large ? "gap-2.5" : "gap-1.5"}`}>
+          {d.logos.map((src) => (
+            <Image
+              key={src}
+              src={src}
+              alt=""
+              width={logoSize}
+              height={logoSize}
+              className="object-contain"
+              style={{ width: logoSize, height: logoSize }}
+            />
+          ))}
+        </div>
+      ) : d.logo && !d.textOnly ? (
         <Image
           src={d.logo}
           alt=""
-          width={40}
-          height={40}
-          className="size-10 object-contain"
+          width={d.large ? 52 : 40}
+          height={d.large ? 52 : 40}
+          className="object-contain"
+          style={{
+            width: d.large ? 52 : 40,
+            height: d.large ? 52 : 40,
+          }}
         />
       ) : null}
-      <p className={flowLabelClass}>{d.label}</p>
+      <p className={`${flowLabelClass} ${d.large ? "text-base" : ""}`}>
+        {d.label}
+      </p>
       {d.lines?.map((line) => (
         <p key={line} className={flowMetaClass}>
           {line}
@@ -159,6 +200,14 @@ function StepNode({ data }: NodeProps) {
           className={DOT}
         />
       ) : null}
+      {d.outUp ? (
+        <Handle
+          type="source"
+          position={Position.Top}
+          id="out-up"
+          className={DOT}
+        />
+      ) : null}
     </div>
   );
 }
@@ -173,7 +222,7 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "citizen",
         type: "step",
-        position: { x: -81.1963498739745, y: 29.707504945552515 },
+        position: { x: -76.0864325446909, y: 103.80130622016486 },
         data: {
           label: "Citizen Web",
           logo: "/brands/citizens.png",
@@ -184,18 +233,18 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "mobile",
         type: "step",
-        position: { x: -80.05273931236924, y: 200 },
+        position: { x: -75.302775116183, y: 209.49992839237248 },
         data: {
           label: "iOS · Android",
           textOnly: true,
-          lines: ["report ingest"],
+          lines: ["report"],
           out: true,
         },
       },
       {
         id: "officer",
         type: "step",
-        position: { x: -73.19107594273758, y: 360 },
+        position: { x: -74.04272883095152, y: 270.5764467375368 },
         data: {
           label: "Officer Admin",
           logo: "/brands/officer.png",
@@ -206,19 +255,42 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "terraform",
         type: "step",
-        position: { x: 306.4594607292632, y: 40 },
+        position: { x: 254.2836699034495, y: -37.576875864409296 },
         data: {
           label: "Terraform",
-          textOnly: true,
+          logo: "/brands/terraform.png",
           lines: ["ugnai/infra", "GCP · Firebase"],
           note: "provision",
           outBottom: true,
         },
       },
       {
+        id: "github",
+        type: "step",
+        position: { x: 524.2014458401512, y: -25.63495291243398 },
+        data: {
+          label: "GitHub Actions",
+          logos: ["/brands/github.png", "/brands/github-actions.png"],
+          lines: ["CI/CD · deploy"],
+          note: "deploy",
+          outBottom: true,
+        },
+      },
+      {
+        id: "squarespace",
+        type: "step",
+        position: { x: 253.35304292702818, y: 383.5529873966153 },
+        data: {
+          label: "Squarespace",
+          logo: "/brands/squarespace.png",
+          lines: ["DNS · ugnaiph.com"],
+          inFromTop: true,
+        },
+      },
+      {
         id: "hosting",
         type: "step",
-        position: { x: 306.4594607292632, y: 189.70750494555253 },
+        position: { x: 254.20985457121446, y: 187.33252284745942 },
         data: {
           label: "Firebase Hosting",
           logo: "/brands/firebase.png",
@@ -229,40 +301,71 @@ function SystemArchitectureFlowCanvas() {
           inMid: true,
           inBot: true,
           out: true,
+          outBottom: true,
         },
       },
       {
         id: "run",
         type: "step",
-        position: { x: 488.4268657791937, y: 186.03716376428656 },
+        position: { x: 487.5758303932828, y: 167.3143852742473 },
         data: {
           label: "Cloud Run",
-          logo: "/brands/cloud-run.png",
+          logos: ["/brands/cloud-run.png", "/brands/nextjs.png"],
           lines: ["Next.js 15", "API + UI"],
           note: "asia-southeast1",
+          large: true,
           in: true,
+          inFromTop: true,
           outTop: true,
           outMid: true,
-          outBot: true,
+          outBottom: true,
+        },
+      },
+      {
+        id: "figma",
+        type: "step",
+        position: { x: 252.09530210464953, y: 501.61674087205915 },
+        data: {
+          label: "Figma",
+          logo: "/brands/figma.png",
+          lines: ["Ugnai Flow · UX"],
+          out: true,
+        },
+      },
+      {
+        id: "ui",
+        type: "step",
+        position: { x: 487.7402620006719, y: 429.2708705811217 },
+        data: {
+          label: "UI stack",
+          logos: [
+            "/brands/shadcn.svg",
+            "/brands/tailwindcss.svg",
+            "/brands/lucide.svg",
+            "/brands/framer-motion.svg",
+          ],
+          lines: ["shadcn · Tailwind · Lucide · Motion"],
+          inFromTop: true,
+          in: true,
         },
       },
       {
         id: "firestore",
         type: "step",
-        position: { x: 716.0105478624737, y: 62.872211232105485 },
+        position: { x: 824.8514332224167, y: -12.431427294827945 },
         data: {
           label: "Firestore",
           logo: "/brands/firestore.png",
           lines: ["reports · inventory"],
           in: true,
-          outTop: true,
           outBot: true,
+          outUp: true,
         },
       },
       {
         id: "storage",
         type: "step",
-        position: { x: 718.2977689856843, y: 194.28194719197361 },
+        position: { x: 787.7591940421524, y: 534.2608347864266 },
         data: {
           label: "Storage",
           logo: "/brands/gcs.png",
@@ -273,7 +376,7 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "auth",
         type: "step",
-        position: { x: 722.8722112321054, y: 331.99472606876304 },
+        position: { x: 787.7786251867639, y: 427.6481293533913 },
         data: {
           label: "Firebase Auth",
           logo: "/brands/firebase.png",
@@ -284,7 +387,7 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "vertex",
         type: "step",
-        position: { x: 1064.0685611060799, y: -27.446653478526592 },
+        position: { x: 1134.0544640961862, y: -227.73983564637743 },
         data: {
           label: "Vertex AI",
           logo: "/brands/vertex-ai.svg",
@@ -294,35 +397,68 @@ function SystemArchitectureFlowCanvas() {
         },
       },
       {
+        id: "train",
+        type: "step",
+        position: { x: 1320, y: -227.73983564637743 },
+        data: {
+          label: "Train",
+          textOnly: true,
+          lines: ["AutoML / endpoint"],
+          in: true,
+          out: true,
+        },
+      },
+      {
+        id: "deploy",
+        type: "step",
+        position: { x: 1480, y: -227.73983564637743 },
+        data: {
+          label: "Deploy",
+          textOnly: true,
+          lines: ["API ready"],
+          in: true,
+        },
+      },
+      {
         id: "gemini",
         type: "step",
-        position: { x: 1076.648277283738, y: 133.13833663036837 },
+        position: { x: 1131.0289923593396, y: 10.122103276260944 },
         data: {
           label: "Gemini",
           logo: "/brands/gemini.png",
           lines: ["validate · allocate"],
-          inTop: true,
-          inBot: true,
-          outTop: true,
-          outBot: true,
+          in: true,
+        },
+      },
+      {
+        id: "datasets",
+        type: "step",
+        position: { x: 598.8110372630342, y: -326.46850621050567 },
+        data: {
+          label: "Downloaded datasets",
+          textOnly: true,
+          lines: ["AIDERv2 · Zenodo"],
+          note: "train images",
+          out: true,
         },
       },
       {
         id: "bq",
         type: "step",
-        position: { x: 1077.7918878453431, y: 329.7338746017371 },
+        position: { x: 820.9004818217878, y: -227.5975167218253 },
         data: {
           label: "BigQuery",
           logo: "/brands/bigquery.png",
           lines: ["verdict mirror"],
           in: true,
+          inFromBottom: true,
           out: true,
         },
       },
       {
         id: "twilio",
         type: "step",
-        position: { x: 1369.2543631175806, y: -76.64827728373803 },
+        position: { x: 946.8601540587107, y: 126.9984601587933 },
         data: {
           label: "Twilio",
           logo: "/brands/twilio.png",
@@ -333,7 +469,7 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "resend",
         type: "step",
-        position: { x: 1365.8235314327649, y: 54.78782833231473 },
+        position: { x: 1105.3856532882896, y: 184.95485379214168 },
         data: {
           label: "Resend",
           logo: "/brands/resend.png",
@@ -344,7 +480,7 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "maps",
         type: "step",
-        position: { x: 1371.541584240791, y: 204.52170293405192 },
+        position: { x: 786.9145018931259, y: 320.60683174379375 },
         data: {
           label: "Maps · Weather",
           logo: "/brands/google-maps.png",
@@ -355,21 +491,21 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "ee",
         type: "step",
-        position: { x: 1364.6799208711595, y: 340.5322507965257 },
+        position: { x: 561.1357997579378, y: -230.91196180899942 },
         data: {
           label: "Earth Engine",
           logo: "/brands/earth-engine.webp",
           lines: ["offline → ee_datasets"],
-          outLeft: true,
+          out: true,
         },
       },
       {
         id: "elevenlabs",
         type: "step",
-        position: { x: 1365.8235314327649, y: 470 },
+        position: { x: 946.4159491913505, y: 243.93852558332713 },
         data: {
           label: "ElevenLabs",
-          textOnly: true,
+          logo: "/brands/elevenlabs.png",
           lines: ["Mangugnai Speak", "/api/ai/tts"],
           in: true,
         },
@@ -381,6 +517,16 @@ function SystemArchitectureFlowCanvas() {
       color: "#0f1b2d",
     } as const;
     const style = { stroke: "#0f1b2d", strokeWidth: 1.75 };
+    /** Cloud Run → integrations: curved dashed so they don’t look like node-to-node hops. */
+    const busStyle = {
+      stroke: "#5c6570",
+      strokeWidth: 1.5,
+      strokeDasharray: "6 4",
+    };
+    const busMarker = {
+      type: MarkerType.ArrowClosed,
+      color: "#5c6570",
+    } as const;
     const labelBg = {
       labelBgStyle: { fill: "#eef1f5" },
       labelBgPadding: [4, 6] as [number, number],
@@ -394,7 +540,16 @@ function SystemArchitectureFlowCanvas() {
         sourceHandle: "out-bottom",
         target: "hosting",
         targetHandle: "in-from-top",
-        label: "provision",
+        markerEnd: marker,
+        style,
+      },
+      {
+        id: "e-sqsp",
+        source: "hosting",
+        sourceHandle: "out-bottom",
+        target: "squarespace",
+        targetHandle: "in-from-top",
+        label: "DNS",
         markerEnd: marker,
         style,
         ...labelBg,
@@ -414,10 +569,8 @@ function SystemArchitectureFlowCanvas() {
         sourceHandle: "out",
         target: "hosting",
         targetHandle: "in-mid",
-        label: "ingest",
         markerEnd: marker,
         style,
-        ...labelBg,
       },
       {
         id: "e-officer",
@@ -440,6 +593,39 @@ function SystemArchitectureFlowCanvas() {
         ...labelBg,
       },
       {
+        id: "e-gh",
+        source: "github",
+        sourceHandle: "out-bottom",
+        target: "run",
+        targetHandle: "in-from-top",
+        label: "deploy",
+        markerEnd: marker,
+        style,
+        ...labelBg,
+      },
+      {
+        id: "e-ui",
+        source: "run",
+        sourceHandle: "out-bottom",
+        target: "ui",
+        targetHandle: "in-from-top",
+        label: "frontend",
+        markerEnd: marker,
+        style,
+        ...labelBg,
+      },
+      {
+        id: "e-figma",
+        source: "figma",
+        sourceHandle: "out",
+        target: "ui",
+        targetHandle: "in",
+        label: "design",
+        markerEnd: marker,
+        style,
+        ...labelBg,
+      },
+      {
         id: "e-fs",
         source: "run",
         sourceHandle: "out-top",
@@ -450,82 +636,74 @@ function SystemArchitectureFlowCanvas() {
       },
       {
         id: "e-st",
+        type: "default",
         source: "run",
         sourceHandle: "out-mid",
         target: "storage",
         targetHandle: "in",
-        markerEnd: marker,
-        style,
+        markerEnd: busMarker,
+        style: busStyle,
       },
       {
         id: "e-auth",
+        type: "default",
         source: "run",
-        sourceHandle: "out-bot",
+        sourceHandle: "out-mid",
         target: "auth",
         targetHandle: "in",
-        markerEnd: marker,
-        style,
-      },
-      {
-        id: "e-vertex",
-        source: "firestore",
-        sourceHandle: "out-top",
-        target: "vertex",
-        targetHandle: "in",
-        label: "queued photo",
-        markerEnd: marker,
-        style,
-        ...labelBg,
-      },
-      {
-        id: "e-vertex-gemini",
-        source: "vertex",
-        sourceHandle: "out",
-        target: "gemini",
-        targetHandle: "in-top",
-        label: "image signal",
-        markerEnd: marker,
-        style,
-        ...labelBg,
+        markerEnd: busMarker,
+        style: busStyle,
       },
       {
         id: "e-fs-gemini",
         source: "firestore",
         sourceHandle: "out-bot",
         target: "gemini",
-        targetHandle: "in-bot",
-        label: "text · GPS · trust",
+        targetHandle: "in",
+        label: "validate",
         markerEnd: marker,
         style,
         ...labelBg,
       },
       {
-        id: "e-gemini-twilio",
-        source: "gemini",
-        sourceHandle: "out-top",
+        id: "e-run-twilio",
+        type: "default",
+        source: "run",
+        sourceHandle: "out-mid",
         target: "twilio",
         targetHandle: "in",
-        label: "legit → alerts",
-        markerEnd: marker,
-        style,
+        label: "alerts",
+        markerEnd: busMarker,
+        style: busStyle,
         ...labelBg,
       },
       {
-        id: "e-gemini-resend",
-        source: "gemini",
-        sourceHandle: "out-bot",
+        id: "e-run-resend",
+        type: "default",
+        source: "run",
+        sourceHandle: "out-mid",
         target: "resend",
         targetHandle: "in",
-        markerEnd: marker,
-        style,
+        markerEnd: busMarker,
+        style: busStyle,
       },
       {
         id: "e-run-eleven",
+        type: "default",
         source: "run",
-        sourceHandle: "out-bot",
+        sourceHandle: "out-mid",
         target: "elevenlabs",
         targetHandle: "in",
-        label: "TTS",
+        markerEnd: busMarker,
+        style: busStyle,
+      },
+      {
+        id: "e-datasets-bq",
+        source: "datasets",
+        sourceHandle: "out",
+        target: "bq",
+        targetHandle: "in",
+        label: "import",
         markerEnd: marker,
         style,
         ...labelBg,
@@ -533,27 +711,29 @@ function SystemArchitectureFlowCanvas() {
       {
         id: "e-fs-bq",
         source: "firestore",
-        sourceHandle: "out-bot",
+        sourceHandle: "out-up",
         target: "bq",
-        targetHandle: "in",
+        targetHandle: "in-from-bottom",
         label: "verdict sync",
         markerEnd: marker,
         style,
         ...labelBg,
+        type: "smoothstep",
       },
       {
         id: "e-run-maps",
+        type: "default",
         source: "run",
         sourceHandle: "out-mid",
         target: "maps",
         targetHandle: "in",
-        markerEnd: marker,
-        style,
+        markerEnd: busMarker,
+        style: busStyle,
       },
       {
         id: "e-ee",
         source: "ee",
-        sourceHandle: "out-left",
+        sourceHandle: "out",
         target: "firestore",
         targetHandle: "in",
         label: "ee_datasets",
@@ -562,15 +742,33 @@ function SystemArchitectureFlowCanvas() {
         ...labelBg,
       },
       {
-        id: "e-bq-train",
+        id: "e-bq-vertex",
         source: "bq",
         sourceHandle: "out",
         target: "vertex",
         targetHandle: "in",
-        label: "cron → GCS → retrain",
+        label: "cron → GCS",
         markerEnd: marker,
         style,
         ...labelBg,
+      },
+      {
+        id: "e-vertex-train",
+        source: "vertex",
+        sourceHandle: "out",
+        target: "train",
+        targetHandle: "in",
+        markerEnd: marker,
+        style,
+      },
+      {
+        id: "e-train-deploy",
+        source: "train",
+        sourceHandle: "out",
+        target: "deploy",
+        targetHandle: "in",
+        markerEnd: marker,
+        style,
       },
     ];
 
@@ -648,9 +846,10 @@ export function SystemArchitectureFlow() {
           System Architecture
         </h1>
         <p className="mt-1 text-sm text-[var(--muted)]">
-          Terraform provisions Firebase Hosting → Cloud Run (Next.js) →
-          Firestore / Storage / Auth. Gemini + Vertex for AI; Twilio, Resend,
-          ElevenLabs for alerts and Speak; Earth Engine offline datasets.
+          Terraform provisions Firebase Hosting → Cloud Run (Next.js + shadcn /
+          Tailwind / Lucide / Motion) → Firestore / Storage / Auth. Gemini +
+          Vertex for AI; Twilio, Resend, ElevenLabs for alerts and Speak; Earth
+          Engine offline datasets.
         </p>
       </div>
       <div className="min-h-0 flex-1">

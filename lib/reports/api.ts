@@ -22,6 +22,7 @@ import {
 import { mapDispatchLog } from "@/lib/reports/dispatchLog";
 import { resolveReportMediaUrl } from "@/lib/reports/mediaUrl";
 import { mapReportAssignees } from "@/lib/reports/assignees";
+import { normalizeLatencyMs } from "@/lib/ai/aiTrace";
 import {
   parsePriorityFactors,
   parseReportPriority,
@@ -212,6 +213,8 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
         : data.aiLatencyMs != null && Number.isFinite(Number(data.aiLatencyMs))
           ? Math.max(0, Math.round(Number(data.aiLatencyMs)))
           : null,
+    aiPrompt: data.aiPrompt != null ? String(data.aiPrompt) : null,
+    aiRaw: data.aiRaw != null ? String(data.aiRaw) : null,
     aiPriority: parseReportPriority(data.aiPriority),
     aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
     vertexClass: data.vertexClass != null ? String(data.vertexClass) : null,
@@ -229,6 +232,9 @@ function mapReport(id: string, data: Record<string, unknown>): HazardReport {
             Number.isFinite(Number(data.vertexLatencyMs))
           ? Math.max(0, Math.round(Number(data.vertexLatencyMs)))
           : null,
+    vertexPrompt:
+      data.vertexPrompt != null ? String(data.vertexPrompt) : null,
+    vertexRaw: data.vertexRaw != null ? String(data.vertexRaw) : null,
     vertexLocationLabel:
       data.vertexLocationLabel != null
         ? String(data.vertexLocationLabel)
@@ -398,11 +404,15 @@ export async function startIncidentDraft(input: {
     aiSource: null,
     aiModel: null,
     aiLatencyMs: null,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -591,11 +601,15 @@ export async function createGuestHazardReport(input: {
     aiSource: null,
     aiModel: null,
     aiLatencyMs: null,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: input.vertexClass ?? null,
     vertexConfidence: input.vertexConfidence ?? null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -702,11 +716,15 @@ export async function updateGuestHazardReport(input: {
     aiSource: null,
     aiModel: null,
     aiLatencyMs: null,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -805,11 +823,15 @@ export async function createHazardReport(input: {
     aiSource: null,
     aiModel: null,
     aiLatencyMs: null,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -1059,6 +1081,8 @@ export async function updateReportValidation(
     aiSource: HazardReport["aiSource"];
     aiModel: string | null;
     aiLatencyMs?: number | null;
+    aiPrompt?: string | null;
+    aiRaw?: string | null;
     hazardHint?: ReportHazardHint;
     /** When AI upgrades a generic intent title (e.g. "I need help" → "Fire"). */
     title?: string;
@@ -1067,6 +1091,8 @@ export async function updateReportValidation(
     vertexClass?: string | null;
     vertexConfidence?: number | null;
     vertexLatencyMs?: number | null;
+    vertexPrompt?: string | null;
+    vertexRaw?: string | null;
     vertexLocationLabel?: string | null;
     vertexLocationConfidence?: number | null;
     vertexLocationPlaceId?: string | null;
@@ -1097,6 +1123,16 @@ export async function updateReportValidation(
     updatedAt: new Date().toISOString(),
     updatedAtServer: serverTimestamp(),
   };
+  if ("aiLatencyMs" in rest) {
+    payload.aiLatencyMs = normalizeLatencyMs(
+      typeof rest.aiLatencyMs === "number" ? rest.aiLatencyMs : null,
+    );
+  }
+  if ("vertexLatencyMs" in rest) {
+    payload.vertexLatencyMs = normalizeLatencyMs(
+      typeof rest.vertexLatencyMs === "number" ? rest.vertexLatencyMs : null,
+    );
+  }
   if (trustInput) {
     const trust = computeReportTrust({
       ...trustInput,

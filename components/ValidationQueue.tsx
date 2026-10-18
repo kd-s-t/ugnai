@@ -149,7 +149,11 @@ export function ValidationQueue() {
         aiSource: report.aiSource,
         aiModel: report.aiModel,
         aiLatencyMs: report.aiLatencyMs,
+        aiPrompt: report.aiPrompt,
+        aiRaw: report.aiRaw,
         vertexLatencyMs: report.vertexLatencyMs,
+        vertexPrompt: report.vertexPrompt,
+        vertexRaw: report.vertexRaw,
         validatedAt,
         trustInput: {
           registered: Boolean(report.citizenUid),

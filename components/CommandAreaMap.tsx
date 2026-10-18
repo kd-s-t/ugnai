@@ -1059,7 +1059,8 @@ function CommandAreaMapInner({
             ) : null}
             {isShelter &&
             (sp.stock ||
-              typeof sp.occupancy === "number") ? (
+              typeof sp.occupancy === "number" ||
+              typeof sp.capacity === "number") ? (
               <div style={{ marginTop: 8 }}>
                 <EvacStockList
                   stock={sp.stock ?? emptyEvacStock()}

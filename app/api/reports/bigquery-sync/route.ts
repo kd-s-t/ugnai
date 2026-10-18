@@ -60,6 +60,8 @@ export async function POST(req: Request) {
       typeof r.aiLatencyMs === "number" && Number.isFinite(r.aiLatencyMs)
         ? Math.max(0, Math.round(r.aiLatencyMs))
         : null,
+    aiPrompt: r.aiPrompt != null ? String(r.aiPrompt) : null,
+    aiRaw: r.aiRaw != null ? String(r.aiRaw) : null,
     aiPriority: r.aiPriority ?? null,
     aiPriorityFactors: r.aiPriorityFactors ?? null,
     vertexClass: r.vertexClass ?? null,
@@ -70,6 +72,8 @@ export async function POST(req: Request) {
       Number.isFinite(r.vertexLatencyMs)
         ? Math.max(0, Math.round(r.vertexLatencyMs))
         : null,
+    vertexPrompt: r.vertexPrompt != null ? String(r.vertexPrompt) : null,
+    vertexRaw: r.vertexRaw != null ? String(r.vertexRaw) : null,
     vertexLocationLabel: r.vertexLocationLabel ?? null,
     vertexLocationConfidence:
       typeof r.vertexLocationConfidence === "number"

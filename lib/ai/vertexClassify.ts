@@ -1,4 +1,5 @@
 import { GoogleAuth } from "google-auth-library";
+import { clipAiTrace, normalizeLatencyMs } from "@/lib/ai/aiTrace";
 import {
   filterPlaces,
   matchPlace,
@@ -21,6 +22,10 @@ export type VertexClassifyResult = {
   source: "vertex" | "automl" | "skipped" | "error";
   /** Wall time for the Vertex call (null when skipped / not run). */
   latencyMs: number | null;
+  /** Text prompt sent (image bytes omitted). */
+  prompt: string | null;
+  /** Raw model / API text return. */
+  rawReturn: string | null;
   reason?: string;
   endpoint?: string;
 };
@@ -61,6 +66,8 @@ function emptyResult(
     locationPlaceId: null,
     locationPlaceLabel: null,
     latencyMs: null,
+    prompt: null,
+    rawReturn: null,
     ...partial,
   };
 }
@@ -263,6 +270,9 @@ async function classifyWithAutomlEndpoint(input: {
   }
 
   const url = `https://${input.env.location}-aiplatform.googleapis.com/v1/${resource}:predict`;
+  const prompt = clipAiTrace(
+    `Vertex AutoML :predict\nendpoint: ${resource}\ninstances: [{ content: <image base64 omitted> }]`,
+  );
   const res = await fetch(url, {
     method: "POST",
     headers: {
@@ -278,12 +288,15 @@ async function classifyWithAutomlEndpoint(input: {
     const text = await res.text().catch(() => "");
     return emptyResult({
       source: "error",
+      prompt,
+      rawReturn: clipAiTrace(text),
       reason: `AutoML predict ${res.status}: ${text.slice(0, 180)}`,
       endpoint: resource,
     });
   }
 
   const data = (await res.json()) as { predictions?: unknown[] };
+  const rawReturn = clipAiTrace(JSON.stringify(data, null, 2));
   const { displayNames, confidences } = parsePrediction(data.predictions?.[0]);
   const top = pickTop(displayNames, confidences);
   if (!top.className) {
@@ -291,6 +304,8 @@ async function classifyWithAutomlEndpoint(input: {
       displayNames,
       confidences,
       source: "error",
+      prompt,
+      rawReturn,
       reason: "AutoML returned no class.",
       endpoint: resource,
     });
@@ -301,6 +316,8 @@ async function classifyWithAutomlEndpoint(input: {
     displayNames,
     confidences,
     source: "automl",
+    prompt,
+    rawReturn,
     endpoint: resource,
   });
 }
@@ -317,13 +334,16 @@ async function classifyWithVertexGemini(input: {
   const resource = publisherModelResource(input.env);
   const url = `https://${input.env.location}-aiplatform.googleapis.com/v1/${resource}:generateContent`;
   const mimeType = input.mimeType?.trim() || "image/jpeg";
-  const prompt = `Classify this citizen field-report photo for barangay disaster response in Consolacion / metro Cebu (Philippines).
+  const promptText = `Classify this citizen field-report photo for barangay disaster response in Consolacion / metro Cebu (Philippines).
 Return ONLY JSON:
 {"className":"${VISION_CLASSES.join("|")}","confidence":0-1,"locationLabel":"short place from visual cues","locationConfidence":0-1}
 Rules:
 - className: single best hazard class. Prefer "unrelated" if not a hazard scene.
 - locationLabel: where the photo appears to be (barangay, landmark, street type, subdivision, mall, coast, etc.). Use Philippine place cues when visible. If unknown, use "unknown".
-- locationConfidence: how sure you are about the place (0-1).`;
+- locationConfidence: how sure you are about the place (0-1).
+
+[attached: inline image ${mimeType}]`;
+  const prompt = clipAiTrace(promptText);
 
   const res = await fetch(url, {
     method: "POST",
@@ -336,7 +356,7 @@ Rules:
         {
           role: "user",
           parts: [
-            { text: prompt },
+            { text: promptText.replace(/\n\n\[attached:.*$/, "") },
             {
               inlineData: {
                 mimeType,
@@ -357,6 +377,8 @@ Rules:
     const text = await res.text().catch(() => "");
     return emptyResult({
       source: "error",
+      prompt,
+      rawReturn: clipAiTrace(text),
       reason: `Vertex Gemini ${res.status}: ${text.slice(0, 180)}`,
       endpoint: resource,
     });
@@ -372,11 +394,14 @@ Rules:
       ?.map((p) => p.text ?? "")
       .join("")
       .trim() ?? "";
+  const rawReturn = clipAiTrace(text || JSON.stringify(data, null, 2));
   const parsed = parseVisionJson(text);
   if (!parsed.className || parsed.confidence == null) {
     return emptyResult({
       ...attachPlaceMatch(parsed.locationLabel, parsed.locationConfidence),
       source: "error",
+      prompt,
+      rawReturn,
       reason: "Vertex Gemini returned no usable class.",
       endpoint: resource,
     });
@@ -401,6 +426,8 @@ Rules:
     ...location,
     source: "vertex",
     latencyMs: null,
+    prompt,
+    rawReturn,
     endpoint: resource,
     reason: input.env.endpointId
       ? undefined
@@ -461,9 +488,27 @@ export async function classifyImageWithVertex(input: {
     : Promise.resolve(null);
 
   const [gemini, automl] = await Promise.all([geminiPromise, automlPromise]);
-  const latencyMs = Date.now() - started;
+  const latencyMs = normalizeLatencyMs(Date.now() - started) ?? 0;
 
   if (automl?.source === "automl" && automl.className) {
+    const mergedPrompt = clipAiTrace(
+      [
+        gemini.prompt ? `--- Vertex Gemini ---\n${gemini.prompt}` : null,
+        automl.prompt ? `--- AutoML ---\n${automl.prompt}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+    );
+    const mergedRaw = clipAiTrace(
+      [
+        gemini.rawReturn
+          ? `--- Vertex Gemini ---\n${gemini.rawReturn}`
+          : null,
+        automl.rawReturn ? `--- AutoML ---\n${automl.rawReturn}` : null,
+      ]
+        .filter(Boolean)
+        .join("\n\n"),
+    );
     return {
       ...gemini,
       className: automl.className,
@@ -473,6 +518,8 @@ export async function classifyImageWithVertex(input: {
       source: "automl",
       endpoint: automl.endpoint,
       latencyMs,
+      prompt: mergedPrompt,
+      rawReturn: mergedRaw,
       reason: gemini.locationLabel
         ? "AutoML hazard class · Vertex Gemini location."
         : automl.reason,

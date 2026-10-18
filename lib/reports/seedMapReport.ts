@@ -178,11 +178,15 @@ export async function ensureAftermathReportInDb(
     aiSource: "local",
     aiModel: null,
     aiLatencyMs: 420,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,
@@ -318,6 +322,8 @@ export async function ensureMapReportInDb(
         typeof data.aiLatencyMs === "number" && Number.isFinite(data.aiLatencyMs)
           ? Math.max(0, Math.round(data.aiLatencyMs))
           : 420,
+      aiPrompt: data.aiPrompt != null ? String(data.aiPrompt) : null,
+      aiRaw: data.aiRaw != null ? String(data.aiRaw) : null,
       aiPriority: parseReportPriority(data.aiPriority) ?? "medium",
       aiPriorityFactors: parsePriorityFactors(data.aiPriorityFactors),
       vertexClass:
@@ -331,6 +337,9 @@ export async function ensureMapReportInDb(
         Number.isFinite(data.vertexLatencyMs)
           ? Math.max(0, Math.round(data.vertexLatencyMs))
           : null,
+      vertexPrompt:
+        data.vertexPrompt != null ? String(data.vertexPrompt) : null,
+      vertexRaw: data.vertexRaw != null ? String(data.vertexRaw) : null,
       vertexLocationLabel:
         data.vertexLocationLabel != null
           ? String(data.vertexLocationLabel)
@@ -504,11 +513,15 @@ export async function ensureMapReportInDb(
     aiSource: "local" as const,
     aiModel: null,
     aiLatencyMs: 380,
+    aiPrompt: null,
+    aiRaw: null,
     aiPriority: null,
     aiPriorityFactors: null,
     vertexClass: null,
     vertexConfidence: null,
     vertexLatencyMs: null,
+    vertexPrompt: null,
+    vertexRaw: null,
     vertexLocationLabel: null,
     vertexLocationConfidence: null,
     vertexLocationPlaceId: null,

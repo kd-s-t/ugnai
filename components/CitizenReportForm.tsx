@@ -1208,6 +1208,8 @@ export function CitizenReportForm({
           mediaType,
           mediaMime: uploaded.mediaMime || undefined,
           mediaBase64,
+          // Server downloads when inline base64 was skipped (large photo).
+          mediaPath: mediaBase64 ? undefined : uploaded.mediaPath,
           voiceTranscript: transcript || undefined,
           fileName: file?.name,
         }),
@@ -1234,11 +1236,15 @@ export function CitizenReportForm({
         vertexClass?: string | null;
         vertexConfidence?: number | null;
         vertexLatencyMs?: number | null;
+        vertexPrompt?: string | null;
+        vertexRaw?: string | null;
         vertexLocationLabel?: string | null;
         vertexLocationConfidence?: number | null;
         vertexLocationPlaceId?: string | null;
         vertexLocationPlaceLabel?: string | null;
         aiLatencyMs?: number | null;
+        aiPrompt?: string | null;
+        aiRaw?: string | null;
       };
 
       const detectedHint =
@@ -1256,6 +1262,8 @@ export function CitizenReportForm({
         aiModel: data.model ?? null,
         aiLatencyMs:
           typeof data.aiLatencyMs === "number" ? data.aiLatencyMs : null,
+        aiPrompt: data.aiPrompt ?? null,
+        aiRaw: data.aiRaw ?? null,
         ...(detectedHint !== hazardHint ? { hazardHint: detectedHint } : {}),
         ...(displayTitle !== title ? { title: displayTitle } : {}),
         aiPriority: data.priority ?? null,
@@ -1269,6 +1277,8 @@ export function CitizenReportForm({
           typeof data.vertexLatencyMs === "number"
             ? data.vertexLatencyMs
             : null,
+        vertexPrompt: data.vertexPrompt ?? null,
+        vertexRaw: data.vertexRaw ?? null,
         vertexLocationLabel: data.vertexLocationLabel ?? null,
         vertexLocationConfidence:
           typeof data.vertexLocationConfidence === "number"

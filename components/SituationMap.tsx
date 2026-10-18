@@ -62,6 +62,14 @@ import { useScenario } from "@/lib/scenarios";
 import { resolveScenarioPriorities } from "@/lib/scenarios/resolveScenarioPriorities";
 import type { ScenarioReportPin } from "@/lib/scenarios/types";
 import {
+  ensureNangkaEvacCenters,
+  subscribeEvacCenters,
+} from "@/lib/evacCenters/api";
+import { applyEvacDirectoryToSafePoints } from "@/lib/evacCenters/mapSafePoints";
+import { NANGKA_BARANGAY_ID } from "@/lib/evacCenters/nangkaSeed";
+import type { EvacCenter } from "@/lib/evacCenters/types";
+import type { SafePoint } from "@/lib/geo/safePoints";
+import {
   fetchCebuWeather,
   isHazardousWeather,
   type AreaWeather,
@@ -196,6 +204,7 @@ export function SituationMap({
   const [rosterReady, setRosterReady] = useState(false);
   const [migrating, setMigrating] = useState(false);
   const [dbReports, setDbReports] = useState<HazardReport[]>([]);
+  const [evacCenters, setEvacCenters] = useState<EvacCenter[]>([]);
   const [weather, setWeather] = useState<AreaWeather | null>(null);
   const [weatherError, setWeatherError] = useState<string | null>(null);
   const [weatherLoading, setWeatherLoading] = useState(true);
@@ -265,6 +274,40 @@ export function SituationMap({
       unsub?.();
     };
   }, [nangkaOps, phase, tinoActive]);
+
+  // During/After: live EC directory (people + supplies) on shelter popups.
+  useEffect(() => {
+    if (!nangkaOps || !tinoActive) {
+      setEvacCenters([]);
+      return;
+    }
+    if (phase !== "during" && phase !== "after") {
+      setEvacCenters([]);
+      return;
+    }
+    let unsub: (() => void) | undefined;
+    let cancelled = false;
+    void (async () => {
+      try {
+        await ensureNangkaEvacCenters();
+      } catch (err) {
+        console.warn("Evac center seed failed", err);
+      }
+      if (cancelled) return;
+      unsub = subscribeEvacCenters(NANGKA_BARANGAY_ID, setEvacCenters);
+    })();
+    return () => {
+      cancelled = true;
+      unsub?.();
+    };
+  }, [nangkaOps, phase, tinoActive]);
+
+  const mapSafePoints = useMemo((): SafePoint[] => {
+    if (!tinoActive || (phase !== "during" && phase !== "after")) {
+      return pack.safePoints;
+    }
+    return applyEvacDirectoryToSafePoints(pack.safePoints, evacCenters);
+  }, [pack.safePoints, evacCenters, tinoActive, phase]);
 
   // Tino drill: empty / oversized roster → Nangka house-owner seed.
   useEffect(() => {
@@ -545,7 +588,7 @@ export function SituationMap({
             typhoons={pack.typhoons}
             fires={beforeQuiet ? [] : pack.fires}
             reportPins={mapReportPins}
-            safePoints={pack.safePoints}
+            safePoints={mapSafePoints}
             responders={beforeQuiet ? [] : pack.responders}
             assistPriorities={mapPriorities}
             escapeRoutes={mapEscapes}

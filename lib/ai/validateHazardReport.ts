@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { clipAiTrace, normalizeLatencyMs } from "@/lib/ai/aiTrace";
 import {
   DEFAULT_GEMINI_MODEL,
   resolveGeminiModel,
@@ -46,8 +47,16 @@ export type HazardValidateResult = {
   vertexLocationPlaceLabel: string | null;
   /** Vertex classify wall time in ms (null when skipped). */
   vertexLatencyMs: number | null;
+  /** Vertex text prompt (image omitted). */
+  vertexPrompt: string | null;
+  /** Vertex raw model / API return. */
+  vertexRaw: string | null;
   /** Gemini (or local fallback) wall time in ms. */
   aiLatencyMs: number | null;
+  /** Gemini text prompt (image omitted). */
+  aiPrompt: string | null;
+  /** Gemini raw model return. */
+  aiRaw: string | null;
 };
 
 function parseVerdict(text: string): {
@@ -127,6 +136,8 @@ function withVertex(
     | "vertexLocationPlaceId"
     | "vertexLocationPlaceLabel"
     | "vertexLatencyMs"
+    | "vertexPrompt"
+    | "vertexRaw"
   >,
   vertex: VertexClassifyResult,
 ): HazardValidateResult {
@@ -139,7 +150,9 @@ function withVertex(
     vertexLocationConfidence: vertex.locationConfidence,
     vertexLocationPlaceId: vertex.locationPlaceId,
     vertexLocationPlaceLabel: vertex.locationPlaceLabel,
-    vertexLatencyMs: vertex.latencyMs,
+    vertexLatencyMs: normalizeLatencyMs(vertex.latencyMs),
+    vertexPrompt: clipAiTrace(vertex.prompt),
+    vertexRaw: clipAiTrace(vertex.rawReturn),
   };
 }
 
@@ -192,6 +205,8 @@ function localFallback(input: {
       priorityFactors: ranked.factors,
       reason,
       aiLatencyMs: null,
+      aiPrompt: null,
+      aiRaw: null,
     },
     input.vertex,
   );
@@ -244,6 +259,8 @@ export async function validateHazardReport(input: {
           locationPlaceLabel: null,
           source: "skipped" as const,
           latencyMs: null,
+          prompt: null,
+          rawReturn: null,
           reason: "Image class needs photo bytes (inline base64).",
         } satisfies VertexClassifyResult);
 
@@ -264,7 +281,10 @@ export async function validateHazardReport(input: {
       vertex,
       voiceTranscript,
     });
-    return { ...local, aiLatencyMs: Date.now() - localStarted };
+    return {
+      ...local,
+      aiLatencyMs: normalizeLatencyMs(Date.now() - localStarted) ?? 0,
+    };
   }
 
   const model = resolveGeminiModel(input.model ?? DEFAULT_GEMINI_MODEL);
@@ -347,12 +367,19 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
       });
     }
 
+    const geminiPrompt = clipAiTrace(
+      mediaBase64
+        ? `${prompt}\n\n[attached: inline ${mediaMime}]`
+        : prompt,
+    );
+
     const started = Date.now();
     const response = await ai.models.generateContent({
       model,
       contents: [{ role: "user", parts }],
     });
-    const aiLatencyMs = Date.now() - started;
+    const aiLatencyMs = normalizeLatencyMs(Date.now() - started) ?? 0;
+    const aiRaw = clipAiTrace(response.text ?? "");
 
     const parsed = parseVerdict(response.text ?? "");
     if (!parsed) {
@@ -368,7 +395,7 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
         vertex,
         voiceTranscript,
       });
-      return { ...fallback, aiLatencyMs };
+      return { ...fallback, aiLatencyMs, aiPrompt: geminiPrompt, aiRaw };
     }
 
     // Never keep AI-generated / stock / watermark as a reject reason.
@@ -423,6 +450,8 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
         priorityFactors,
         reason,
         aiLatencyMs,
+        aiPrompt: geminiPrompt,
+        aiRaw,
       },
       vertex,
     );
@@ -440,6 +469,11 @@ Media type: ${mediaType}${voiceOnly ? " (voice-only report)" : ""}`;
       vertex,
       voiceTranscript,
     });
-    return { ...fallback, aiLatencyMs: Date.now() - localStarted };
+    return {
+      ...fallback,
+      aiLatencyMs: normalizeLatencyMs(Date.now() - localStarted) ?? 0,
+      aiPrompt: clipAiTrace(prompt),
+      aiRaw: null,
+    };
   }
 }
